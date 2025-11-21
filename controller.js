@@ -1,7 +1,3 @@
-import e from "express";
-const app = e();
-app.use(e.json());   
-
 export const signupPostController = (req, res) => {
   const { name, username, email, password } = req.body;
 

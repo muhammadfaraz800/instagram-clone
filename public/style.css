@@ -31,7 +31,8 @@ main {
 
 /* Phones Image Section */
 .phones-container {
-  display: none; /* Hidden on small screens */
+  display: none;
+  /* Hidden on small screens */
   margin-right: 32px;
   height: 581px;
   flex-basis: 380px;
@@ -73,8 +74,10 @@ main {
 }
 
 .logo {
-  font-family: 'Grand Hotel', cursive; /* Fallback if font not loaded, but standard system fonts used elsewhere */
-  font-size: 3rem; /* Approximation for the logo image */
+  font-family: 'Grand Hotel', cursive;
+  /* Fallback if font not loaded, but standard system fonts used elsewhere */
+  font-size: 3rem;
+  /* Approximation for the logo image */
   margin: 22px auto 12px;
   text-align: center;
   font-weight: 500;
@@ -86,7 +89,8 @@ main {
   background-repeat: no-repeat;
   height: 51px;
   width: 175px;
-  text-indent: -9999px; /* Hide text */
+  text-indent: -9999px;
+  /* Hide text */
 }
 
 .login-form {
@@ -126,7 +130,8 @@ main {
   font-size: 12px;
   pointer-events: none;
   transition: 0.1s ease-out;
-  display: none; /* Hiding for simplicity as JS is needed for full effect, using placeholder logic instead if preferred, but let's try to keep it simple */
+  display: none;
+  /* Hiding for simplicity as JS is needed for full effect, using placeholder logic instead if preferred, but let's try to keep it simple */
 }
 
 /* Actually, let's use standard placeholders for simplicity as per the original login.html but styled better */
