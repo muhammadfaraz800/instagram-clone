@@ -1,51 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up Page</title>
+  <title>Sign up • Instagram</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
+
 <body>
-  <div class="container">
-    <h2>Sign Up</h2>
-    <form>
-      <input type="text" placeholder="Full Name" required />
-      <input type="text" placeholder="Username" required />
-      <input type="email" placeholder="Email" required />
-      <input type="password" placeholder="Password" required />
-      <span id="message"></span>
-      <button type="submit">Create Account</button>
-      <span>Already have an account? <a href="login.html">Login</a></span>
-    </form>
-    <script>
-      const form = document.querySelector('form');
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+  <main>
+    <div class="container">
+      <div class="phones-container">
+        <img src="phones.png" alt="Instagram App" class="phones-img">
+      </div>
 
-        const data = {
-          name: form.elements[0].value,
-          username: form.elements[1].value,
-          email: form.elements[2].value,
-          password: form.elements[3].value,
-        };
+      <div class="login-container">
+        <div class="box login-box">
+          <h1 class="logo">Instagram</h1>
+          <h2
+            style="color: #8e8e8e; font-size: 17px; font-weight: 600; line-height: 20px; margin: 0 40px 10px; text-align: center;">
+            Sign up to see photos and videos from your friends.</h2>
 
-        try {
-          const res = await fetch('/signup', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          });
+          <form class="login-form">
+            <div class="input-group">
+              <input type="text" placeholder="Full Name" required>
+            </div>
+            <div class="input-group">
+              <input type="text" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+              <input type="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+              <input type="password" placeholder="Password" required>
+            </div>
 
-          const result = await res.text();
-          document.getElementById('message').textContent = result;
-        } catch (err) {
-         document.getElementById('message').textContent = 'Error sending request';
+            <div style="text-align: center; margin: 10px 0; color: #ed4956; font-size: 14px;" id="message"></div>
+
+            <button type="submit" class="login-btn">Sign up</button>
+
+            <p style="color: #8e8e8e; font-size: 12px; margin-top: 15px; text-align: center;">
+              By signing up, you agree to our Terms, Data Policy and Cookies Policy.
+            </p>
+          </form>
+        </div>
+
+        <div class="box signup-box">
+          <p>Have an account? <a href="login.html">Log in</a></p>
+        </div>
+
+        <div class="get-app">
+          <p>Get the app.</p>
+          <div class="app-stores">
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yt/r/Yfc020c87j0.png" alt="Get it on Google Play"
+              class="store-badge">
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yz/r/c5Rp7Ym-Klz.png" alt="Get it on Microsoft"
+              class="store-badge">
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="#">Meta</a>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Jobs</a>
+      <a href="#">Help</a>
+      <a href="#">API</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Top Accounts</a>
+      <a href="#">Locations</a>
+      <a href="#">Instagram Lite</a>
+      <a href="#">Threads</a>
+      <a href="#">Contact Uploading & Non-Users</a>
+      <a href="#">Meta Verified</a>
+    </div>
+    <div class="copyright">
+      &copy; 2024 Instagram from Meta
+    </div>
+  </footer>
+
+  <script>
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        name: inputs[0].value,
+        username: inputs[1].value,
+        email: inputs[2].value,
+        password: inputs[3].value,
+      };
+
+      try {
+        const res = await fetch('/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.text();
+        document.getElementById('message').textContent = result;
+
+        // Optional: Clear form on success or redirect
+        if (res.ok) {
+          // form.reset();
         }
-      });
-    </script>
-  </div>
+      } catch (err) {
+        document.getElementById('message').textContent = 'Error sending request';
+      }
+    });
+  </script>
 </body>
+
 </html>

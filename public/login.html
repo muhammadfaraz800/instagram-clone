@@ -1,20 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Page</title>
+  <title>Instagram</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
+
 <body>
-  <div class="container">
-    <h2>Login</h2>
-    <form>
-      <input type="text" placeholder="Username" required />
-      <input type="password" placeholder="Password" required />
-      <button type="submit">Sign In</button>
-      <span>Don't have an account? <a href="signup.html">Sign Up</a></span>
-    </form>
-  </div>
+  <main>
+    <div class="container">
+      <div class="phones-container">
+        <img src="phones.png" alt="Instagram App" class="phones-img">
+      </div>
+
+      <div class="login-container">
+        <div class="box login-box">
+          <h1 class="logo">Instagram</h1>
+
+          <form class="login-form">
+            <div class="input-group">
+              <input type="text" required>
+              <label>Phone number, username, or email</label>
+            </div>
+            <div class="input-group">
+              <input type="password" required>
+              <label>Password</label>
+            </div>
+
+            <button type="submit" class="login-btn" disabled>Log in</button>
+
+            <div class="divider">
+              <div class="line"></div>
+              <div class="or">OR</div>
+              <div class="line"></div>
+            </div>
+
+            <a href="#" class="fb-login">
+              <span class="fb-icon">f</span> Log in with Facebook
+            </a>
+
+            <a href="#" class="forgot-password">Forgot password?</a>
+          </form>
+        </div>
+
+        <div class="box signup-box">
+          <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+        </div>
+
+        <div class="get-app">
+          <p>Get the app.</p>
+          <div class="app-stores">
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yt/r/Yfc020c87j0.png" alt="Get it on Google Play"
+              class="store-badge">
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yz/r/c5Rp7Ym-Klz.png" alt="Get it on Microsoft"
+              class="store-badge">
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="#">Meta</a>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Jobs</a>
+      <a href="#">Help</a>
+      <a href="#">API</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Top Accounts</a>
+      <a href="#">Locations</a>
+      <a href="#">Instagram Lite</a>
+      <a href="#">Threads</a>
+      <a href="#">Contact Uploading & Non-Users</a>
+      <a href="#">Meta Verified</a>
+    </div>
+    <div class="copyright">
+      &copy; 2024 Instagram from Meta
+    </div>
+  </footer>
+
+  <script>
+    // Simple script to enable button when inputs are filled
+    const inputs = document.querySelectorAll('input');
+    const btn = document.querySelector('.login-btn');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const allFilled = Array.from(inputs).every(i => i.value.length > 0);
+        btn.disabled = !allFilled;
+      });
+    });
+  </script>
 </body>
+
 </html>
