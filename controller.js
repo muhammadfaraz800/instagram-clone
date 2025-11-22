@@ -13,7 +13,7 @@ export const signupPostController = async (req, res) => {
       { autoCommit: true }
     );
     console.log("Rows inserted: " + result.rowsAffected);
-    res.send("Signup received and saved successfully!");
+    res.send("Account Created");
   } catch (err) {
     console.error("Error executing insert", err);
     res.status(500).send("Error saving data");

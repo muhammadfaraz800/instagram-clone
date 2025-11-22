@@ -37,7 +37,7 @@
               <input type="password" placeholder="Password" required>
             </div>
 
-            <div style="text-align: center; margin: 10px 0; color: #ed4956; font-size: 14px;" id="message"></div>
+            <div style="text-align: center; margin: 10px 0; font-size: 14px;" id="message"></div>
 
             <button type="submit" class="login-btn">Sign up</button>
 
@@ -117,6 +117,7 @@
           form.reset();
         }
       } catch (err) {
+        document.getElementById('message').style.color = 'red';
         document.getElementById('message').textContent = 'Error sending request';
       }
     });
