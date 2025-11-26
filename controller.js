@@ -1,4 +1,5 @@
 import { getPool } from './db.js';
+import fs from 'fs';
 
 // Signup
 export const signupPostController = async (req, res) => {
@@ -64,14 +65,23 @@ export const loginPostController = async (req, res) => {
       { username, password },
       { autoCommit: true }
     );
+    let loggedInStatus = "failed";
     console.log("Rows selected: " + result.rows.length);
     if (result.rows.length === 1) {
       res.send("Login successful");
+      loggedInStatus = "success";
       console.log(`Logged in successfully: ${username}`);
     } else {
       res.status(401).send("Invalid username or password");
+      loggedInStatus = "failed";
       console.log(`Logged in failed: ${username}`);
     }
+
+    // Logging logic
+    fs.appendFile('log.txt', `${Date.now()} ${req.method} ${req.url} ${username} ${loggedInStatus} \n`, (err) => {
+      if (err) console.log(err);
+    });
+
   } catch (err) {
     console.error("Error executing select", err);
     res.status(500).send("Error logging in");
