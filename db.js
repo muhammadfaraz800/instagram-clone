@@ -9,12 +9,13 @@ const dbConfig = {
   connectString: process.env.DB_CONNECTION_STRING,
 };
 
+// Initialize the database connection pool
 export async function initialize() {
   try {
     console.log(`Attempting to connect to Oracle DB...`);
     console.log(`User: ${dbConfig.user}`);
     console.log(`Connection String: ${dbConfig.connectString}`);
-    await oracledb.createPool(dbConfig);
+    await oracledb.createPool(dbConfig); // Create a connection pool
     console.log('Oracle Database pool created successfully');
 
     // Verify connection
@@ -28,6 +29,7 @@ export async function initialize() {
   }
 }
 
+// Close the database connection pool for clean shutdown - not used currently
 export async function close() {
   try {
     await oracledb.getPool().close(0);

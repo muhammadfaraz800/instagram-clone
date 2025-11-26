@@ -22,11 +22,11 @@
 
           <form class="login-form">
             <div class="input-group">
-              <input type="text" required>
+              <input type="text" name="username" required>
               <label>Phone number, username, or email</label>
             </div>
             <div class="input-group">
-              <input type="password" required>
+              <input type="password" name="password" required>
               <label>Password</label>
             </div>
 
@@ -89,12 +89,41 @@
     // Simple script to enable button when inputs are filled
     const inputs = document.querySelectorAll('input');
     const btn = document.querySelector('.login-btn');
+    const form = document.querySelector('.login-form');
 
     inputs.forEach(input => {
       input.addEventListener('input', () => {
         const allFilled = Array.from(inputs).every(i => i.value.length > 0);
         btn.disabled = !allFilled;
       });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = inputs[0].value;
+      const password = inputs[1].value;
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.text();
+        if (response.ok) {
+          alert('Success: ' + data);
+          // Redirect to home page or dashboard if needed
+          // window.location.href = '/dashboard.html'; 
+        } else {
+          alert('Login failed: ' + data);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred during login');
+      }
     });
   </script>
 </body>

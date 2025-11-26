@@ -1,9 +1,10 @@
 import express from 'express';
-import { signupPostController } from './controller.js';
+import { signupPostController, loginPostController } from './controller.js';
 const router = express.Router();
-router.use(express.json()); //middleware to parse JSON bodies
 
 router.post('/signup', signupPostController);
+
+router.post('/login', loginPostController);
 
 // update person name - we are expecting json data
 router.put('/update', (req, res) => {
