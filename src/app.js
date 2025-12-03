@@ -5,6 +5,7 @@ const app = express();
 
 // Middleware
 app.use(express.static('public')); // Serve static files
+app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use(express.json()); // Parse JSON bodies
 
 // Routes

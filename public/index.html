@@ -1,12 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagran</title>
+    <title>Instagram</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <!-- Material Icons for reliable icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
+
 <body>
-    <h2>Welcome to Instagran</h2>
-    <a href="signup.html">Sign Up</a> | <a href="login.html">Login</a>
+    <div class="app-container">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="brand-logo">Instagram</h1>
+            </div>
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Search</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-regular fa-compass"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <span>Reels</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    <span>Messages</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-regular fa-heart"></i>
+                    <span>Notifications</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-regular fa-square-plus"></i>
+                    <span>Create</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <div class="profile-icon-small">
+                        <img src="https://via.placeholder.com/24" alt="Profile">
+                    </div>
+                    <span>Profile</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-bars"></i>
+                    <span>More</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Feed Section -->
+        <main class="main-content">
+            <div class="feed-container">
+                <!-- Stories -->
+                <div class="stories-container">
+                    <div class="story-item">
+                        <div class="story-ring">
+                            <img src="https://via.placeholder.com/56" alt="User">
+                        </div>
+                        <span class="story-username">danishnazi...</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-ring">
+                            <img src="https://via.placeholder.com/56" alt="User">
+                        </div>
+                        <span class="story-username">i_am_must...</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-ring">
+                            <img src="https://via.placeholder.com/56" alt="User">
+                        </div>
+                        <span class="story-username">ieee.cs.cui</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-ring">
+                            <img src="https://via.placeholder.com/56" alt="User">
+                        </div>
+                        <span class="story-username">logam.aca...</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-ring">
+                            <img src="https://via.placeholder.com/56" alt="User">
+                        </div>
+                        <span class="story-username">thiojoe</span>
+                    </div>
+                </div>
+
+                <!-- Posts -->
+                <div class="posts-container">
+                    <article class="post">
+                        <div class="post-header">
+                            <div class="post-user">
+                                <div class="story-ring small">
+                                    <img src="https://via.placeholder.com/32" alt="User">
+                                </div>
+                                <div class="post-user-info">
+                                    <span class="username">hammadzaheer_</span>
+                                    <span class="post-time">• 14h</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-ellipsis post-options"></i>
+                        </div>
+                        <div class="post-image-container">
+                            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                                alt="Post Content">
+                        </div>
+                        <div class="post-actions">
+                            <div class="action-buttons">
+                                <i class="fa-regular fa-heart"></i>
+                                <i class="fa-regular fa-comment"></i>
+                                <i class="fa-regular fa-paper-plane"></i>
+                            </div>
+                            <i class="fa-regular fa-bookmark save-btn"></i>
+                        </div>
+                        <div class="post-likes">
+                            1,012 likes
+                        </div>
+                        <div class="post-caption">
+                            <span class="username">hammadzaheer_</span>
+                            <span class="caption-text">Chilling with the squad at CUI. #university #life</span>
+                        </div>
+                        <div class="post-comments-link">
+                            View all 15 comments
+                        </div>
+                        <div class="add-comment">
+                            <input type="text" placeholder="Add a comment...">
+                            <button>Post</button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="user-profile-card">
+                <div class="profile-pic-large">
+                    <img src="https://via.placeholder.com/56" alt="Profile">
+                </div>
+                <div class="user-info">
+                    <div class="username" id="sidebar-username">farazx_u</div>
+                    <div class="name" id="sidebar-account-type">Faraz</div>
+                </div>
+                <button class="switch-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="suggestions-header">
+                <span>Suggested for you</span>
+                <a href="#">See All</a>
+            </div>
+
+            <div class="suggestions-list">
+                <div class="suggestion-item">
+                    <div class="suggestion-pic">
+                        <img src="https://via.placeholder.com/32" alt="User">
+                    </div>
+                    <div class="suggestion-info">
+                        <span class="username">Peter Griffin</span>
+                        <span class="relation">Followed by tanvirabbas31 + 1 more</span>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-pic">
+                        <img src="https://via.placeholder.com/32" alt="User">
+                    </div>
+                    <div class="suggestion-info">
+                        <span class="username">shabby</span>
+                        <span class="relation">Followed by babarali.9988 + 2 more</span>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+                <div class="suggestion-item">
+                    <div class="suggestion-pic">
+                        <img src="https://via.placeholder.com/32" alt="User">
+                    </div>
+                    <div class="suggestion-info">
+                        <span class="username">sham.822005</span>
+                        <span class="relation">Followed by babarali.9988 + 1 more</span>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <a href="#">About</a> • <a href="#">Help</a> • <a href="#">Press</a> • <a href="#">API</a> • <a
+                    href="#">Jobs</a> • <a href="#">Privacy</a> • <a href="#">Terms</a> • <a href="#">Locations</a> • <a
+                    href="#">Language</a> • <a href="#">Meta Verified</a>
+            </div>
+            <div class="copyright">
+                © 2025 INSTAGRAM FROM META
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auth Check
+        const username = localStorage.getItem('username');
+        const accountType = localStorage.getItem('accountType');
+        const profilePictureUrl = localStorage.getItem('profilePictureUrl');
+
+        if (!username) {
+            window.location.href = '/login.html';
+        } else {
+            document.getElementById('sidebar-username').textContent = username;
+            // Display Account Type in the 'name' field as requested
+            document.getElementById('sidebar-account-type').textContent = accountType || 'Normal Account';
+
+            // Update profile pictures
+            if (profilePictureUrl) {
+                // Right sidebar large profile pic
+                const largeProfilePic = document.querySelector('.profile-pic-large img');
+                if (largeProfilePic) {
+                    largeProfilePic.src = profilePictureUrl;
+                }
+
+                // Left sidebar small profile icon
+                const smallProfilePic = document.querySelector('.profile-icon-small img');
+                if (smallProfilePic) {
+                    smallProfilePic.src = profilePictureUrl;
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+    </script>
 </body>
+
 </html>

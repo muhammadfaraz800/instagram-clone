@@ -5,8 +5,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Instagram</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="login.css" />
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script>
+    // Check if already logged in
+    if (localStorage.getItem('username')) {
+      window.location.href = '/';
+    }
+  </script>
 </head>
 
 <body>
@@ -112,13 +118,16 @@
           body: JSON.stringify({ username, password })
         });
 
-        const data = await response.text();
+        const data = await response.json(); // Expect JSON
         if (response.ok) {
-          alert('Success: ' + data);
-          // Redirect to home page or dashboard if needed
-          // window.location.href = '/dashboard.html'; 
+          // Store auth info
+          localStorage.setItem('username', data.username);
+          localStorage.setItem('accountType', data.accountType);
+          localStorage.setItem('profilePictureUrl', data.profilePictureUrl);
+
+          window.location.href = '/';
         } else {
-          alert('Login failed: ' + data);
+          alert('Login failed: ' + (data.message || data));
         }
       } catch (error) {
         console.error('Error:', error);

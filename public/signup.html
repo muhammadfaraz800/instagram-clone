@@ -5,8 +5,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign up • Instagram</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="signup.css" />
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script>
+    // Check if already logged in
+    if (localStorage.getItem('username')) {
+      window.location.href = '/';
+    }
+  </script>
+  <style>
+    .hidden {
+      display: none;
+    }
+
+    select {
+      width: 100%;
+      background: #fafafa;
+      border: 1px solid #dbdbdb;
+      border-radius: 3px;
+      padding: 9px 0 7px 8px;
+      margin-bottom: 6px;
+      box-sizing: border-box;
+      color: #262626;
+      font-size: 12px;
+    }
+  </style>
 </head>
 
 <body>
@@ -25,16 +48,50 @@
 
           <form class="login-form">
             <div class="input-group">
-              <input type="text" placeholder="Full Name" required>
+              <input type="text" id="name" placeholder="Full Name" required>
             </div>
             <div class="input-group">
-              <input type="text" placeholder="Username" required>
+              <input type="text" id="username" placeholder="Username" required>
             </div>
             <div class="input-group">
-              <input type="email" placeholder="Email" required>
+              <input type="email" id="email" placeholder="Email" required>
             </div>
             <div class="input-group">
-              <input type="password" placeholder="Password" required>
+              <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <!-- Account Type Selection -->
+            <div class="input-group">
+              <select id="account_type" required>
+                <option value="" disabled selected>Select Account Type</option>
+                <option value="Normal">Normal Account</option>
+                <option value="Business">Business Account</option>
+              </select>
+            </div>
+
+            <!-- Normal Account Fields -->
+            <div id="normal-fields" class="hidden">
+              <div class="input-group">
+                <select id="gender">
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Business Account Fields -->
+            <div id="business-fields" class="hidden">
+              <div class="input-group">
+                <input type="text" id="business_type" placeholder="Business Type (Optional)">
+              </div>
+              <div class="input-group">
+                <input type="text" id="contact_no" placeholder="Contact Number (Optional)">
+              </div>
+              <div class="input-group">
+                <input type="text" id="bio_url" placeholder="Website / Bio URL (Optional)">
+              </div>
             </div>
 
             <div style="text-align: center; margin: 10px 0; font-size: 14px;" id="message"></div>
@@ -88,17 +145,44 @@
 
   <script>
     const form = document.querySelector('form');
-    const inputs = form.querySelectorAll('input');
+    const accountTypeSelect = document.getElementById('account_type');
+    const normalFields = document.getElementById('normal-fields');
+    const businessFields = document.getElementById('business-fields');
+    const messageDiv = document.getElementById('message');
+
+    // Toggle fields based on account type
+    accountTypeSelect.addEventListener('change', (e) => {
+      const type = e.target.value;
+      if (type === 'Normal') {
+        normalFields.classList.remove('hidden');
+        businessFields.classList.add('hidden');
+      } else {
+        normalFields.classList.add('hidden');
+        businessFields.classList.remove('hidden');
+      }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      messageDiv.textContent = ''; // Clear previous messages
+
+      const accountType = accountTypeSelect.value;
 
       const data = {
-        name: inputs[0].value,
-        username: inputs[1].value,
-        email: inputs[2].value,
-        password: inputs[3].value,
+        name: document.getElementById('name').value,
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        account_type: accountType
       };
+
+      if (accountType === 'Normal') {
+        data.gender = document.getElementById('gender').value;
+      } else {
+        data.business_type = document.getElementById('business_type').value;
+        data.contact_no = document.getElementById('contact_no').value;
+        data.bio_url = document.getElementById('bio_url').value;
+      }
 
       try {
         const res = await fetch('/api/auth/signup', {
@@ -109,16 +193,24 @@
           body: JSON.stringify(data),
         });
 
-        const result = await res.text();
-        document.getElementById('message').textContent = result;
+        const result = await res.json();
 
-        // Optional: Clear form on success or redirect
         if (res.ok) {
-          form.reset();
+          // Success: Redirect to login
+          messageDiv.style.color = 'green';
+          messageDiv.textContent = 'Account created! Redirecting to login...';
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          // Error: Show message
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = result.message || 'Signup failed';
         }
       } catch (err) {
-        document.getElementById('message').style.color = 'red';
-        document.getElementById('message').textContent = 'Error sending request';
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Error sending request';
+        console.error(err);
       }
     });
   </script>
