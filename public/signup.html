@@ -47,56 +47,64 @@
             Sign up to see photos and videos from your friends.</h2>
 
           <form class="login-form">
-            <div class="input-group">
-              <input type="text" id="name" placeholder="Full Name" required>
-            </div>
-            <div class="input-group">
-              <input type="text" id="username" placeholder="Username" required>
-            </div>
-            <div class="input-group">
-              <input type="email" id="email" placeholder="Email" required>
-            </div>
-            <div class="input-group">
-              <input type="password" id="password" placeholder="Password" required>
-            </div>
-
-            <!-- Account Type Selection -->
-            <div class="input-group">
-              <select id="account_type" required>
-                <option value="" disabled selected>Select Account Type</option>
-                <option value="Normal">Normal Account</option>
-                <option value="Business">Business Account</option>
-              </select>
-            </div>
-
-            <!-- Normal Account Fields -->
-            <div id="normal-fields" class="hidden">
+            <!-- Step 1: Basic Info -->
+            <div id="step-1">
               <div class="input-group">
-                <select id="gender">
-                  <option value="" disabled selected>Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                <input type="text" id="name" placeholder="Full Name" required>
+              </div>
+              <div class="input-group">
+                <input type="text" id="username" placeholder="Username" required>
+              </div>
+              <div class="input-group">
+                <input type="email" id="email" placeholder="Email" required>
+              </div>
+              <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+              </div>
+              <button type="button" class="login-btn" id="next-btn">Next</button>
+            </div>
+
+            <!-- Step 2: Account Details -->
+            <div id="step-2" class="hidden">
+              <div class="input-group">
+                <select id="account_type" required>
+                  <option value="" disabled selected>Select Account Type</option>
+                  <option value="Normal">Normal Account</option>
+                  <option value="Business">Business Account</option>
                 </select>
               </div>
-            </div>
 
-            <!-- Business Account Fields -->
-            <div id="business-fields" class="hidden">
-              <div class="input-group">
-                <input type="text" id="business_type" placeholder="Business Type (Optional)">
+              <!-- Normal Account Fields -->
+              <div id="normal-fields" class="hidden">
+                <div class="input-group">
+                  <select id="gender">
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
-              <div class="input-group">
-                <input type="text" id="contact_no" placeholder="Contact Number (Optional)">
+
+              <!-- Business Account Fields -->
+              <div id="business-fields" class="hidden">
+                <div class="input-group">
+                  <input type="text" id="business_type" placeholder="Business Type (Optional)">
+                </div>
+                <div class="input-group">
+                  <input type="text" id="contact_no" placeholder="Contact Number (Optional)">
+                </div>
+                <div class="input-group">
+                  <input type="text" id="bio_url" placeholder="Website / Bio URL (Optional)">
+                </div>
               </div>
-              <div class="input-group">
-                <input type="text" id="bio_url" placeholder="Website / Bio URL (Optional)">
-              </div>
+
+              <button type="submit" class="login-btn">Sign up</button>
+              <button type="button" class="login-btn" id="back-btn"
+                style="background-color: #fafafa; color: #3897f0; border: 1px solid #dbdbdb; margin-top: 5px;">Back</button>
             </div>
 
             <div style="text-align: center; margin: 10px 0; font-size: 14px;" id="message"></div>
-
-            <button type="submit" class="login-btn">Sign up</button>
 
             <p style="color: #8e8e8e; font-size: 12px; margin-top: 15px; text-align: center;">
               By signing up, you agree to our Terms, Data Policy and Cookies Policy.
@@ -145,10 +153,35 @@
 
   <script>
     const form = document.querySelector('form');
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const nextBtn = document.getElementById('next-btn');
+    const backBtn = document.getElementById('back-btn');
     const accountTypeSelect = document.getElementById('account_type');
     const normalFields = document.getElementById('normal-fields');
     const businessFields = document.getElementById('business-fields');
     const messageDiv = document.getElementById('message');
+
+    // Next Button Logic
+    nextBtn.addEventListener('click', () => {
+      const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (name && username && email && password) {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+      } else {
+        alert('Please fill in all fields.');
+      }
+    });
+
+    // Back Button Logic
+    backBtn.addEventListener('click', () => {
+      step2.classList.add('hidden');
+      step1.classList.remove('hidden');
+    });
 
     // Toggle fields based on account type
     accountTypeSelect.addEventListener('change', (e) => {
