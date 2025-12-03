@@ -15,14 +15,16 @@ export const signup = async (req, res) => {
         return res.status(400).send("Name, username, email, and password are required.");
     }
 
-    console.log("Received signup:", req.body);
+    console.log("Received signup:", req.body.name, req.body.username, req.body.email, "Password: ****");
 
     let connection;
     try {
+        const accountType = req.body.account_type || 'Normal';
+
         connection = await getPool().getConnection();
         const result = await connection.execute(
-            `INSERT INTO users (name, username, email, password) VALUES (:name, :username, :email, :password)`,
-            { name, username, email, password }, // Bind variables
+            `INSERT INTO Accounts (username, email, hashed_password, profile_name, account_type) VALUES (:username, :email, :password, :name, :accountType)`,
+            { username, email, password, name, accountType },
             { autoCommit: true }
         );
         console.log("Rows inserted: " + result.rowsAffected);
@@ -65,7 +67,7 @@ export const login = async (req, res) => {
     try {
         connection = await getPool().getConnection();
         const result = await connection.execute(
-            `SELECT * FROM USERS WHERE USERNAME=:username AND PASSWORD=:password`,
+            `SELECT * FROM ACCOUNTS WHERE USERNAME=:username AND PASSWORD=:password`,
             { username, password },
             { autoCommit: true }
         );
