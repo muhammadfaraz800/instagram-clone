@@ -172,8 +172,10 @@
       if (name && username && email && password) {
         step1.classList.add('hidden');
         step2.classList.remove('hidden');
+        messageDiv.textContent = ''; // Clear error
       } else {
-        alert('Please fill in all fields.');
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Please fill in all fields.';
       }
     });
 
@@ -181,6 +183,7 @@
     backBtn.addEventListener('click', () => {
       step2.classList.add('hidden');
       step1.classList.remove('hidden');
+      messageDiv.textContent = '';
     });
 
     // Toggle fields based on account type
@@ -200,6 +203,16 @@
       messageDiv.textContent = ''; // Clear previous messages
 
       const accountType = accountTypeSelect.value;
+
+      // Validate Account Type specific fields
+      if (accountType === 'Normal') {
+        const gender = document.getElementById('gender').value;
+        if (!gender) {
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = 'Please select a gender.';
+          return;
+        }
+      }
 
       const data = {
         name: document.getElementById('name').value,
