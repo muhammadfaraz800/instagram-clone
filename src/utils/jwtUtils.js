@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use env variable in production
 
 export const generateToken = (username) => {
-    return jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
 };
 
 export const verifyToken = (req, res, next) => {
