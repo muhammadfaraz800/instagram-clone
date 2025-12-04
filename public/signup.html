@@ -9,9 +9,9 @@
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <script>
     // Check if already logged in
-    if (localStorage.getItem('username')) {
-      window.location.href = '/';
-    }
+    fetch('/api/auth/me').then(res => {
+      if (res.ok) window.location.href = '/';
+    });
   </script>
   <style>
     .hidden {

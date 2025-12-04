@@ -211,50 +211,42 @@
 
     <script>
         // Auth Check
-        const token = localStorage.getItem('token');
+        fetch('/api/auth/me')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Invalid token');
+                }
+                return res.json();
+            })
+            .then(user => {
+                document.getElementById('sidebar-username').textContent = user.username;
+                document.getElementById('sidebar-account-type').textContent = user.accountType || 'Normal Account';
 
-        if (!token) {
-            window.location.href = '/login.html';
-        } else {
-            // Fetch user data from backend using token
-            fetch('/api/auth/me', {
-                headers: {
-                    'Authorization': token
+                // Update profile pictures
+                if (user.profilePictureUrl) {
+                    const largeProfilePic = document.querySelector('.profile-pic-large img');
+                    if (largeProfilePic) {
+                        largeProfilePic.src = user.profilePictureUrl;
+                    }
+
+                    const smallProfilePic = document.querySelector('.profile-icon-small img');
+                    if (smallProfilePic) {
+                        smallProfilePic.src = user.profilePictureUrl;
+                    }
                 }
             })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error('Invalid token');
-                    }
-                    return res.json();
-                })
-                .then(user => {
-                    document.getElementById('sidebar-username').textContent = user.username;
-                    document.getElementById('sidebar-account-type').textContent = user.accountType || 'Normal Account';
-
-                    // Update profile pictures
-                    if (user.profilePictureUrl) {
-                        const largeProfilePic = document.querySelector('.profile-pic-large img');
-                        if (largeProfilePic) {
-                            largeProfilePic.src = user.profilePictureUrl;
-                        }
-
-                        const smallProfilePic = document.querySelector('.profile-icon-small img');
-                        if (smallProfilePic) {
-                            smallProfilePic.src = user.profilePictureUrl;
-                        }
-                    }
-                })
-                .catch(err => {
-                    console.error('Auth error:', err);
-                    localStorage.clear(); // Clear invalid token
-                    window.location.href = '/login.html';
-                });
-        }
+            .catch(err => {
+                console.error('Auth error:', err);
+                localStorage.clear(); // Clear invalid token
+                window.location.href = '/login.html';
+            });
 
         function logout() {
-            localStorage.clear();
-            window.location.href = '/login.html';
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    localStorage.clear();
+                    window.location.href = '/login.html';
+                });
         }
     </script>
 </body>

@@ -7,7 +7,7 @@ export const generateToken = (username) => {
 };
 
 export const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
+    const token = req.cookies.token;
 
     if (!token) {
         return res.status(403).send({ message: "No token provided." });
