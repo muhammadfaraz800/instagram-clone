@@ -1,6 +1,7 @@
 import { getPool } from '../config/db.js';
 import { logAction } from '../utils/logger.js';
 import bcrypt from 'bcrypt';
+import { generateToken } from '../utils/jwtUtils.js';
 
 /**
  * Handle user signup
@@ -122,6 +123,7 @@ export const login = async (req, res) => {
     try {
         connection = await getPool().getConnection();
 
+        // resultObj is an give metaData and rows in json format
         const resultObj = await connection.execute(
             `SELECT username, hashed_password, account_type, profile_picture_url FROM ACCOUNTS WHERE USERNAME=:username`,
             { username },
@@ -135,8 +137,11 @@ export const login = async (req, res) => {
             const match = await bcrypt.compare(password, user.HASHED_PASSWORD);
 
             if (match) {
+                const token = generateToken(user.USERNAME);
+
                 res.send({
                     message: "Login successful",
+                    token: token,
                     username: user.USERNAME,
                     accountType: user.ACCOUNT_TYPE,
                     profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
@@ -165,6 +170,41 @@ export const login = async (req, res) => {
                 await connection.close();
             } catch (err) {
                 console.error("Error closing connection", err);
+            }
+        }
+    }
+};
+
+export const getMe = async (req, res) => {
+    const username = req.username; // Set by verifyToken
+    let connection;
+    try {
+        connection = await getPool().getConnection();
+        const result = await connection.execute(
+            `SELECT username, account_type, profile_picture_url FROM ACCOUNTS WHERE USERNAME = :username`,
+            { username },
+            { outFormat: 4002 }
+        );
+
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
+            res.send({
+                username: user.USERNAME,
+                accountType: user.ACCOUNT_TYPE,
+                profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
+            });
+        } else {
+            res.status(404).send({ message: "User not found" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Server error" });
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
             }
         }
     }

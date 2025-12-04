@@ -9,7 +9,7 @@
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <script>
     // Check if already logged in
-    if (localStorage.getItem('username')) {
+    if (localStorage.getItem('token')) {
       window.location.href = '/';
     }
   </script>
@@ -121,6 +121,7 @@
         const data = await response.json(); // Expect JSON
         if (response.ok) {
           // Store auth info
+          localStorage.setItem('token', data.token);
           localStorage.setItem('username', data.username);
           localStorage.setItem('accountType', data.accountType);
           localStorage.setItem('profilePictureUrl', data.profilePictureUrl);
