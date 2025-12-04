@@ -139,9 +139,14 @@ export const login = async (req, res) => {
             if (match) {
                 const token = generateToken(user.USERNAME);
 
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                    maxAge: 3600000 // 1 hour
+                });
+
                 res.send({
                     message: "Login successful",
-                    token: token,
                     username: user.USERNAME,
                     accountType: user.ACCOUNT_TYPE,
                     profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
@@ -208,4 +213,9 @@ export const getMe = async (req, res) => {
             }
         }
     }
+};
+
+export const logout = (req, res) => {
+    res.clearCookie('token');
+    res.status(200).send({ message: "Logged out successfully" });
 };

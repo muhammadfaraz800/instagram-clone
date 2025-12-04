@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup, login, getMe } from '../controllers/authController.js';
+import { signup, login, getMe, logout } from '../controllers/authController.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
 const router = express.Router();
@@ -13,6 +13,11 @@ router.post('/signup', signup);
 // @route   POST /api/auth/login
 // @access  Public
 router.post('/login', login);
+
+// @desc    Logout
+// @route   POST /api/auth/logout
+// @access  Public
+router.post('/logout', logout);
 
 // @desc    Get current user
 // @route   GET /api/auth/me
