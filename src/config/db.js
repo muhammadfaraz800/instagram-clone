@@ -14,8 +14,8 @@ let pool;
 export async function initializeDatabase() {
     try {
         console.log(`Attempting to connect to Oracle DB...`);
-        // It's often better not to log credentials, even partially, in production, but for this dev setup I'll keep the user log.
-        console.log(`User: ${dbConfig.user}`);
+
+        // console.log(`User: ${dbConfig.user}`); // hidden for security written for debugging
 
         pool = await oracledb.createPool(dbConfig);
         console.log('Oracle Database pool created successfully');
