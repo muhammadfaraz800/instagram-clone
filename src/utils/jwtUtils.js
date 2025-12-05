@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Use env variable in production
+const JWT_SECRET = process.env.JWT_SECRET || 'the-secret-key-is-in-env-file'; // Use env variable in production
 
 export const generateToken = (username) => {
     return jwt.sign({ username }, JWT_SECRET, { expiresIn: '24h' });
