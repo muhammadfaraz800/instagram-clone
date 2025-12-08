@@ -32,6 +32,7 @@ export const signup = async (req, res) => {
         console.log("Starting transaction...");
 
         // 1. Insert into Parent Table (Accounts)
+        // console.log("Before executing insert into Account...");
         await connection.execute(
             `INSERT INTO Account (USERNAME, BIO, HASHED_PASSWORD, EMAIL, PROFILE_NAME, PROFILE_PICTURE_URL, VISIBILITY) 
              VALUES (:username, :bio, :hashed_password, :email, :profile_name, :profile_picture_url, :visibility)`,
@@ -46,6 +47,7 @@ export const signup = async (req, res) => {
             },
             { autoCommit: false }
         );
+        // console.log("After executing insert into Account.");
 
         // 2. Insert into Child Table based on Account Type
         if (account_type === 'Business') {
@@ -53,6 +55,7 @@ export const signup = async (req, res) => {
             if (!business_type) {
                 return res.status(400).send({ message: "Business type is required." });
             }
+            // console.log("Before executing insert into Business...");
             await connection.execute(
                 `INSERT INTO Business (USERNAME, BIO_URL, CONTACTNO, BUSINESS_TYPE) 
                  VALUES (:username, :bio_url, :contact_no, :business_type)`,
@@ -64,8 +67,10 @@ export const signup = async (req, res) => {
                 },
                 { autoCommit: false }
             );
+            // console.log("After executing insert into Business.");
         } else if (account_type === 'Normal') {
             const { gender } = req.body;
+            console.log("Before executing insert into Normal...");
             await connection.execute(
                 `INSERT INTO Normal (USERNAME, GENDER) 
                  VALUES (:username, :gender)`,
@@ -75,11 +80,13 @@ export const signup = async (req, res) => {
                 },
                 { autoCommit: false }
             );
+            // console.log("After executing insert into Normal.");
         } else {
             throw new Error("Invalid account type");
         }
 
         // Commit Transaction
+        console.log("Committing transaction...");
         await connection.commit();
         console.log("Transaction committed. Account created.");
 
@@ -106,7 +113,9 @@ export const signup = async (req, res) => {
     } finally {
         if (connection) {
             try {
+                console.log("Closing connection...");
                 await connection.close();
+                console.log("Connection closed.");
             } catch (err) {
                 console.error("Error closing connection", err);
             }
@@ -203,6 +212,7 @@ export const getMe = async (req, res) => {
         connection = await getPool().getConnection();
         const result = await connection.execute(
             `SELECT 
+                a.profile_name,
                 a.username, 
                 a.profile_picture_url,
                 b.business_type
@@ -219,7 +229,8 @@ export const getMe = async (req, res) => {
             res.send({
                 username: user.USERNAME,
                 accountType: accountType,
-                profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
+                profileName: user.PROFILE_NAME,
+                profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
             });
         } else {
             res.status(404).send({ message: "User not found" });

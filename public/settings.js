@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userAccountType === 'business') {
             businessFields.forEach(el => el.style.display = 'block');
             personalFields.forEach(el => el.style.display = 'none');
-            if (changePhotoBtn) changePhotoBtn.style.display = 'none';
+            if (changePhotoBtn) changePhotoBtn.style.display = 'inline-block';
         } else {
             personalFields.forEach(el => el.style.display = 'block');
             businessFields.forEach(el => el.style.display = 'none');

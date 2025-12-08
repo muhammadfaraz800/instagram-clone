@@ -8,8 +8,9 @@ fetch('/api/auth/me')
         return res.json();
     })
     .then(user => {
+        console.log(user);
         document.getElementById('sidebar-username').textContent = user.username;
-        document.getElementById('sidebar-account-type').textContent = user.accountType || 'Normal Account';
+        document.getElementById('sidebar-account-type').textContent = user.profileName || 'XYZ';
 
         // Update profile pictures
         if (user.profilePictureUrl) {
