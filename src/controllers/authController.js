@@ -19,26 +19,30 @@ export const signup = async (req, res) => {
 
     let connection;
     try {
-        // console.log("Hashing password...");
+        console.log("Hashing password...");
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        console.log("Password hashed.");
 
-        // console.log("Getting DB connection...");
+        console.log("Getting DB connection...");
         connection = await getPool().getConnection();
+        console.log("DB connection acquired.");
 
         // Start Transaction
-        // console.log("Starting transaction...");
+        console.log("Starting transaction...");
 
         // 1. Insert into Parent Table (Accounts)
         await connection.execute(
-            `INSERT INTO Accounts (username, email, hashed_password, profile_name, account_type) 
-             VALUES (:username, :email, :password, :name, :account_type)`,
+            `INSERT INTO Account (USERNAME, BIO, HASHED_PASSWORD, EMAIL, PROFILE_NAME, PROFILE_PICTURE_URL, VISIBILITY) 
+             VALUES (:username, :bio, :hashed_password, :email, :profile_name, :profile_picture_url, :visibility)`,
             {
                 username: username.toLowerCase(),
+                bio: '',
+                hashed_password: hashedPassword,
                 email: email.toLowerCase(),
-                password: hashedPassword,
-                name: name,
-                account_type
+                profile_name: name,
+                profile_picture_url: '/uploads/default/default-avatar.png',
+                visibility: 'Public'
             },
             { autoCommit: false }
         );
@@ -46,21 +50,24 @@ export const signup = async (req, res) => {
         // 2. Insert into Child Table based on Account Type
         if (account_type === 'Business') {
             const { bio_url, contact_no, business_type } = req.body;
+            if (!business_type) {
+                return res.status(400).send({ message: "Business type is required." });
+            }
             await connection.execute(
-                `INSERT INTO Business_Account (UserName, Bio_URL, CONTACT_NO, Business_Type) 
+                `INSERT INTO Business (USERNAME, BIO_URL, CONTACTNO, BUSINESS_TYPE) 
                  VALUES (:username, :bio_url, :contact_no, :business_type)`,
                 {
                     username: username.toLowerCase(),
                     bio_url: bio_url || null,
                     contact_no: contact_no || null,
-                    business_type: business_type || null
+                    business_type: business_type
                 },
                 { autoCommit: false }
             );
         } else if (account_type === 'Normal') {
             const { gender } = req.body;
             await connection.execute(
-                `INSERT INTO Normal_Account (UserName, Gender) 
+                `INSERT INTO Normal (USERNAME, GENDER) 
                  VALUES (:username, :gender)`,
                 {
                     username: username.toLowerCase(),
@@ -125,7 +132,14 @@ export const login = async (req, res) => {
 
         // resultObj is an give metaData and rows in json format
         const resultObj = await connection.execute(
-            `SELECT username, hashed_password, account_type, profile_picture_url FROM ACCOUNTS WHERE USERNAME=:username`,
+            `SELECT 
+                a.username, 
+                a.hashed_password, 
+                a.profile_picture_url,
+                b.business_type
+             FROM Account a
+             LEFT JOIN Business b ON a.UserName = b.UserName
+             WHERE a.UserName = :username`,
             { username },
             { outFormat: 4002 }
         );
@@ -145,10 +159,12 @@ export const login = async (req, res) => {
                     maxAge: 3600000 * 24 // 24 hour
                 });
 
+                const accountType = user.BUSINESS_TYPE ? 'Business' : 'Normal';
+
                 res.send({
                     message: "Login successful",
                     username: user.USERNAME,
-                    accountType: user.ACCOUNT_TYPE,
+                    accountType: accountType,
                     profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
                 });
                 loggedInStatus = "success";
@@ -186,16 +202,23 @@ export const getMe = async (req, res) => {
     try {
         connection = await getPool().getConnection();
         const result = await connection.execute(
-            `SELECT username, account_type, profile_picture_url FROM ACCOUNTS WHERE USERNAME = :username`,
+            `SELECT 
+                a.username, 
+                a.profile_picture_url,
+                b.business_type
+             FROM Account a
+             LEFT JOIN Business b ON a.UserName = b.UserName
+             WHERE a.UserName = :username`,
             { username },
             { outFormat: 4002 }
         );
 
         if (result.rows.length > 0) {
             const user = result.rows[0];
+            const accountType = user.BUSINESS_TYPE ? 'Business' : 'Normal';
             res.send({
                 username: user.USERNAME,
-                accountType: user.ACCOUNT_TYPE,
+                accountType: accountType,
                 profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
             });
         } else {

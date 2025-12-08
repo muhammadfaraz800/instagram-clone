@@ -89,7 +89,7 @@
               <!-- Business Account Fields -->
               <div id="business-fields" class="hidden">
                 <div class="input-group">
-                  <input type="text" id="business_type" placeholder="Business Type (Optional)">
+                  <input type="text" id="business_type" placeholder="Business Type">
                 </div>
                 <div class="input-group">
                   <input type="text" id="contact_no" placeholder="Contact Number (Optional)">
@@ -189,12 +189,18 @@
     // Toggle fields based on account type
     accountTypeSelect.addEventListener('change', (e) => {
       const type = e.target.value;
+      const businessTypeInput = document.getElementById('business_type');
+
       if (type === 'Normal') {
         normalFields.classList.remove('hidden');
         businessFields.classList.add('hidden');
+        // Remove required from hidden business fields to allow form submission
+        businessTypeInput.removeAttribute('required');
       } else {
         normalFields.classList.add('hidden');
         businessFields.classList.remove('hidden');
+        // Add required back to business type when visible
+        businessTypeInput.setAttribute('required', '');
       }
     });
 

@@ -1,0 +1,395 @@
+/* ===================================================
+   Instagram Clone - Settings Page Stylesheet
+   Premium dark theme for Edit Profile page
+   =================================================== */
+
+/* ---------- Settings Container ---------- */
+.settings-container {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    padding-left: 100px;
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+/* Edit Profile Wrapper */
+.edit-profile-wrapper {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Settings Header */
+.settings-header {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+/* ---------- Edit Profile Header ---------- */
+.edit-profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-tertiary);
+    padding: 16px 20px;
+    border-radius: var(--radius-xl);
+    margin-bottom: 20px;
+}
+
+.user-info-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-pic-medium {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.profile-pic-medium img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-text .username {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.header-text .name {
+    font-size: 14px;
+    color: var(--text-tertiary);
+}
+
+/* Change Photo Button */
+.change-photo-btn {
+    background: var(--accent-blue);
+    color: white;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.change-photo-btn:hover {
+    background: var(--accent-blue-hover);
+    transform: scale(1.02);
+}
+
+/* ---------- Form Sections ---------- */
+.form-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    margin-top: 0;
+}
+
+/* Input Group */
+.input-group {
+    margin-bottom: 8px;
+}
+
+.input-field {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    font-size: 16px;
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
+    resize: none;
+}
+
+.input-field:focus {
+    border-color: var(--text-tertiary);
+    outline: none;
+}
+
+.input-field::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Textarea specific */
+textarea.input-field {
+    min-height: 100px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+/* Input with character count */
+.input-with-count {
+    position: relative;
+}
+
+.char-count {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+/* Helper Text */
+.helper-text {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+/* ---------- Checkbox Group ---------- */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.custom-checkbox-input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent-blue);
+    cursor: pointer;
+}
+
+/* ---------- Select Dropdown ---------- */
+select.input-field {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e8e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+select.input-field:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ---------- Submit Button ---------- */
+.submit-btn {
+    width: 100%;
+    background: var(--accent-blue);
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: 16px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: var(--accent-blue-hover);
+    transform: scale(1.01);
+}
+
+.submit-btn:disabled {
+    background: var(--accent-blue);
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ---------- Field Visibility Classes ---------- */
+/* These classes are toggled by settings.js based on account type */
+.field-business {
+    display: block;
+}
+
+.field-personal {
+    display: block;
+}
+
+/* When account is business, hide personal fields */
+body.account-business .field-personal {
+    display: none;
+}
+
+/* When account is personal, hide business fields */
+body.account-personal .field-business {
+    display: none;
+}
+
+/* ---------- Divider ---------- */
+.settings-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 24px 0;
+}
+
+/* ---------- Danger Zone ---------- */
+.danger-zone {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+}
+
+.danger-zone .form-section-title {
+    color: #ed4956;
+}
+
+.delete-btn {
+    background: transparent;
+    color: #ed4956;
+    border: 1px solid #ed4956;
+    padding: 12px 20px;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.delete-btn:hover {
+    background: #ed4956;
+    color: white;
+}
+
+/* ---------- Success/Error Messages ---------- */
+.message {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.message.success {
+    background: rgba(71, 209, 71, 0.1);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+}
+
+.message.error {
+    background: rgba(237, 73, 86, 0.1);
+    border: 1px solid #ed4956;
+    color: #ed4956;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+    .settings-container {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 1024px) {
+    .settings-container {
+        margin-left: var(--sidebar-width-collapsed);
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        margin-left: 0;
+        padding: 20px 16px 80px;
+    }
+
+    .edit-profile-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .user-info-group {
+        flex-direction: column;
+    }
+
+    .change-photo-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-profile-wrapper {
+        gap: 16px;
+    }
+
+    .settings-header {
+        font-size: 18px;
+    }
+
+    .input-field {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .form-section-title {
+        font-size: 14px;
+    }
+}
+
+/* ---------- Loading Spinner ---------- */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Submit button loading state */
+.submit-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
