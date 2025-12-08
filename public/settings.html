@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile • Instagram</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <script src="settings.js" defer></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar Navigation (Reused from index.html) -->
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- Settings Main Content -->
+        <div class="settings-container" style="display: none;">
+            <div class="edit-profile-wrapper">
+                <div class="settings-header">Edit profile</div>
+
+                <!-- Profile Photo Section -->
+                <div class="edit-profile-header">
+                    <div class="user-info-group">
+                        <div class="profile-pic-medium">
+                            <img src="https://via.placeholder.com/50" alt="Profile Photo">
+                        </div>
+                        <div class="header-text">
+                            <div class="username">user_123</div>
+                            <div class="name">User Name</div>
+                        </div>
+                    </div>
+                    <button class="change-photo-btn">Change photo</button>
+                </div>
+
+                <!-- Input Fields -->
+
+                <!-- Name -->
+                <div class="form-section-title">Name</div>
+                <div class="input-group">
+                    <input type="text" id="profileName" class="input-field" placeholder="Name" value="User Name">
+                </div>
+
+                <!-- Email (Requested instead of Website) -->
+                <div class="form-section-title">Email</div>
+                <div class="input-group">
+                    <input type="email" class="input-field" placeholder="Email" value="email@example.com">
+                </div>
+
+                <!-- Website (Business Only) -->
+                <div class="form-section-title field-business">Website</div>
+                <div class="input-group field-business">
+                    <input type="text" id="website" class="input-field" placeholder="Website" value="http://mysite.com">
+                </div>
+
+                <!-- Contact Number (Business Only) -->
+                <div class="form-section-title field-business">Contact Number</div>
+                <div class="input-group field-business">
+                    <input type="text" id="contact" class="input-field" placeholder="Contact Number"
+                        value="+1234567890">
+                </div>
+
+                <!-- Business Type (Business Only) -->
+                <div class="form-section-title field-business">Business Type</div>
+                <div class="input-group field-business">
+                    <input type="text" id="businessType" class="input-field" placeholder="Business Type" disabled
+                        style="opacity: 0.6; cursor: not-allowed;">
+                </div>
+
+                <!-- Bio -->
+                <div class="form-section-title">Bio</div>
+                <div class="input-group input-with-count">
+                    <textarea class="input-field"
+                        placeholder="Bio">"I'm bad, and that's good. I will never be good, and that's not bad."</textarea>
+                    <div class="char-count">69 / 150</div>
+                </div>
+
+                <!-- Public/Private Checkbox -->
+                <!-- <div class="form-section-title">Gender</div> -->
+                <!-- Removed as user replaced it with Private Checkbox requirement -->
+                <!-- Gender (Personal Only) -->
+                <div class="form-section-title field-personal">Gender</div>
+                <div class="input-group field-personal">
+                    <select id="gender" class="input-field" disabled
+                        style="appearance: none; -webkit-appearance: none; opacity: 0.6; cursor: not-allowed;">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="custom">Custom</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                    <div class="helper-text">Gender can't be changed</div>
+                </div>
+
+                <!-- Public/Private Checkbox (Personal Only) -->
+                <!-- Business accounts will have this section hidden by settings.js -->
+                <div class="checkbox-group field-personal" style="cursor: pointer;">
+                    <label class="checkbox-label" style="pointer-events: none;">Private Account</label>
+                    <input type="checkbox" id="privateAccount" class="custom-checkbox-input"
+                        style="width: 20px; height: 20px; accent-color: #0095f6;">
+                </div>
+                <div class="helper-text" style="margin-top: -20px; margin-bottom: 30px;">This won't be part of your
+                    public profile.</div>
+
+                <!-- Submit Button -->
+                <button class="submit-btn">Submit</button>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

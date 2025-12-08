@@ -1,261 +1,421 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ===================================================
+   Instagram Clone - Login Page Stylesheet
+   Premium dark theme matching Instagram's aesthetics
+   =================================================== */
+
+/* ---------- CSS Variables ---------- */
+:root {
+    --bg-primary: #000000;
+    --bg-secondary: #121212;
+    --bg-tertiary: #1a1a1a;
+    --bg-elevated: #262626;
+    --bg-input: #121212;
+
+    --text-primary: #fafafa;
+    --text-secondary: #a8a8a8;
+    --text-tertiary: #8e8e8e;
+
+    --accent-blue: #0095f6;
+    --accent-blue-hover: #1877f2;
+    --accent-blue-disabled: rgba(0, 149, 246, 0.3);
+
+    --border-color: #363636;
+
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-logo: 'Grand Hotel', cursive;
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 14px;
 }
 
 body {
-  background-color: #fafafa;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  color: #262626;
+    font-family: var(--font-family);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
 }
 
+a {
+    color: var(--text-link);
+    text-decoration: none;
+}
+
+/* ---------- Main Container ---------- */
 main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding-bottom: 50px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  max-width: 935px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 30px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    max-width: 935px;
+    width: 100%;
 }
 
-/* Phones Image Section */
+/* ---------- Phones Image ---------- */
 .phones-container {
-  display: none;
-  /* Hidden on small screens */
-  margin-right: 32px;
-  height: 521px;
-  flex-basis: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .phones-img {
-  height: 100%;
-  object-fit: contain;
+    max-width: 380px;
+    height: auto;
+    object-fit: contain;
 }
 
-@media (min-width: 876px) {
-  .phones-container {
-    display: block;
-  }
-}
-
-/* Login Section */
+/* ---------- Login Form Container ---------- */
 .login-container {
-  display: flex;
-  flex-direction: column;
-  width: 350px;
-  flex-grow: 1;
-  max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 350px;
 }
 
 .box {
-  background-color: #fff;
-  border: 1px solid #dbdbdb;
-  border-radius: 1px;
-  margin-bottom: 10px;
-  padding: 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    width: 100%;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 40px;
 }
 
 .login-box {
-  padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+/* ---------- Logo ---------- */
 .logo {
-  font-family: 'Grand Hotel', cursive;
-  /* Fallback if font not loaded, but standard system fonts used elsewhere */
-  font-size: 3rem;
-  /* Approximation for the logo image */
-  margin: 22px auto 12px;
-  text-align: center;
-  font-weight: 500;
-  /* Using a font that looks somewhat like the logo if image fails, 
-     but ideally this would be an image sprite */
-  background-image: url('https://static.cdninstagram.com/rsrc.php/v3/yM/r/8n91YnfPq0s.png');
-  background-position: 0 -52px;
-  background-size: 176px 181px;
-  background-repeat: no-repeat;
-  height: 51px;
-  width: 175px;
-  text-indent: -9999px;
-  /* Hide text */
+    font-family: 'Grand Hotel', cursive;
+    font-size: 50px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 36px;
+    text-align: center;
 }
 
+/* ---------- Login Form ---------- */
 .login-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  margin-top: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
+/* Input Group with Floating Label */
 .input-group {
-  position: relative;
-  margin-bottom: 6px;
-  height: 38px;
+    position: relative;
+    margin-bottom: 6px;
 }
 
 .input-group input {
-  width: 100%;
-  height: 100%;
-  background: #fafafa;
-  border: 1px solid #dbdbdb;
-  border-radius: 3px;
-  padding: 9px 0 7px 8px;
-  font-size: 12px;
-  outline: none;
+    width: 100%;
+    height: 38px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 14px 8px 2px;
+    font-size: 12px;
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
 }
 
 .input-group input:focus {
-  border: 1px solid #a8a8a8;
+    border-color: var(--text-tertiary);
+    outline: none;
 }
 
-/* Floating label effect simulation */
 .input-group label {
-  position: absolute;
-  left: 8px;
-  top: 12px;
-  color: #8e8e8e;
-  font-size: 12px;
-  pointer-events: none;
-  transition: 0.1s ease-out;
-  display: none;
-  /* Hiding for simplicity as JS is needed for full effect, using placeholder logic instead if preferred, but let's try to keep it simple */
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+    transition: all var(--transition-fast);
 }
 
-/* Actually, let's use standard placeholders for simplicity as per the original login.html but styled better */
+/* Floating label effect when input has value or is focused */
+.input-group input:focus+label,
+.input-group input:not(:placeholder-shown)+label,
+.input-group input:valid+label {
+    top: 10px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+/* Hide placeholder initially, show on focus */
 .input-group input::placeholder {
-  color: #8e8e8e;
+    color: transparent;
 }
 
+/* ---------- Login Button ---------- */
 .login-btn {
-  background-color: #0095f6;
-  border: transparent;
-  border-radius: 4px;
-  color: #fff;
-  font-weight: 600;
-  padding: 5px 9px;
-  text-align: center;
-  cursor: pointer;
-  margin: 8px 0;
-  height: 30px;
-  font-size: 14px;
+    width: 100%;
+    height: 32px;
+    background: var(--accent-blue);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    transition: all var(--transition-fast);
+}
+
+.login-btn:hover:not(:disabled) {
+    background: var(--accent-blue-hover);
 }
 
 .login-btn:disabled {
-  background-color: #b2dffc;
-  cursor: default;
+    background: var(--accent-blue-disabled);
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
+/* ---------- Divider ---------- */
 .divider {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  margin: 10px 0 18px 0;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 10px 0 20px;
+    width: 100%;
 }
 
 .line {
-  flex-grow: 1;
-  height: 1px;
-  background-color: #dbdbdb;
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
 }
 
 .or {
-  color: #8e8e8e;
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
 }
 
+/* ---------- Facebook Login ---------- */
 .fb-login {
-  color: #385185;
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #4267b2;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    transition: opacity var(--transition-fast);
+}
+
+.fb-login:hover {
+    opacity: 0.8;
 }
 
 .fb-icon {
-  margin-right: 8px;
-  font-weight: bold;
+    width: 16px;
+    height: 16px;
+    background: #4267b2;
+    color: white;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
 }
 
+/* ---------- Forgot Password ---------- */
 .forgot-password {
-  color: #00376b;
-  font-size: 12px;
-  text-decoration: none;
-  text-align: center;
-  margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-link);
+    text-align: center;
 }
 
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Sign Up Box ---------- */
 .signup-box {
-  padding: 20px 0;
-  font-size: 14px;
+    padding: 20px 40px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.signup-box p {
+    font-size: 14px;
+    color: var(--text-primary);
 }
 
 .signup-box a {
-  color: #0095f6;
-  text-decoration: none;
-  font-weight: 600;
+    color: var(--accent-blue);
+    font-weight: 600;
 }
 
+.signup-box a:hover {
+    color: var(--text-primary);
+}
+
+/* ---------- Get the App ---------- */
 .get-app {
-  text-align: center;
-  margin: 10px 0;
+    margin-top: 20px;
+    text-align: center;
 }
 
 .get-app p {
-  margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 16px;
 }
 
 .app-stores {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
 }
 
 .store-badge {
-  height: 40px;
+    height: 40px;
+    width: auto;
+    object-fit: contain;
 }
 
-/* Footer */
+/* ---------- Footer ---------- */
 footer {
-  padding: 0 20px;
-  margin-bottom: 52px;
+    padding: 20px;
+    text-align: center;
 }
 
 .footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 16px;
+    margin-bottom: 16px;
 }
 
 .footer-links a {
-  color: #8e8e8e;
-  font-size: 12px;
-  text-decoration: none;
-  margin: 0 8px 10px 8px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
 }
 
 .copyright {
-  color: #8e8e8e;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 875px) {
+    .phones-container {
+        display: none;
+    }
+
+    .container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 450px) {
+    .box {
+        border: none;
+        padding: 24px 16px;
+    }
+
+    .logo {
+        font-size: 42px;
+        margin-bottom: 24px;
+    }
+
+    .login-container {
+        max-width: 100%;
+    }
+}
+
+/* ---------- Password Show/Hide Toggle ---------- */
+.input-group .toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.input-group .toggle-password:hover {
+    color: var(--text-tertiary);
+}
+
+/* ---------- Error States ---------- */
+.input-group.error input {
+    border-color: #ed4956;
+}
+
+.input-group .error-message {
+    font-size: 12px;
+    color: #ed4956;
+    margin-top: 4px;
+}
+
+/* ---------- Loading State ---------- */
+.login-btn.loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.login-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

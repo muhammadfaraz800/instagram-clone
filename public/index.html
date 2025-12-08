@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=1">
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <!-- Material Icons for reliable icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -17,89 +17,76 @@
 <body>
     <div class="app-container">
         <!-- Left Sidebar Navigation -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h1 class="brand-logo">Instagram</h1>
-            </div>
-            <div class="sidebar-menu">
-                <a href="#" class="menu-item active">
-                    <i class="fa-solid fa-house"></i>
-                    <span>Home</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>Search</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fa-regular fa-compass"></i>
-                    <span>Explore</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fa-solid fa-clapperboard"></i>
-                    <span>Reels</span>
-                </a>
-                <!-- <a href="#" class="menu-item">
-                    <i class="fa-regular fa-paper-plane"></i>
-                    <span>Messages</span>
-                </a> -->
-                <a href="#" class="menu-item">
-                    <i class="fa-regular fa-heart"></i>
-                    <span>Notifications</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fa-regular fa-square-plus"></i>
-                    <span>Create</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <div class="profile-icon-small">
-                        <img src="https://via.placeholder.com/24" alt="Profile">
-                    </div>
-                    <span>Profile</span>
-                </a>
-            </div>
-            <div class="sidebar-footer">
-                <a href="#" class="menu-item">
-                    <i class="fa-solid fa-bars"></i>
-                    <span>More</span>
-                </a>
-            </div>
-        </div>
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
 
         <!-- Main Feed Section -->
         <main class="main-content">
             <div class="feed-container">
                 <!-- Stories -->
-                <div class="stories-container">
-                    <div class="story-item">
-                        <div class="story-ring">
-                            <img src="https://via.placeholder.com/56" alt="User">
+                <div class="stories-wrapper">
+                    <button class="stories-nav stories-nav-prev" id="storiesPrev" aria-label="Previous stories">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="stories-container" id="storiesContainer">
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">danishnazir</span>
                         </div>
-                        <span class="story-username">danishnazi...</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-ring">
-                            <img src="https://via.placeholder.com/56" alt="User">
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">i_am_must...</span>
                         </div>
-                        <span class="story-username">i_am_must...</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-ring">
-                            <img src="https://via.placeholder.com/56" alt="User">
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">i_am_must...</span>
                         </div>
-                        <span class="story-username">ieee.cs.cui</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-ring">
-                            <img src="https://via.placeholder.com/56" alt="User">
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">i_am_must...</span>
                         </div>
-                        <span class="story-username">logam.aca...</span>
-                    </div>
-                    <div class="story-item">
-                        <div class="story-ring">
-                            <img src="https://via.placeholder.com/56" alt="User">
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">i_am_must...</span>
                         </div>
-                        <span class="story-username">thiojoe</span>
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">i_am_must...</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">ieee.cs.cui</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">logam.aca...</span>
+                        </div>
+                        <div class="story-item">
+                            <div class="story-ring">
+                                <img src="https://via.placeholder.com/56" alt="User">
+                            </div>
+                            <span class="story-username">thiojoe</span>
+                        </div>
                     </div>
+                    <button class="stories-nav stories-nav-next" id="storiesNext" aria-label="Next stories">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
 
                 <!-- Posts -->
