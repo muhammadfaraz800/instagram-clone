@@ -26,7 +26,7 @@ fetch('/api/auth/me')
     })
     .catch(err => {
         console.error('Auth error:', err);
-        localStorage.clear(); // Clear invalid token
+        localStorage.clear(); // Clear invalid cached data
         window.location.href = '/login.html';
     });
 
