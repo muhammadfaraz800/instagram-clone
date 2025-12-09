@@ -4,3 +4,4 @@ log.txt
 *.sql
 SQL/
 uploads/
+*.bat

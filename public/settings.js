@@ -35,7 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Common Fields
         if (usernameDisplay) usernameDisplay.textContent = data.USERNAME || '';
-        if (nameDisplay) nameDisplay.textContent = data.PROFILE_NAME || '';
+        if (nameDisplay) {
+            const accountTypeLabel = (userAccountType === 'business') ? 'Business' : 'Personal';
+            nameDisplay.textContent = (data.PROFILE_NAME || '') + ` • ${accountTypeLabel}`;
+        }
         if (profilePic && data.PROFILE_PICTURE_URL) profilePic.src = data.PROFILE_PICTURE_URL;
 
         if (nameInput) nameInput.value = data.PROFILE_NAME || '';
