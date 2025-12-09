@@ -19,7 +19,7 @@ export const updateUser = async (req, res) => {
         await connection.execute(
             `UPDATE Account 
              SET PROFILE_NAME = :profile_name, 
-                 EMAIL = :email, 
+                 EMAIL = NVL(:email, EMAIL), 
                  BIO = :bio, 
                  VISIBILITY = :visibility
              WHERE USERNAME = :username`,
