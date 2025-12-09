@@ -10,6 +10,9 @@ export const updateUser = async (req, res) => {
     if (!username) {
         return res.status(401).send({ message: 'Unauthorized' });
     }
+    if (!email) {
+        return res.status(400).send({ message: 'Email is required' });
+    }
 
     let connection;
     try {
@@ -18,10 +21,11 @@ export const updateUser = async (req, res) => {
         // 1. Update Account Table (Common fields)
         await connection.execute(
             `UPDATE Account 
-             SET PROFILE_NAME = :profile_name, 
+             SET 
+                 PROFILE_NAME = NVL(:profile_name, PROFILE_NAME), 
                  EMAIL = NVL(:email, EMAIL), 
                  BIO = :bio, 
-                 VISIBILITY = :visibility
+                 VISIBILITY = NVL(:visibility, VISIBILITY)
              WHERE USERNAME = :username`,
             {
                 profile_name: profile_name || '',
@@ -38,11 +42,7 @@ export const updateUser = async (req, res) => {
 
         // Attempt Business Update
         const businessResult = await connection.execute(
-            `UPDATE Business 
-             SET BIO_URL = :website, 
-                 CONTACTNO = :contact_no,
-                 BUSINESS_TYPE = :business_type
-             WHERE USERNAME = :username`,
+            `TODO: Business update url`,
             {
                 website: website || '',
                 contact_no: contact_no || '',
@@ -51,20 +51,6 @@ export const updateUser = async (req, res) => {
             },
             { autoCommit: false }
         );
-
-        // If no business row updated, try Normal table
-        if (businessResult.rowsAffected === 0) {
-            await connection.execute(
-                `UPDATE Normal
-                 SET GENDER = :gender
-                 WHERE USERNAME = :username`,
-                {
-                    gender: gender || 'prefer_not_to_say',
-                    username: username
-                },
-                { autoCommit: false }
-            );
-        }
 
         await connection.commit();
         res.json({ message: 'Profile updated successfully' });
