@@ -202,16 +202,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                // Assuming POST or PUT to /api/user/update
-                // Note: You might need to check your exact route requirements in src/routes/user.js
-                // Assuming it expects `firstname`, `lastname`, or just a general update object.
-                // Let's assume a generic update endpoint for now or userController update logic.
-                // Looking at userController.js in previous turns, 'updateUser' just took firstname/lastname.
-                // We might need to ensure the backend supports this update. 
-                // For now, I'll write the client side logic.
 
                 const response = await fetch('/api/user/update', {
-                    method: 'POST', // or PUT
+                    method: 'PUT', // or POST
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -227,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // 2. RE-FETCH data to ensure cache is 100% in sync with server state (canonical source)
                     // OR manually update the cache object if we trust the payload.
                     // Verification fetching is safer.
-                    const verifyResponse = await fetch('/api/user/settings');
+                    const verifyResponse = await fetch('/api/user/update');
                     if (verifyResponse.ok) {
                         const freshData = await verifyResponse.json();
                         localStorage.setItem('userSettingsCache', JSON.stringify(freshData));
