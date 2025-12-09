@@ -8,11 +8,44 @@ import { generateToken } from '../utils/jwtUtils.js';
  */
 
 export const signup = async (req, res) => {
-    const { username, email, password, name, account_type } = req.body;
+    const { username, email, password, name, account_type, business_type, gender } = req.body;
 
     // Validate required fields
     if (!name || !username || !email || !password || !account_type) {
         return res.status(400).send({ message: "All fields are required." });
+    }
+    if (account_type !== 'Business' && account_type !== 'Normal') {
+        return res.status(400).send({ message: "Invalid account type." });
+    }
+    if (account_type == 'Business') {
+        if (!business_type) {
+            return res.status(400).send({ message: "Business type is required." });
+        }
+    } else if (account_type == 'Normal') {
+        if (!gender) {
+            return res.status(400).send({ message: "Gender is required." });
+        }
+    }
+    // if (password.length < 8) {
+    //     return res.status(400).send({ message: "Password must be at least 8 characters long." });
+    // }
+    if (username.length < 3) {
+        return res.status(400).send({ message: "Username must be at least 3 characters long." });
+    }
+    if (username.length > 20) {
+        return res.status(400).send({ message: "Username must be at most 20 characters long." });
+    }
+    if (email.length < 5) {
+        return res.status(400).send({ message: "Email must be at least 5 characters long." });
+    }
+    if (email.length > 50) {
+        return res.status(400).send({ message: "Email must be at most 50 characters long." });
+    }
+    if (name.length < 2) {
+        return res.status(400).send({ message: "Name must be at least 2 characters long." });
+    }
+    if (name.length > 50) {
+        return res.status(400).send({ message: "Name must be at most 50 characters long." });
     }
 
     console.log("Processing signup for:", username);
