@@ -196,6 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (userAccountType === 'business') {
                 payload.website = websiteInput.value;
                 payload.contact_no = contactInput.value;
+                payload.business_type = businessTypeInput ? businessTypeInput.value : 'Business';
             } else {
                 payload.gender = genderSelect.value;
                 payload.visibility = privateAccountCheckbox.checked ? 'Private' : 'Public';
