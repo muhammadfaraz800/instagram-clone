@@ -298,8 +298,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const file = e.target.files[0];
             if (!file) return;
 
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
+            const validTypes = ['image/jpeg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please select a JPG, JPEG, or PNG image.');
                 return;
             }
 
