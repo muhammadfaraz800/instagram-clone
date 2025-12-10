@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ---------- State ----------
     let currentUser = null;      // Logged-in user
-    let profileUser = null;      // Profile being viewed
+    let profileUser = null;      // Profile being viewed - fetched from db below
     let isOwnProfile = false;
     let isFollowing = false;
     let currentTab = 'posts';
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // ---------- Fetch Posts ----------
+    // ---------- Fetch Posts ---------- /api/profile/${username}/posts?type=${type}
     async function fetchPosts(username, type = 'all') {
         try {
             const response = await fetch(`/api/profile/${username}/posts?type=${type}`);
