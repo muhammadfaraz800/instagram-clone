@@ -4,7 +4,8 @@
 import { getPool } from "../config/db.js";
 
 export const updateUser = async (req, res) => {
-    const { profile_name, email, bio, visibility } = req.body;
+    const { profile_name, email, bio, visibility, business_type } = req.body;
+    if (business_type) { visibility = 'Public' };
     const username = req.username; // From verifyToken middleware
 
     if (!username) {
@@ -21,24 +22,27 @@ export const updateUser = async (req, res) => {
     try {
         connection = await getPool().getConnection();
         // 1. Update Account Table (Common fields)
+
         await connection.execute(
             `UPDATE Account 
              SET 
                  PROFILE_NAME = NVL(:profile_name, PROFILE_NAME), 
                  EMAIL = NVL(:email, EMAIL), 
+                 VISIBILITY = NVL(:visibility, VISIBILITY),
                  BIO = :bio
              WHERE USERNAME = :username`,
             {
                 profile_name: profile_name || '',
                 email: email || '',
                 bio: bio || '',
+                visibility: visibility,
                 username: username
             },
             { autoCommit: false }
         );
 
         // 2. Update Child Table
-        const { website, contact_no, business_type, gender } = req.body;
+        const { website, contact_no } = req.body;
 
         if (website) {
             const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
@@ -65,19 +69,6 @@ export const updateUser = async (req, res) => {
                 },
                 { autoCommit: false }
             );
-        } else if (gender) {
-            await connection.execute(
-                `
-            UPDATE Normal
-            SET 
-                Gender = :gender
-            WHERE UserName = :current_user`,
-                {
-                    gender: gender || '',
-                    current_user: username
-                },
-                { autoCommit: false }
-            )
         }
 
         await connection.commit();
