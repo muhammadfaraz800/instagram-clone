@@ -105,6 +105,11 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch('/api/auth/me')
         .then(res => {
             if (res.ok) return res.json();
+            if (res.status === 401) {
+                // Not authenticated, redirect to login
+                window.location.href = '/login.html';
+                throw new Error('Redirecting to login');
+            }
             throw new Error('Not authenticated');
         })
         .then(user => {
@@ -116,9 +121,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         })
         .catch(err => {
-            // If auth fails here, we might not want to redirect immediately 
-            // if the page script handles it, but for sidebar consistency typically:
-            // console.log("Sidebar auth check failed", err);
+            // Check if we are already redirected or if it's a network error that warrants a redirect
+            if (err.message !== 'Redirecting to login') {
+                console.error("Sidebar auth check failed", err);
+                // Optional: Force login on error too? safer for protected routes.
+                window.location.href = '/login.html';
+            }
         });
 
     // Logout Functionality
