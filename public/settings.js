@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // 2. RE-FETCH data to ensure cache is 100% in sync with server state (canonical source)
                     // OR manually update the cache object if we trust the payload.
                     // Verification fetching is safer.
-                    const verifyResponse = await fetch('/api/user/update');
+                    const verifyResponse = await fetch('/api/user/settings');
                     if (verifyResponse.ok) {
                         const freshData = await verifyResponse.json();
                         localStorage.setItem('userSettingsCache', JSON.stringify(freshData));
