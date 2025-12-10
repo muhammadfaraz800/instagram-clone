@@ -17,7 +17,7 @@ export const getProfile = async (req, res) => {
         connection = await getPool().getConnection();
 
         // Fetch user profile data
-        // Fetch user profile data with counts
+        // Fetch user profile data + counts of posts, followers, and following
         const profileResult = await connection.execute(
             `SELECT 
                 a.UserName,
@@ -48,6 +48,7 @@ export const getProfile = async (req, res) => {
 
         const user = profileResult.rows[0];
 
+        //send everything to frontend
         res.json({
             username: user.USERNAME,
             profileName: user.PROFILE_NAME,
