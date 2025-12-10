@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <span>Blocked accounts</span>
                     </a>
                      <!-- Profile with Picture -->
-                    <a href="settings.html" class="more-option-item" id="nav-profile-menu">
+                    <a href="#" class="more-option-item" id="nav-profile-menu">
                          <div class="profile-icon-menu" style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
                              <!-- Image will be updated by JS -->
                             <img src="/uploads/default/default-avatar.png" alt="Profile" class="sidebar-profile-pic" style="width: 100%; height: 100%; object-fit: cover;">
@@ -118,6 +118,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 profilePics.forEach(img => {
                     img.src = user.profilePictureUrl;
                 });
+            }
+            // Set profile link to user's profile page
+            if (user && user.username) {
+                const profileLink = document.getElementById('nav-profile-menu');
+                if (profileLink) {
+                    profileLink.href = `/${user.username}`;
+                }
             }
         })
         .catch(err => {

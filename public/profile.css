@@ -1,0 +1,569 @@
+/* ===================================================
+   Profile Page Styles
+   Instagram-style user profile page
+   =================================================== */
+
+/* ---------- Profile Main Container ---------- */
+.profile-main {
+    padding-top: 30px;
+}
+
+.profile-container {
+    width: 100%;
+    max-width: 935px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ---------- Profile Header ---------- */
+.profile-header {
+    display: flex;
+    gap: 80px;
+    padding: 20px 0 40px;
+    margin-bottom: 20px;
+}
+
+/* Profile Picture */
+.profile-picture-container {
+    flex-shrink: 0;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+/* Profile Info Section */
+.profile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Username Row */
+.profile-username-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-username {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.profile-options-btn {
+    padding: 8px;
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+    transition: background var(--transition-fast);
+}
+
+.profile-options-btn:hover {
+    background: var(--bg-elevated);
+}
+
+/* Profile Actions (buttons) */
+.profile-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Edit Profile Button */
+.edit-profile-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+    text-decoration: none;
+}
+
+.edit-profile-btn:hover {
+    background: var(--border-light);
+    color: var(--text-primary);
+}
+
+/* Follow Button */
+.follow-btn-profile {
+    background: var(--accent-blue);
+    color: white;
+    padding: 7px 24px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+    min-width: 100px;
+}
+
+.follow-btn-profile:hover {
+    background: var(--accent-blue-hover);
+}
+
+/* Following Button (dropdown style) */
+.following-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 110px;
+}
+
+.following-btn:hover {
+    background: var(--border-light);
+}
+
+.following-btn i {
+    font-size: 12px;
+}
+
+/* Contact Button */
+.contact-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+}
+
+.contact-btn:hover {
+    background: var(--border-light);
+}
+
+/* Suggest/Add Person Button */
+.suggest-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 7px 10px;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    transition: background var(--transition-fast);
+}
+
+.suggest-btn:hover {
+    background: var(--border-light);
+}
+
+/* ---------- Stats Row ---------- */
+.profile-stats {
+    display: flex;
+    gap: 40px;
+}
+
+.stat-item {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+}
+
+.stat-item.clickable {
+    cursor: pointer;
+}
+
+.stat-item.clickable:hover .stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-number {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-primary);
+    transition: color var(--transition-fast);
+}
+
+/* ---------- Bio Section ---------- */
+.profile-bio-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.business-type {
+    font-size: 14px;
+    color: var(--text-tertiary);
+}
+
+.profile-bio {
+    font-size: 14px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    line-height: 1.4;
+}
+
+.profile-website {
+    font-size: 14px;
+    color: var(--accent-blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.profile-website:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Profile Tabs ---------- */
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 20px;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 0;
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-top: 1px solid transparent;
+    margin-top: -1px;
+    transition: color var(--transition-fast);
+}
+
+.tab-btn i {
+    font-size: 12px;
+}
+
+.tab-btn:hover {
+    color: var(--text-secondary);
+}
+
+.tab-btn.active {
+    color: var(--text-primary);
+    border-top-color: var(--text-primary);
+}
+
+/* ---------- Posts Grid ---------- */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 4px 0 60px;
+}
+
+.post-item {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--bg-secondary);
+}
+
+.post-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity var(--transition-fast);
+}
+
+.post-item:hover img {
+    opacity: 0.7;
+}
+
+/* Reel Indicator */
+.reel-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    color: white;
+    font-size: 16px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Post Hover Overlay */
+.post-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.post-item:hover .post-overlay {
+    opacity: 1;
+}
+
+.overlay-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.overlay-stat i {
+    font-size: 18px;
+}
+
+/* ---------- Empty State ---------- */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state.hidden {
+    display: none;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.empty-icon i {
+    font-size: 36px;
+    color: var(--text-primary);
+}
+
+.empty-state h2 {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* ---------- Private Account Message ---------- */
+.private-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.private-message.hidden {
+    display: none;
+}
+
+.private-icon {
+    width: 90px;
+    height: 90px;
+    border: 2px solid var(--text-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.private-icon i {
+    font-size: 40px;
+    color: var(--text-primary);
+}
+
+.private-message h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.private-message p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 300px;
+}
+
+/* ---------- Unfollow Modal ---------- */
+.unfollow-modal {
+    width: 400px;
+    max-width: 90vw;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.unfollow-modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 20px;
+    position: relative;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.unfollow-modal-picture {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+}
+
+.unfollow-modal-username {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 18px;
+    transition: background var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+    background: var(--bg-elevated);
+}
+
+.unfollow-modal-body {
+    padding: 0;
+}
+
+.unfollow-confirm-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-red);
+    background: transparent;
+    border: none;
+    transition: background var(--transition-fast);
+}
+
+.unfollow-confirm-btn:hover {
+    background: var(--bg-elevated);
+}
+
+/* ---------- Responsive Design ---------- */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .profile-picture {
+        width: 86px;
+        height: 86px;
+    }
+
+    .profile-info {
+        align-items: center;
+    }
+
+    .profile-username-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-bio-section {
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-tabs {
+        gap: 40px;
+    }
+
+    .tab-btn span {
+        display: none;
+    }
+
+    .tab-btn i {
+        font-size: 24px;
+    }
+
+    .posts-grid {
+        gap: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 0 10px;
+    }
+
+    .profile-header {
+        padding: 10px 0 20px;
+    }
+
+    .profile-stats {
+        gap: 20px;
+    }
+
+    .stat-number,
+    .stat-label {
+        font-size: 14px;
+    }
+
+    .profile-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .posts-grid {
+        gap: 1px;
+    }
+}

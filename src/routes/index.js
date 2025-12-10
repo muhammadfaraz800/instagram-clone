@@ -1,6 +1,7 @@
 import express from 'express';
 import authRoutes from './auth.js';
 import userRoutes from './user.js';
+import profileRoutes from './profile.js';
 
 const router = express.Router();
 
@@ -8,5 +9,6 @@ const router = express.Router();
 // Since the main app mounts this router at /api, these will be /api/signup, /api/login, /api/update
 router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
+router.use('/profile', profileRoutes);
 
 export default router;

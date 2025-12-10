@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Instagram</title>
+    <link rel="stylesheet" href="index.css?v=1">
+    <link rel="stylesheet" href="profile.css?v=1">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar Navigation -->
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- Main Profile Content -->
+        <main class="main-content profile-main">
+            <div class="profile-container">
+                <!-- Profile Header -->
+                <header class="profile-header">
+                    <!-- Profile Picture -->
+                    <div class="profile-picture-container">
+                        <img id="profile-picture" src="/uploads/default/default-avatar.png" alt="Profile Picture"
+                            class="profile-picture">
+                    </div>
+
+                    <!-- Profile Info -->
+                    <div class="profile-info">
+                        <!-- Username Row -->
+                        <div class="profile-username-row">
+                            <h1 id="profile-username" class="profile-username">username</h1>
+                            <button class="profile-options-btn" id="profile-options-btn">
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                            <!-- Action Buttons - dynamically populated -->
+                            <div id="profile-actions" class="profile-actions">
+                                <!-- Edit Profile / Follow / Following buttons will be inserted here -->
+                            </div>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span id="posts-count" class="stat-number">0</span>
+                                <span class="stat-label">posts</span>
+                            </div>
+                            <div class="stat-item clickable" id="followers-stat">
+                                <span id="followers-count" class="stat-number">0</span>
+                                <span class="stat-label">followers</span>
+                            </div>
+                            <div class="stat-item clickable" id="following-stat">
+                                <span id="following-count" class="stat-number">0</span>
+                                <span class="stat-label">following</span>
+                            </div>
+                        </div>
+
+                        <!-- Account Name & Bio -->
+                        <div class="profile-bio-section">
+                            <div id="profile-name" class="profile-name"></div>
+                            <div id="business-type" class="business-type"></div>
+                            <div id="profile-bio" class="profile-bio"></div>
+                            <a id="profile-website" class="profile-website" href="#" target="_blank"
+                                rel="noopener noreferrer"></a>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Tabs (Posts / Reels) -->
+                <div class="profile-tabs">
+                    <button class="tab-btn active" id="tab-posts" data-tab="posts">
+                        <i class="fa-solid fa-table-cells"></i>
+                        <span>Posts</span>
+                    </button>
+                    <button class="tab-btn" id="tab-reels" data-tab="reels">
+                        <i class="fa-solid fa-clapperboard"></i>
+                        <span>Reels</span>
+                    </button>
+                </div>
+
+                <!-- Posts Grid -->
+                <div id="posts-grid" class="posts-grid">
+                    <!-- Posts will be dynamically loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state hidden">
+                    <div class="empty-icon">
+                        <i class="fa-regular fa-image"></i>
+                    </div>
+                    <h2 id="empty-title">No Posts Yet</h2>
+                    <p id="empty-message">When posts are shared, they will appear here.</p>
+                </div>
+
+                <!-- Private Account Message -->
+                <div id="private-message" class="private-message hidden">
+                    <div class="private-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h2>This Account is Private</h2>
+                    <p>Follow this account to see their photos and videos.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Unfollow Modal -->
+    <div id="unfollow-modal" class="modal-overlay">
+        <div class="modal-content unfollow-modal">
+            <div class="unfollow-modal-header">
+                <img id="unfollow-modal-picture" src="/uploads/default/default-avatar.png" alt="User"
+                    class="unfollow-modal-picture">
+                <span id="unfollow-modal-username" class="unfollow-modal-username">username</span>
+                <button class="modal-close-btn" id="unfollow-modal-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="unfollow-modal-body">
+                <button id="unfollow-confirm-btn" class="unfollow-confirm-btn">Unfollow</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+
+</html>
