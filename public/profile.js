@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return null;
     }
 
-    // ---------- Fetch Current User ----------
+    // ---------- Fetch Current User ---------- /api/auth/me
     async function fetchCurrentUser() {
         try {
             const response = await fetch('/api/auth/me');
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // ---------- Fetch Profile Data ----------
+    // ---------- Fetch Profile Data ---------- /api/profile/${username}
     async function fetchProfileData(username) {
         try {
             const response = await fetch(`/api/profile/${username}`);
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // ---------- Fetch Follow Status ----------
+    // ---------- Fetch Follow Status ---------- /api/profile/${username}/follow-status
     async function fetchFollowStatus(username) {
         try {
             const response = await fetch(`/api/profile/${username}/follow-status`);
@@ -164,25 +164,33 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // ---------- Render Action Buttons ----------
+    // ---------- Render Action Buttons ----------
     function renderActionButtons() {
-        profileActions.innerHTML = '';
+        const profileActions = document.getElementById('profile-actions'); // Header actions
+        const profileBioActions = document.getElementById('profile-bio-actions'); // Bio actions (below)
+
+        // Clear both
+        if (profileActions) profileActions.innerHTML = '';
+        if (profileBioActions) profileBioActions.innerHTML = '';
 
         if (isOwnProfile) {
-            // Own profile - show Edit Profile button
+            // Own profile - show Edit Profile button in header (next to username)
             const editBtn = document.createElement('a');
             editBtn.href = 'settings.html';
             editBtn.className = 'edit-profile-btn';
             editBtn.textContent = 'Edit profile';
             profileActions.appendChild(editBtn);
         } else {
-            // Other's profile
+            // Other's profile - show buttons BELOW bio
+            if (!profileBioActions) return;
+
             if (isFollowing) {
                 // Following button
                 const followingBtn = document.createElement('button');
                 followingBtn.className = 'following-btn';
                 followingBtn.innerHTML = 'Following <i class="fa-solid fa-chevron-down"></i>';
                 followingBtn.addEventListener('click', openUnfollowModal);
-                profileActions.appendChild(followingBtn);
+                profileBioActions.appendChild(followingBtn);
 
                 // Contact button (only for business accounts)
                 if (profileUser.businessType) {
@@ -190,21 +198,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                     contactBtn.className = 'contact-btn';
                     contactBtn.textContent = 'Contact';
                     contactBtn.addEventListener('click', handleContact);
-                    profileActions.appendChild(contactBtn);
+                    profileBioActions.appendChild(contactBtn);
                 }
 
                 // Suggest button
                 const suggestBtn = document.createElement('button');
                 suggestBtn.className = 'suggest-btn';
                 suggestBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
-                profileActions.appendChild(suggestBtn);
+                profileBioActions.appendChild(suggestBtn);
             } else {
                 // Not following - show Follow button
                 const followBtn = document.createElement('button');
                 followBtn.className = 'follow-btn-profile';
                 followBtn.textContent = 'Follow';
                 followBtn.addEventListener('click', handleFollow);
-                profileActions.appendChild(followBtn);
+                profileBioActions.appendChild(followBtn);
 
                 // Contact button (only for business accounts on public profiles)
                 if (profileUser.businessType && profileUser.visibility === 'Public') {
@@ -212,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     contactBtn.className = 'contact-btn';
                     contactBtn.textContent = 'Contact';
                     contactBtn.addEventListener('click', handleContact);
-                    profileActions.appendChild(contactBtn);
+                    profileBioActions.appendChild(contactBtn);
                 }
             }
         }

@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Instagram</title>
-    <link rel="stylesheet" href="index.css?v=1">
-    <link rel="stylesheet" href="profile.css?v=1">
+    <link rel="stylesheet" href="/index.css?v=1">
+    <link rel="stylesheet" href="/profile.css?v=1">
+    <link rel="stylesheet" href="/profile-actions.css?v=1">
     <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,7 +18,7 @@
     <div class="app-container">
         <!-- Left Sidebar Navigation -->
         <div id="sidebar-container"></div>
-        <script src="sidebar.js"></script>
+        <script src="/sidebar.js"></script>
 
         <!-- Main Profile Content -->
         <main class="main-content profile-main">
@@ -26,15 +27,14 @@
                 <header class="profile-header">
                     <!-- Profile Picture -->
                     <div class="profile-picture-container">
-                        <img id="profile-picture" src="/uploads/default/default-avatar.png" alt="Profile Picture"
-                            class="profile-picture">
+                        <img id="profile-picture" src="" alt="Profile Picture" class="profile-picture">
                     </div>
 
                     <!-- Profile Info -->
                     <div class="profile-info">
                         <!-- Username Row -->
                         <div class="profile-username-row">
-                            <h1 id="profile-username" class="profile-username">username</h1>
+                            <h1 id="profile-username" class="profile-username"></h1>
                             <button class="profile-options-btn" id="profile-options-btn">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
@@ -68,6 +68,9 @@
                             <a id="profile-website" class="profile-website" href="#" target="_blank"
                                 rel="noopener noreferrer"></a>
                         </div>
+
+                        <!-- Action Buttons (Below Bio for other profiles) -->
+                        <div id="profile-bio-actions" class="profile-bio-actions"></div>
                     </div>
                 </header>
 
@@ -126,7 +129,7 @@
         </div>
     </div>
 
-    <script src="profile.js"></script>
+    <script src="/profile.js"></script>
 </body>
 
 </html>

@@ -4,7 +4,8 @@
 import { getPool } from "../config/db.js";
 
 export const updateUser = async (req, res) => {
-    const { profile_name, email, bio, visibility, business_type } = req.body;
+    const { profile_name, email, bio, business_type } = req.body;
+    let visibility = req.body.visibility;
     if (business_type) { visibility = 'Public' };
     const username = req.username; // From verifyToken middleware
 
