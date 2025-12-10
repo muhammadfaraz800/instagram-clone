@@ -88,6 +88,52 @@ export const updateUser = async (req, res) => {
     }
 };
 
+// Delete user account
+export const deleteAccount = async (req, res) => {
+    const username = req.username; // From verifyToken middleware
+
+    if (!username) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    let connection;
+    try {
+        connection = await getPool().getConnection();
+
+        // Delete from Account table - child tables (Normal, Business) should cascade
+        const result = await connection.execute(
+            `DELETE FROM Account WHERE UserName = :username`,
+            { username: username },
+            { autoCommit: true }
+        );
+
+        if (result.rowsAffected === 0) {
+            return res.status(404).json({ message: 'Account not found' });
+        }
+
+        // Clear the auth cookie
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        res.json({ message: 'Account deleted successfully' });
+
+    } catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Failed to delete account', details: error.message });
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error('Error closing connection:', err);
+            }
+        }
+    }
+};
+
 // Get user settings
 
 export const getSettings = async (req, res) => {

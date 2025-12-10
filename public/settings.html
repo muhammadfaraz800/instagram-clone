@@ -115,6 +115,37 @@
                 <!-- Submit Button -->
                 <button class="submit-btn">Submit</button>
 
+                <!-- Danger Zone -->
+                <div class="danger-zone">
+                    <div class="form-section-title">Danger Zone</div>
+                    <p class="helper-text" style="margin-top: 0; margin-bottom: 12px;">Permanently delete your account
+                        and all associated data.</p>
+                    <button class="delete-btn" id="openDeleteModal">Delete Account</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Delete Account Confirmation Modal -->
+        <div id="deleteAccountModal" class="modal-overlay">
+            <div class="modal-content delete-modal-content">
+                <div class="delete-modal-header">
+                    <h3>Delete Account</h3>
+                    <button class="close-delete-modal-btn" id="closeDeleteModal">&times;</button>
+                </div>
+                <div class="delete-modal-body">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p class="warning-text">
+                        <strong>This action is irreversible.</strong><br>
+                        Your account and all associated data will be deleted immediately.
+                    </p>
+                    <p class="confirmation-text">Type <strong>Delete</strong> to confirm:</p>
+                    <input type="text" id="deleteConfirmInput" class="input-field" placeholder="Type Delete here"
+                        autocomplete="off">
+                    <button class="confirm-delete-btn" id="confirmDeleteBtn" disabled>Delete My Account</button>
+                </div>
             </div>
         </div>
 

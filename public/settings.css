@@ -281,6 +281,139 @@ body.account-personal .field-business {
     color: white;
 }
 
+/* ---------- Delete Account Modal ---------- */
+.delete-modal-content {
+    padding: 0;
+    text-align: center;
+}
+
+.delete-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.delete-modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ed4956;
+    margin: 0;
+}
+
+.close-delete-modal-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-delete-modal-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.delete-modal-body {
+    padding: 24px;
+}
+
+.warning-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: rgba(237, 73, 86, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.warning-icon i {
+    font-size: 32px;
+    color: #ed4956;
+}
+
+.warning-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.warning-text strong {
+    color: #ed4956;
+}
+
+.confirmation-text {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+}
+
+.confirmation-text strong {
+    color: var(--text-primary);
+}
+
+.delete-modal-body .input-field {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.confirm-delete-btn {
+    width: 100%;
+    background: #ed4956;
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.confirm-delete-btn:disabled {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.confirm-delete-btn:not(:disabled):hover {
+    background: #d63847;
+    transform: scale(1.01);
+}
+
+.confirm-delete-btn.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.confirm-delete-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
 /* ---------- Success/Error Messages ---------- */
 .message {
     padding: 12px 16px;
@@ -435,6 +568,7 @@ body.account-personal .field-business {
         opacity: 0;
         transform: scale(0.95) translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);

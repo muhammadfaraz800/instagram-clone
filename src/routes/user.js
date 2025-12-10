@@ -1,5 +1,5 @@
 import express from 'express';
-import { updateUser, getSettings } from '../controllers/userController.js';
+import { updateUser, getSettings, deleteAccount } from '../controllers/userController.js';
 import { upload, uploadProfilePicture } from '../controllers/uploadController.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
@@ -22,5 +22,10 @@ router.get('/settings', getSettings);
 // @route   POST /api/user/upload-pfp
 // @access  Private
 router.post('/upload-pfp', upload.single('profilePicture'), uploadProfilePicture);
+
+// @desc    Delete user account
+// @route   DELETE /api/user/delete
+// @access  Private
+router.delete('/delete', deleteAccount);
 
 export default router;

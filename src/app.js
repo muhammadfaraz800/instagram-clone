@@ -23,8 +23,8 @@ app.get('/:username', (req, res, next) => {
     const { username } = req.params;
 
     // Skip if it's a reserved keyword or looks like a static file
-    // Added 'api', 'uploads' etc to prevent catching server routes
-    // Added 'explore', 'reels' (root level) to prevent catching future routes
+    // using 'api', 'uploads' etc to prevent catching server routes
+    // using 'explore', 'reels' (root level) to prevent catching future routes
     const reservedRoutes = ['api', 'uploads', 'explore', 'reels', 'login.html', 'signup.html', 'settings.html', 'index.html'];
 
     if (staticExtensions.test(username) || reservedRoutes.includes(username.toLowerCase())) {
