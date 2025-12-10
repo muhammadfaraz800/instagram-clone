@@ -37,6 +37,7 @@
                         </div>
                     </div>
                     <button class="change-photo-btn">Change photo</button>
+                    <input type="file" id="pfpFileInput" accept="image/*" style="display: none;">
                 </div>
 
                 <!-- Input Fields -->
@@ -113,6 +114,53 @@
                 <!-- Submit Button -->
                 <button class="submit-btn">Submit</button>
 
+            </div>
+        </div>
+
+        <!-- Image Editor Modal -->
+        <div class="image-editor-modal" id="imageEditorModal">
+            <div class="image-editor-content">
+                <div class="editor-header">
+                    <h3>Edit Photo</h3>
+                    <button class="close-editor-btn" id="closeEditorBtn">&times;</button>
+                </div>
+
+                <div class="editor-canvas-container" id="editorCanvasContainer">
+                    <canvas id="editorCanvas"></canvas>
+                    <div class="crop-box" id="cropBox">
+                        <div class="crop-handle top-left"></div>
+                        <div class="crop-handle top-right"></div>
+                        <div class="crop-handle bottom-left"></div>
+                        <div class="crop-handle bottom-right"></div>
+                    </div>
+                </div>
+
+                <div class="editor-controls">
+                    <!-- Zoom Controls -->
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoomOutBtn">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="range" id="zoomSlider" min="50" max="200" value="100" class="zoom-slider">
+                        <button class="zoom-btn" id="zoomInBtn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <span class="zoom-label" id="zoomLabel">100%</span>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="filter-controls">
+                        <button class="filter-btn active" data-filter="none">None</button>
+                        <button class="filter-btn" data-filter="grayscale">Grayscale</button>
+                        <button class="filter-btn" data-filter="sepia">Sepia</button>
+                        <button class="filter-btn" data-filter="brightness">Bright</button>
+                        <button class="filter-btn" data-filter="contrast">Contrast</button>
+                        <button class="filter-btn" data-filter="saturate">Saturate</button>
+                        <button class="filter-btn" data-filter="blur">Blur</button>
+                    </div>
+                </div>
+
+                <button class="save-photo-btn" id="savePhotoBtn">Submit</button>
             </div>
         </div>
     </div>

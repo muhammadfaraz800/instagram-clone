@@ -51,7 +51,7 @@ export const updateUser = async (req, res) => {
         // Attempt Business Update
         if (business_type) {
 
-            const businessResult = await connection.execute(
+            await connection.execute(
                 `
             UPDATE Business
             SET 
