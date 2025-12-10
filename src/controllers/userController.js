@@ -13,25 +13,25 @@ export const updateUser = async (req, res) => {
     if (!email) {
         return res.status(400).send({ message: 'Email is required' });
     }
+    if (!profile_name) {
+        return res.status(400).send({ message: 'Profile name is required' });
+    }
 
     let connection;
     try {
         connection = await getPool().getConnection();
-
         // 1. Update Account Table (Common fields)
         await connection.execute(
             `UPDATE Account 
              SET 
                  PROFILE_NAME = NVL(:profile_name, PROFILE_NAME), 
                  EMAIL = NVL(:email, EMAIL), 
-                 BIO = :bio, 
-                 VISIBILITY = NVL(:visibility, VISIBILITY)
+                 BIO = :bio
              WHERE USERNAME = :username`,
             {
                 profile_name: profile_name || '',
                 email: email || '',
                 bio: bio || '',
-                visibility: visibility || 'Public',
                 username: username
             },
             { autoCommit: false }
@@ -41,16 +41,36 @@ export const updateUser = async (req, res) => {
         const { website, contact_no, business_type, gender } = req.body;
 
         // Attempt Business Update
-        const businessResult = await connection.execute(
-            `TODO: Business update url`,
-            {
-                website: website || '',
-                contact_no: contact_no || '',
-                business_type: business_type || 'Creator',
-                username: username
-            },
-            { autoCommit: false }
-        );
+        if (business_type) {
+
+            const businessResult = await connection.execute(
+                `
+            UPDATE Business
+            SET 
+                ContactNo = :contactNo,
+                Bio_URL = :bioUrl
+            WHERE UserName = :current_user`,
+                {
+                    contactNo: contact_no || '',
+                    bioUrl: website || '',
+                    current_user: username
+                },
+                { autoCommit: false }
+            );
+        } else if (gender) {
+            await connection.execute(
+                `
+            UPDATE Normal
+            SET 
+                Gender = :gender
+            WHERE UserName = :current_user`,
+                {
+                    gender: gender || '',
+                    current_user: username
+                },
+                { autoCommit: false }
+            )
+        }
 
         await connection.commit();
         res.json({ message: 'Profile updated successfully' });
