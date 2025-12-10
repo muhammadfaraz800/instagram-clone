@@ -674,5 +674,103 @@ document.addEventListener('DOMContentLoaded', async () => {
             initCropBox();
         }
     });
+
+    // ========================================
+    // DELETE ACCOUNT FUNCTIONALITY
+    // ========================================
+
+    const deleteAccountModal = document.getElementById('deleteAccountModal');
+    const openDeleteModalBtn = document.getElementById('openDeleteModal');
+    const closeDeleteModalBtn = document.getElementById('closeDeleteModal');
+    const deleteConfirmInput = document.getElementById('deleteConfirmInput');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+    // Open delete modal
+    if (openDeleteModalBtn && deleteAccountModal) {
+        openDeleteModalBtn.addEventListener('click', () => {
+            deleteAccountModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Reset input and button state
+            if (deleteConfirmInput) deleteConfirmInput.value = '';
+            if (confirmDeleteBtn) confirmDeleteBtn.disabled = true;
+        });
+    }
+
+    // Close delete modal
+    function closeDeleteModal() {
+        if (deleteAccountModal) {
+            deleteAccountModal.classList.remove('active');
+            document.body.style.overflow = '';
+            if (deleteConfirmInput) deleteConfirmInput.value = '';
+            if (confirmDeleteBtn) confirmDeleteBtn.disabled = true;
+        }
+    }
+
+    if (closeDeleteModalBtn) {
+        closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+    }
+
+    // Close on outside click
+    if (deleteAccountModal) {
+        deleteAccountModal.addEventListener('click', (e) => {
+            if (e.target === deleteAccountModal) {
+                closeDeleteModal();
+            }
+        });
+    }
+
+    // Validate confirmation input
+    if (deleteConfirmInput && confirmDeleteBtn) {
+        deleteConfirmInput.addEventListener('input', () => {
+            const value = deleteConfirmInput.value.trim();
+            if (value === 'Delete') {
+                confirmDeleteBtn.disabled = false;
+            } else {
+                confirmDeleteBtn.disabled = true;
+            }
+        });
+    }
+
+    // Handle delete account
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', async () => {
+            // Double check input value
+            if (deleteConfirmInput.value.trim() !== 'Delete') {
+                return;
+            }
+
+            // Show loading state
+            confirmDeleteBtn.classList.add('loading');
+            confirmDeleteBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/user/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Clear local storage
+                    localStorage.removeItem('userSettingsCache');
+
+                    // Redirect to login page
+                    alert('Your account has been deleted.');
+                    window.location.href = '/login.html';
+                } else {
+                    const err = await response.json();
+                    alert('Failed to delete account: ' + (err.message || 'Unknown error'));
+                    confirmDeleteBtn.classList.remove('loading');
+                    confirmDeleteBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                alert('An error occurred while deleting your account.');
+                confirmDeleteBtn.classList.remove('loading');
+                confirmDeleteBtn.disabled = false;
+            }
+        });
+    }
 });
 
