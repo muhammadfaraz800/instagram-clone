@@ -40,6 +40,14 @@ export const updateUser = async (req, res) => {
         // 2. Update Child Table
         const { website, contact_no, business_type, gender } = req.body;
 
+        if (website) {
+            const urlRegex = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+            if (!urlRegex.test(website.trim())) {
+                await connection.rollback();
+                return res.status(400).json({ message: 'Invalid website URL' });
+            }
+        }
+
         // Attempt Business Update
         if (business_type) {
 
