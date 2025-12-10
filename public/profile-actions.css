@@ -1,0 +1,48 @@
+/* ---------- Bio Actions (Below Bio) ---------- */
+.profile-bio-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+}
+
+.profile-bio-actions button {
+    flex: 1;
+    /* Match mobile style buttons taking available width or equal width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+}
+
+.profile-bio-actions .follow-btn-profile {
+    background: var(--accent-blue);
+    color: white;
+}
+
+.profile-bio-actions .follow-btn-profile:hover {
+    background: var(--accent-blue-hover);
+}
+
+.profile-bio-actions .following-btn,
+.profile-bio-actions .contact-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.profile-bio-actions .following-btn:hover,
+.profile-bio-actions .contact-btn:hover {
+    background: var(--border-light);
+}
+
+.profile-bio-actions .suggest-btn {
+    flex: 0 0 auto;
+    /* Don't stretch suggest button too much */
+    padding: 7px 12px;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}

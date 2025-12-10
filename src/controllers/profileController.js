@@ -7,6 +7,7 @@ import { getPool } from '../config/db.js';
 /**
  * Get user profile data
  * GET /api/profile/:username
+ * Returns profile data for a specific user for profile page
  */
 export const getProfile = async (req, res) => {
     const { username } = req.params;
@@ -16,6 +17,7 @@ export const getProfile = async (req, res) => {
         connection = await getPool().getConnection();
 
         // Fetch user profile data
+        // Fetch user profile data with counts
         const profileResult = await connection.execute(
             `SELECT 
                 a.UserName,
@@ -26,7 +28,13 @@ export const getProfile = async (req, res) => {
                 a.Visibility,
                 b.Bio_URL AS Website,
                 b.ContactNo,
-                b.Business_Type
+                b.Business_Type,
+                -- Count total content (Reels + Images)
+                (SELECT COUNT(*) FROM Content c WHERE c.UserName = a.UserName) AS Posts_Count,
+                -- Count how many people follow THIS user
+                (SELECT COUNT(*) FROM Follows f WHERE f.FollowedUserName = a.UserName) AS Followers_Count,
+                -- Count how many people THIS user follows
+                (SELECT COUNT(*) FROM Follows f WHERE f.FollowerUserName = a.UserName) AS Following_Count
             FROM Account a
             LEFT JOIN Business b ON a.UserName = b.UserName
             WHERE LOWER(a.UserName) = LOWER(:username)`,
@@ -40,39 +48,6 @@ export const getProfile = async (req, res) => {
 
         const user = profileResult.rows[0];
 
-        // Fetch follower count - XX placeholder query
-        // TODO: Implement when Follows table is created
-        let followersCount = 0;
-        let followingCount = 0;
-        let postsCount = 0;
-
-        // Placeholder: When Follows table exists, use these queries:
-        /*
-        const followersResult = await connection.execute(
-            `SELECT COUNT(*) AS count FROM Follows WHERE LOWER(FollowingUsername) = LOWER(:username)`,
-            { username },
-            { outFormat: 4002 }
-        );
-        followersCount = followersResult.rows[0]?.COUNT || 0;
-
-        const followingResult = await connection.execute(
-            `SELECT COUNT(*) AS count FROM Follows WHERE LOWER(FollowerUsername) = LOWER(:username)`,
-            { username },
-            { outFormat: 4002 }
-        );
-        followingCount = followingResult.rows[0]?.COUNT || 0;
-        */
-
-        // Placeholder: When Posts table exists, use this query:
-        /*
-        const postsResult = await connection.execute(
-            `SELECT COUNT(*) AS count FROM Posts WHERE LOWER(Username) = LOWER(:username)`,
-            { username },
-            { outFormat: 4002 }
-        );
-        postsCount = postsResult.rows[0]?.COUNT || 0;
-        */
-
         res.json({
             username: user.USERNAME,
             profileName: user.PROFILE_NAME,
@@ -82,9 +57,9 @@ export const getProfile = async (req, res) => {
             website: user.WEBSITE,
             contactNo: user.CONTACTNO,
             businessType: user.BUSINESS_TYPE,
-            followersCount,
-            followingCount,
-            postsCount
+            followersCount: user.FOLLOWERS_COUNT || 0,
+            followingCount: user.FOLLOWING_COUNT || 0,
+            postsCount: user.POSTS_COUNT || 0
         });
 
     } catch (error) {

@@ -22,14 +22,19 @@ const knownRoutes = ['api', 'uploads', 'login.html', 'signup.html', 'settings.ht
 app.get('/:username', (req, res, next) => {
     const { username } = req.params;
 
-    // Skip if it's a static file extension or known route
-    if (staticExtensions.test(username) || knownRoutes.includes(username.toLowerCase())) {
+    // Skip if it's a reserved keyword or looks like a static file
+    // Added 'api', 'uploads' etc to prevent catching server routes
+    // Added 'explore', 'reels' (root level) to prevent catching future routes
+    const reservedRoutes = ['api', 'uploads', 'explore', 'reels', 'login.html', 'signup.html', 'settings.html', 'index.html'];
+
+    if (staticExtensions.test(username) || reservedRoutes.includes(username.toLowerCase())) {
         return next();
     }
 
     res.sendFile('profile.html', { root: 'public' });
 });
 
+// Handle /:username/reels (without subpaths)
 app.get('/:username/reels', (req, res, next) => {
     const { username } = req.params;
 
@@ -37,8 +42,23 @@ app.get('/:username/reels', (req, res, next) => {
     if (staticExtensions.test(username)) {
         return next();
     }
-
     res.sendFile('profile.html', { root: 'public' });
+});
+
+// Handle /:username/reels and redirect deeper paths
+// Using regex to capture username and any remaining path
+// Matches /username/reels/anything
+app.get(/^\/([^/]+)\/reels\/(.+)$/, (req, res, next) => {
+    const username = req.params[0];
+    // const extraPath = req.params[1];
+
+    // Skip if it looks like a static file request
+    if (staticExtensions.test(username)) {
+        return next();
+    }
+
+    // Always redirect any subpath back to the main reels page
+    res.redirect(`/${username}/reels`);
 });
 
 export default app;
