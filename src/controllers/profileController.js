@@ -164,6 +164,7 @@ export const getProfilePosts = async (req, res) => {
 };
 
 /**
+ * TODO: Implement follow functionality when Follows table exists
  * Follow a user
  * POST /api/profile/:username/follow
  */
@@ -218,6 +219,7 @@ export const followUser = async (req, res) => {
 };
 
 /**
+ * TODO: Implement unfollow functionality when Follows table exists
  * Unfollow a user
  * DELETE /api/profile/:username/follow
  */
@@ -257,6 +259,7 @@ export const unfollowUser = async (req, res) => {
 };
 
 /**
+ * TODO: Implement follow status check when Follows table exists
  * Get follow status
  * GET /api/profile/:username/follow-status
  */

@@ -3,6 +3,91 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarContainer = document.getElementById("sidebar-container");
     if (!sidebarContainer) return;
 
+    // Mock notifications data (will be fetched from requests table in future)
+    const mockNotifications = [
+        {
+            id: 1,
+            type: 'following',
+            username: 'sadatali.larik',
+            profilePic: '/uploads/default/default-avatar.png',
+            message: 'started following you.',
+            time: 'Nov 08',
+            isFollowing: true
+        },
+        {
+            id: 2,
+            type: 'not_following',
+            username: 'ch_umer_64',
+            profilePic: '/uploads/default/default-avatar.png',
+            message: 'started following you.',
+            time: 'Oct 30',
+            isFollowing: false
+        },
+        {
+            id: 3,
+            type: 'request',
+            username: 'shazanajaved',
+            profilePic: '/uploads/default/default-avatar.png',
+            message: 'requested to follow you.',
+            time: 'Oct 28',
+            isFollowing: false
+        },
+        {
+            id: 4,
+            type: 'following',
+            username: 'adan_ali_04',
+            profilePic: '/uploads/default/default-avatar.png',
+            message: 'started following you.',
+            time: 'Oct 28',
+            isFollowing: true
+        },
+        {
+            id: 5,
+            type: 'following',
+            username: 'tanvirabbas31',
+            profilePic: '/uploads/default/default-avatar.png',
+            message: 'started following you.',
+            time: 'Oct 08',
+            isFollowing: true
+        }
+    ];
+
+    // Generate notification items HTML
+    function generateNotificationItems() {
+        return mockNotifications.map(notif => {
+            let actionButtons = '';
+            if (notif.type === 'request') {
+                actionButtons = `
+                    <button class="notif-btn notif-btn-confirm" data-id="${notif.id}">Confirm</button>
+                    <button class="notif-btn notif-btn-delete" data-id="${notif.id}">Delete</button>
+                `;
+            } else if (notif.type === 'following') {
+                actionButtons = `
+                    <button class="notif-btn notif-btn-following" data-id="${notif.id}">Following</button>
+                `;
+            } else {
+                actionButtons = `
+                    <button class="notif-btn notif-btn-follow-back" data-id="${notif.id}">Follow Back</button>
+                `;
+            }
+            return `
+                <div class="notification-item" data-id="${notif.id}">
+                    <div class="notif-avatar">
+                        <img src="${notif.profilePic}" alt="${notif.username}">
+                    </div>
+                    <div class="notif-content">
+                        <span class="notif-username">${notif.username}</span>
+                        <span class="notif-message">${notif.message}</span>
+                        <span class="notif-time">${notif.time}</span>
+                    </div>
+                    <div class="notif-actions">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
     // Define Sidebar HTML
     const sidebarHTML = `
         <div class="sidebar">
@@ -67,6 +152,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 </a>
             </div>
         </div>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notificationsPanel">
+            <div class="notifications-header">
+                <h2>Notifications</h2>
+            </div>
+            <div class="notifications-section">
+                <h4 class="notifications-section-title">Earlier</h4>
+                <div class="notifications-list">
+                    ${generateNotificationItems()}
+                </div>
+            </div>
+        </div>
     `;
 
     // Inject Sidebar
@@ -85,10 +183,48 @@ document.addEventListener("DOMContentLoaded", function () {
     const moreMenu = document.getElementById("moreOptionsMenu");
     const logoutBtn = document.getElementById("logoutBtn");
 
+    // Notifications Panel Logic
+    const notificationsBtn = document.getElementById("nav-notifications");
+    const notificationsPanel = document.getElementById("notificationsPanel");
+    const sidebar = document.querySelector(".sidebar");
+
+    if (notificationsBtn && notificationsPanel) {
+        notificationsBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = notificationsPanel.classList.contains("open");
+
+            if (isOpen) {
+                notificationsPanel.classList.remove("open");
+                sidebar.classList.remove("notifications-active");
+            } else {
+                // Close more menu if open
+                if (moreMenu) moreMenu.style.display = "none";
+                notificationsPanel.classList.add("open");
+                sidebar.classList.add("notifications-active");
+            }
+        });
+
+        // Close notifications panel when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!notificationsPanel.contains(e.target) &&
+                !notificationsBtn.contains(e.target) &&
+                notificationsPanel.classList.contains("open")) {
+                notificationsPanel.classList.remove("open");
+                sidebar.classList.remove("notifications-active");
+            }
+        });
+    }
+
     if (moreBtn && moreMenu) {
         moreBtn.addEventListener("click", function (e) {
             e.preventDefault();
-            e.stopPropagation(); // Prevent closing immediately
+            e.stopPropagation();
+            // Close notifications panel if open
+            if (notificationsPanel) {
+                notificationsPanel.classList.remove("open");
+                sidebar.classList.remove("notifications-active");
+            }
             const isHidden = moreMenu.style.display === "none";
             moreMenu.style.display = isHidden ? "block" : "none";
         });
