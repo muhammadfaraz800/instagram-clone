@@ -104,24 +104,27 @@ export const deleteAccount = async (req, res) => {
         const result = await connection.execute(
             `DELETE FROM Account WHERE UserName = :username`,
             { username: username },
-            { autoCommit: true }
+            { autoCommit: false }
         );
 
         if (result.rowsAffected === 0) {
             return res.status(404).json({ message: 'Account not found' });
         }
 
-        // Clear the auth cookie
+        // Clear the auth cookie    
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         });
-
+        await connection.commit();
         res.json({ message: 'Account deleted successfully' });
 
     } catch (error) {
         console.error('Delete account error:', error);
+        if (connection) {
+            try { await connection.rollback(); } catch (e) { console.error(e); }
+        }
         res.status(500).json({ message: 'Failed to delete account', details: error.message });
     } finally {
         if (connection) {
