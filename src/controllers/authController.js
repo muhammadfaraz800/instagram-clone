@@ -47,6 +47,11 @@ export const signup = async (req, res) => {
     if (name.length > 50) {
         return res.status(400).send({ message: "Name must be at most 50 characters long." });
     }
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send({ message: "Invalid email format." });
+    }
 
     console.log("Processing signup for:", username);
 
@@ -84,10 +89,7 @@ export const signup = async (req, res) => {
 
         // 2. Insert into Child Table based on Account Type
         if (account_type === 'Business') {
-            const { bio_url, contact_no, business_type } = req.body;
-            if (!business_type) {
-                return res.status(400).send({ message: "Business type is required." });
-            }
+            const { bio_url, contact_no } = req.body;
             // console.log("Before executing insert into Business...");
             await connection.execute(
                 `INSERT INTO Business (USERNAME, BIO_URL, CONTACTNO, BUSINESS_TYPE) 
@@ -137,8 +139,9 @@ export const signup = async (req, res) => {
             }
         }
 
-        // Handle Unique Constraint Violation (ORA-00001)
+        // Handle Oracle ORA-00001: unique constraint violation
         if (err.errorNum === 1) {
+            // Could be username OR email - check which one exists
             return res.status(409).send({ message: "Username or Email already exists" });
         }
 

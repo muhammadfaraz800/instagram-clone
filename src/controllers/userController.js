@@ -24,7 +24,7 @@ export const updateUser = async (req, res) => {
         connection = await getPool().getConnection();
         // 1. Update Account Table (Common fields)
 
-        await connection.execute(
+        const accountResult = await connection.execute(
             `UPDATE Account 
              SET 
                  PROFILE_NAME = NVL(:profile_name, PROFILE_NAME), 
@@ -42,6 +42,11 @@ export const updateUser = async (req, res) => {
             { autoCommit: false }
         );
 
+        // Verify user exists
+        if (accountResult.rowsAffected === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
         // 2. Update Child Table
         const { website, contact_no } = req.body;
 
@@ -53,10 +58,9 @@ export const updateUser = async (req, res) => {
             }
         }
 
-        // Attempt Business Update
+        // Attempt Business Update - verify user is actually a business account
         if (business_type) {
-
-            await connection.execute(
+            const businessResult = await connection.execute(
                 `
             UPDATE Business
             SET 
@@ -70,6 +74,12 @@ export const updateUser = async (req, res) => {
                 },
                 { autoCommit: false }
             );
+
+            // If no rows affected, user is not a business account
+            if (businessResult.rowsAffected === 0) {
+                await connection.rollback();
+                return res.status(400).json({ error: 'Account is not a business account' });
+            }
         }
 
         await connection.commit();

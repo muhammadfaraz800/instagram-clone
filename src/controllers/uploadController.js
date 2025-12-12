@@ -44,7 +44,6 @@ export const upload = multer({
     }
 });
 
-// Upload profile picture handler
 // Default profile picture path
 const DEFAULT_PROFILE_PICTURE = '/uploads/default/default-avatar.png';
 
@@ -61,7 +60,7 @@ export const removeProfilePicture = async (req, res) => {
         connection = await getPool().getConnection();
 
         // Update the profile picture URL to default (don't delete old file)
-        await connection.execute(
+        const result = await connection.execute(
             `UPDATE Account 
              SET PROFILE_PICTURE_URL = :profile_picture_url
              WHERE USERNAME = :username`,
@@ -71,6 +70,11 @@ export const removeProfilePicture = async (req, res) => {
             },
             { autoCommit: true }
         );
+
+        // Verify user exists
+        if (result.rowsAffected === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         res.json({
             message: 'Profile picture removed successfully',
@@ -114,7 +118,7 @@ export const uploadProfilePicture = async (req, res) => {
         connection = await getPool().getConnection();
 
         // Update the profile picture URL in the database
-        await connection.execute(
+        const result = await connection.execute(
             `UPDATE Account 
              SET PROFILE_PICTURE_URL = :profile_picture_url
              WHERE USERNAME = :username`,
@@ -124,6 +128,14 @@ export const uploadProfilePicture = async (req, res) => {
             },
             { autoCommit: true }
         );
+
+        // Verify user exists - clean up file if not
+        if (result.rowsAffected === 0) {
+            if (req.file && req.file.path) {
+                try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+            }
+            return res.status(404).json({ error: 'User not found' });
+        }
 
         res.json({
             message: 'Profile picture updated successfully',
