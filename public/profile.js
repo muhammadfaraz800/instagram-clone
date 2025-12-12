@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let profileUser = null;      // Profile being viewed - fetched from db below
     let isOwnProfile = false;
     let isFollowing = false;
+    let isPending = false;       // Follow request pending (for private accounts)
     let currentTab = 'posts';
 
     // ---------- Get Username from URL ----------
@@ -86,12 +87,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function fetchFollowStatus(username) {
         try {
             const response = await fetch(`/api/profile/${username}/follow-status`);
-            if (!response.ok) return false;
+            if (!response.ok) return { isFollowing: false, isPending: false };
             const data = await response.json();
-            return data.isFollowing;
+            return { isFollowing: data.isFollowing, isPending: data.isPending || false };
         } catch (error) {
             console.error('Error fetching follow status:', error);
-            return false;
+            return { isFollowing: false, isPending: false };
         }
     }
 
@@ -164,7 +165,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // ---------- Render Action Buttons ----------
-    // ---------- Render Action Buttons ----------
     function renderActionButtons() {
         const profileActions = document.getElementById('profile-actions'); // Header actions
         const profileBioActions = document.getElementById('profile-bio-actions'); // Bio actions (below)
@@ -206,6 +206,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                 suggestBtn.className = 'suggest-btn';
                 suggestBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
                 profileBioActions.appendChild(suggestBtn);
+            } else if (isPending) {
+                // Requested button - pending follow request for private account
+                const requestedBtn = document.createElement('button');
+                requestedBtn.className = 'requested-btn';
+                requestedBtn.textContent = 'Requested';
+                requestedBtn.addEventListener('click', handleCancelRequest);
+                profileBioActions.appendChild(requestedBtn);
             } else {
                 // Not following - show Follow button
                 const followBtn = document.createElement('button');
@@ -280,19 +287,47 @@ document.addEventListener('DOMContentLoaded', async function () {
             });
 
             if (response.ok) {
-                isFollowing = true;
-                profileUser.followersCount = (profileUser.followersCount || 0) + 1;
-                followersCount.textContent = formatNumber(profileUser.followersCount);
+                const data = await response.json();
+
+                if (data.requested) {
+                    // Private account - request sent, now pending
+                    isPending = true;
+                    isFollowing = false;
+                } else if (data.followed) {
+                    // Public account - now following
+                    isFollowing = true;
+                    isPending = false;
+                    profileUser.followersCount = (profileUser.followersCount || 0) + 1;
+                    followersCount.textContent = formatNumber(profileUser.followersCount);
+                }
+
                 renderActionButtons();
 
-                // If account was private, reload posts
-                if (profileUser.visibility === 'Private') {
+                // If account was public and now following, reload posts
+                if (isFollowing && profileUser.visibility === 'Private') {
                     hidePrivateMessage();
                     await loadPosts();
                 }
             }
         } catch (error) {
             console.error('Error following user:', error);
+        }
+    }
+
+    // ---------- Handle Cancel Request ----------
+    async function handleCancelRequest() {
+        try {
+            const response = await fetch(`/api/profile/${profileUser.username}/follow`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                isPending = false;
+                isFollowing = false;
+                renderActionButtons();
+            }
+        } catch (error) {
+            console.error('Error cancelling request:', error);
         }
     }
 
@@ -441,7 +476,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Fetch follow status if not own profile
         if (!isOwnProfile) {
-            isFollowing = await fetchFollowStatus(username);
+            const followStatus = await fetchFollowStatus(username);
+            isFollowing = followStatus.isFollowing;
+            isPending = followStatus.isPending;
         }
 
         // Render profile
