@@ -54,6 +54,12 @@ export const getRequests = async (req, res) => {
 export const acceptRequest = async (req, res) => {
     const { username: senderUsername } = req.params;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!senderUsername || typeof senderUsername !== 'string' || senderUsername.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     try {
@@ -103,9 +109,10 @@ export const acceptRequest = async (req, res) => {
         if (connection) {
             try { await connection.rollback(); } catch (e) { console.error(e); }
         }
-        // Handle duplicate key (already following - shouldn't happen but just in case)
+        // Handle Oracle ORA-00001: unique constraint violation
+        // (User is already following - shouldn't happen but just in case)
         if (error.errorNum === 1) {
-            return res.status(400).json({ error: 'User is already following you' });
+            return res.status(409).json({ error: 'User is already following you' });
         }
         console.error('Error accepting request:', error);
         res.status(500).json({ error: 'Failed to accept request', details: error.message });
@@ -123,6 +130,12 @@ export const acceptRequest = async (req, res) => {
 export const rejectRequest = async (req, res) => {
     const { username: senderUsername } = req.params;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!senderUsername || typeof senderUsername !== 'string' || senderUsername.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     try {

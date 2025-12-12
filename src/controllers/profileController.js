@@ -11,6 +11,12 @@ import { getPool } from '../config/db.js';
  */
 export const getProfile = async (req, res) => {
     const { username } = req.params;
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     try {
@@ -82,6 +88,12 @@ export const getProfilePosts = async (req, res) => {
     const { username } = req.params;
     const { type = 'all' } = req.query;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     try {
@@ -168,6 +180,12 @@ export const getProfilePosts = async (req, res) => {
 export const followUser = async (req, res) => {
     const { username } = req.params;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     // Cannot follow yourself
@@ -260,6 +278,12 @@ export const followUser = async (req, res) => {
 export const unfollowUser = async (req, res) => {
     const { username } = req.params;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     try {
@@ -311,6 +335,12 @@ export const unfollowUser = async (req, res) => {
 export const getFollowStatus = async (req, res) => {
     const { username } = req.params;
     const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
     let connection;
 
     // Check if viewing own profile
