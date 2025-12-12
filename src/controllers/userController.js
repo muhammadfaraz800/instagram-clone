@@ -15,6 +15,11 @@ export const updateUser = async (req, res) => {
     if (!email) {
         return res.status(400).send({ message: 'Email is required' });
     }
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send({ message: 'Invalid email format' });
+    }
     if (!profile_name) {
         return res.status(400).send({ message: 'Profile name is required' });
     }
