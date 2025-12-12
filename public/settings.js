@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const privateAccountCheckbox = document.getElementById('privateAccount');
     const privateAccountRow = document.querySelector('.checkbox-group');
     const changePhotoBtn = document.querySelector('.change-photo-btn');
+    const removePhotoBtn = document.getElementById('removePhotoBtn');
 
     // Field references
     const nameInput = document.getElementById('profileName') || document.querySelector('input[placeholder="Name"]');
@@ -289,6 +290,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         changePhotoBtn.addEventListener('click', (e) => {
             e.preventDefault();
             pfpFileInput.click();
+        });
+    }
+
+    // Handle remove photo button click
+    if (removePhotoBtn) {
+        removePhotoBtn.addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to remove your profile picture?')) {
+                return;
+            }
+
+            removePhotoBtn.disabled = true;
+            removePhotoBtn.textContent = 'Removing...';
+
+            try {
+                const response = await fetch('/api/user/remove-pfp', {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    // Update profile picture in the UI
+                    if (profilePic && result.profilePictureUrl) {
+                        profilePic.src = result.profilePictureUrl + '?t=' + Date.now();
+                    }
+
+                    // Update cache
+                    const cachedData = localStorage.getItem('userSettingsCache');
+                    if (cachedData) {
+                        const data = JSON.parse(cachedData);
+                        data.PROFILE_PICTURE_URL = result.profilePictureUrl;
+                        localStorage.setItem('userSettingsCache', JSON.stringify(data));
+                    }
+
+                    alert('Profile picture removed!');
+                } else {
+                    const err = await response.json();
+                    alert('Failed to remove: ' + (err.message || err.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error removing profile picture:', error);
+                alert('An error occurred while removing your profile picture.');
+            } finally {
+                removePhotoBtn.disabled = false;
+                removePhotoBtn.textContent = 'Remove photo';
+            }
         });
     }
 

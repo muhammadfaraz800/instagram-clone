@@ -1,6 +1,6 @@
 import express from 'express';
 import { updateUser, getSettings, deleteAccount } from '../controllers/userController.js';
-import { upload, uploadProfilePicture } from '../controllers/uploadController.js';
+import { upload, uploadProfilePicture, removeProfilePicture } from '../controllers/uploadController.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
 const router = express.Router();
@@ -22,6 +22,11 @@ router.get('/settings', getSettings);
 // @route   POST /api/user/upload-pfp
 // @access  Private
 router.post('/upload-pfp', upload.single('profilePicture'), uploadProfilePicture);
+
+// @desc    Remove profile picture (reset to default)
+// @route   DELETE /api/user/remove-pfp
+// @access  Private
+router.delete('/remove-pfp', removeProfilePicture);
 
 // @desc    Delete user account
 // @route   DELETE /api/user/delete
