@@ -111,7 +111,9 @@ export const getProfilePosts = async (req, res) => {
         }
 
         const visibility = profileResult.rows[0].VISIBILITY;
-        const isOwnProfile = currentUser.toLowerCase() === username.toLowerCase();
+
+        // Safely check if viewing own profile (currentUser may be undefined if not authenticated)
+        const isOwnProfile = currentUser && currentUser.toLowerCase() === username.toLowerCase();
 
         // Check if profile is private and user is not following
         if (visibility === 'Private' && !isOwnProfile) {
