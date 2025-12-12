@@ -96,6 +96,42 @@
     transform: scale(1.02);
 }
 
+/* Photo Button Group */
+.photo-btn-group {
+    display: flex;
+    gap: 8px;
+}
+
+/* Remove Photo Button */
+.remove-photo-btn {
+    background: transparent;
+    color: #ed4956;
+    border: 1px solid #ed4956;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.remove-photo-btn:hover {
+    background: #ed4956;
+    color: white;
+    transform: scale(1.02);
+}
+
+.remove-photo-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.remove-photo-btn:disabled:hover {
+    background: transparent;
+    color: #ed4956;
+}
+
 /* ---------- Form Sections ---------- */
 .form-section-title {
     font-size: 16px;

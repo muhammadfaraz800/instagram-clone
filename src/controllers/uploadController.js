@@ -45,6 +45,56 @@ export const upload = multer({
 });
 
 // Upload profile picture handler
+// Default profile picture path
+const DEFAULT_PROFILE_PICTURE = '/uploads/default/default-avatar.png';
+
+// Remove profile picture (reset to default)
+export const removeProfilePicture = async (req, res) => {
+    const username = req.username;
+
+    if (!username) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    let connection;
+    try {
+        connection = await getPool().getConnection();
+
+        // Update the profile picture URL to default (don't delete old file)
+        await connection.execute(
+            `UPDATE Account 
+             SET PROFILE_PICTURE_URL = :profile_picture_url
+             WHERE USERNAME = :username`,
+            {
+                profile_picture_url: DEFAULT_PROFILE_PICTURE,
+                username: username
+            },
+            { autoCommit: true }
+        );
+
+        res.json({
+            message: 'Profile picture removed successfully',
+            profilePictureUrl: DEFAULT_PROFILE_PICTURE
+        });
+
+    } catch (error) {
+        console.error('Error removing profile picture:', error);
+        res.status(500).json({
+            error: 'Failed to remove profile picture',
+            details: error.message
+        });
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error('Error closing connection:', err);
+            }
+        }
+    }
+};
+
+// Upload profile picture handler
 export const uploadProfilePicture = async (req, res) => {
     const username = req.username;
 
