@@ -20,10 +20,7 @@ export const getRequests = async (req, res) => {
             `SELECT 
                 r.SenderUserName,
                 a.Profile_Name,
-                a.Profile_Picture_URL,
-                (SELECT COUNT(*) FROM Follows 
-                 WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
-                 AND LOWER(FollowedUserName) = LOWER(r.SenderUserName)) AS isFollowingBack
+                a.Profile_Picture_URL
              FROM Requests r
              JOIN Account a ON LOWER(r.SenderUserName) = LOWER(a.UserName)
              WHERE LOWER(r.ReceiverUserName) = LOWER(:currentUser)
@@ -35,8 +32,7 @@ export const getRequests = async (req, res) => {
         const requests = (result.rows || []).map(row => ({
             username: row.SENDERUSERNAME,
             profileName: row.PROFILE_NAME,
-            profilePictureUrl: row.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
-            isFollowingBack: row.ISFOLLOWINGBACK > 0
+            profilePictureUrl: row.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
         }));
 
         res.json(requests);
@@ -98,21 +94,9 @@ export const acceptRequest = async (req, res) => {
 
         await connection.commit();
 
-        // Check if current user follows the sender back
-        const followBackResult = await connection.execute(
-            `SELECT 1 FROM Follows 
-             WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
-             AND LOWER(FollowedUserName) = LOWER(:senderUsername)`,
-            { currentUser, senderUsername },
-            { outFormat: 4002 }
-        );
-
-        const isFollowingBack = followBackResult.rows && followBackResult.rows.length > 0;
-
         res.json({
             accepted: true,
-            message: 'Follow request accepted',
-            isFollowingBack
+            message: 'Follow request accepted'
         });
 
     } catch (error) {
