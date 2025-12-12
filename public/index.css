@@ -483,6 +483,14 @@ textarea {
     background: var(--bg-tertiary);
 }
 
+/* Empty notifications state */
+.notif-empty {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 14px;
+}
+
 /* ==========================================================
    MAIN CONTENT AREA
    ========================================================== */

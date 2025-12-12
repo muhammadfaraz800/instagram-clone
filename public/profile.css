@@ -163,6 +163,23 @@
     background: var(--border-light);
 }
 
+/* Requested Button (pending follow request for private accounts) */
+.requested-btn {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    transition: background var(--transition-fast);
+    min-width: 100px;
+    cursor: pointer;
+}
+
+.requested-btn:hover {
+    background: var(--border-light);
+}
+
 /* ---------- Stats Row ---------- */
 .profile-stats {
     display: flex;

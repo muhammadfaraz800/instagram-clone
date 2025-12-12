@@ -3,89 +3,113 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarContainer = document.getElementById("sidebar-container");
     if (!sidebarContainer) return;
 
-    // Mock notifications data (will be fetched from requests table in future)
-    const mockNotifications = [
-        {
-            id: 1,
-            type: 'following',
-            username: 'sadatali.larik',
-            profilePic: '/uploads/default/default-avatar.png',
-            message: 'started following you.',
-            time: 'Nov 08',
-            isFollowing: true
-        },
-        {
-            id: 2,
-            type: 'not_following',
-            username: 'ch_umer_64',
-            profilePic: '/uploads/default/default-avatar.png',
-            message: 'started following you.',
-            time: 'Oct 30',
-            isFollowing: false
-        },
-        {
-            id: 3,
-            type: 'request',
-            username: 'shazanajaved',
-            profilePic: '/uploads/default/default-avatar.png',
-            message: 'requested to follow you.',
-            time: 'Oct 28',
-            isFollowing: false
-        },
-        {
-            id: 4,
-            type: 'following',
-            username: 'adan_ali_04',
-            profilePic: '/uploads/default/default-avatar.png',
-            message: 'started following you.',
-            time: 'Oct 28',
-            isFollowing: true
-        },
-        {
-            id: 5,
-            type: 'following',
-            username: 'tanvirabbas31',
-            profilePic: '/uploads/default/default-avatar.png',
-            message: 'started following you.',
-            time: 'Oct 08',
-            isFollowing: true
-        }
-    ];
+    // State for notifications
+    let followRequests = [];
 
-    // Generate notification items HTML
-    function generateNotificationItems() {
-        return mockNotifications.map(notif => {
-            let actionButtons = '';
-            if (notif.type === 'request') {
-                actionButtons = `
-                    <button class="notif-btn notif-btn-confirm" data-id="${notif.id}">Confirm</button>
-                    <button class="notif-btn notif-btn-delete" data-id="${notif.id}">Delete</button>
-                `;
-            } else if (notif.type === 'following') {
-                actionButtons = `
-                    <button class="notif-btn notif-btn-following" data-id="${notif.id}">Following</button>
-                `;
+    // Fetch pending follow requests from API
+    async function fetchFollowRequests() {
+        try {
+            const response = await fetch('/api/notifications/requests');
+            if (response.ok) {
+                followRequests = await response.json();
             } else {
-                actionButtons = `
-                    <button class="notif-btn notif-btn-follow-back" data-id="${notif.id}">Follow Back</button>
-                `;
+                followRequests = [];
             }
+        } catch (error) {
+            console.error('Error fetching follow requests:', error);
+            followRequests = [];
+        }
+        return followRequests;
+    }
+
+    // Generate notification items HTML from follow requests
+    function generateNotificationItems() {
+        if (followRequests.length === 0) {
+            return '<div class="notif-empty">No new notifications</div>';
+        }
+
+        return followRequests.map(request => {
             return `
-                <div class="notification-item" data-id="${notif.id}">
+                <div class="notification-item" data-username="${request.username}">
                     <div class="notif-avatar">
-                        <img src="${notif.profilePic}" alt="${notif.username}">
+                        <img src="${request.profilePictureUrl}" alt="${request.username}">
                     </div>
                     <div class="notif-content">
-                        <span class="notif-username">${notif.username}</span>
-                        <span class="notif-message">${notif.message}</span>
-                        <span class="notif-time">${notif.time}</span>
+                        <span class="notif-username">${request.username}</span>
+                        <span class="notif-message">requested to follow you.</span>
                     </div>
                     <div class="notif-actions">
-                        ${actionButtons}
+                        <button class="notif-btn notif-btn-confirm" data-username="${request.username}">Confirm</button>
+                        <button class="notif-btn notif-btn-delete" data-username="${request.username}">Delete</button>
                     </div>
                 </div>
             `;
         }).join('');
+    }
+
+    // Handle accept follow request
+    async function handleAcceptRequest(username) {
+        try {
+            const response = await fetch(`/api/notifications/requests/${username}/accept`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                // Remove from local state and re-render
+                followRequests = followRequests.filter(r => r.username !== username);
+                updateNotificationsList();
+            }
+        } catch (error) {
+            console.error('Error accepting request:', error);
+        }
+    }
+
+    // Handle reject follow request
+    async function handleRejectRequest(username) {
+        try {
+            const response = await fetch(`/api/notifications/requests/${username}/reject`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                // Remove from local state and re-render
+                followRequests = followRequests.filter(r => r.username !== username);
+                updateNotificationsList();
+            }
+        } catch (error) {
+            console.error('Error rejecting request:', error);
+        }
+    }
+
+    // Update the notifications list in the DOM
+    function updateNotificationsList() {
+        const notificationsList = document.querySelector('.notifications-list');
+        if (notificationsList) {
+            notificationsList.innerHTML = generateNotificationItems();
+            attachNotificationHandlers();
+        }
+    }
+
+    // Attach click handlers to notification buttons
+    function attachNotificationHandlers() {
+        const confirmBtns = document.querySelectorAll('.notif-btn-confirm');
+        const deleteBtns = document.querySelectorAll('.notif-btn-delete');
+
+        confirmBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const username = btn.dataset.username;
+                handleAcceptRequest(username);
+            });
+        });
+
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const username = btn.dataset.username;
+                handleRejectRequest(username);
+            });
+        });
     }
 
     // Define Sidebar HTML
@@ -189,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.querySelector(".sidebar");
 
     if (notificationsBtn && notificationsPanel) {
-        notificationsBtn.addEventListener("click", function (e) {
+        notificationsBtn.addEventListener("click", async function (e) {
             e.preventDefault();
             e.stopPropagation();
             const isOpen = notificationsPanel.classList.contains("open");
@@ -202,6 +226,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (moreMenu) moreMenu.style.display = "none";
                 notificationsPanel.classList.add("open");
                 sidebar.classList.add("notifications-active");
+
+                // Fetch notifications when panel opens
+                await fetchFollowRequests();
+                updateNotificationsList();
             }
         });
 

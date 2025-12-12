@@ -103,22 +103,18 @@ export const getProfilePosts = async (req, res) => {
 
         // Check if profile is private and user is not following
         if (visibility === 'Private' && !isOwnProfile) {
-            // TODO: Check follow status when Follows table exists
-            /*
+            // Check if current user follows this private account
             const followResult = await connection.execute(
                 `SELECT 1 FROM Follows 
-                 WHERE LOWER(FollowerUsername) = LOWER(:currentUser) 
-                 AND LOWER(FollowingUsername) = LOWER(:username)`,
+                 WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+                 AND LOWER(FollowedUserName) = LOWER(:username)`,
                 { currentUser, username },
                 { outFormat: 4002 }
             );
-            
+
             if (!followResult.rows || followResult.rows.length === 0) {
-                return res.json([]); // Return empty array for private profile
+                return res.json([]); // Return empty array for private profile not following
             }
-            */
-            // For now, return empty for private profiles (placeholder)
-            return res.json([]);
         }
 
         // TODO: Fetch posts when Posts table exists
@@ -164,9 +160,10 @@ export const getProfilePosts = async (req, res) => {
 };
 
 /**
- * TODO: Implement follow functionality when Follows table exists
  * Follow a user
  * POST /api/profile/:username/follow
+ * For public accounts: inserts directly into Follows table
+ * For private accounts: inserts into Requests table with 'Pending' status
  */
 export const followUser = async (req, res) => {
     const { username } = req.params;
@@ -181,9 +178,9 @@ export const followUser = async (req, res) => {
     try {
         connection = await getPool().getConnection();
 
-        // Check if target user exists
+        // Check if target user exists and get their visibility
         const userResult = await connection.execute(
-            `SELECT UserName FROM Account WHERE LOWER(UserName) = LOWER(:username)`,
+            `SELECT UserName, Visibility FROM Account WHERE LOWER(UserName) = LOWER(:username)`,
             { username },
             { outFormat: 4002 }
         );
@@ -192,22 +189,60 @@ export const followUser = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // TODO: Insert follow relationship when Follows table exists
-        /*
-        await connection.execute(
-            `INSERT INTO Follows (FollowerUsername, FollowingUsername) 
-             VALUES (:currentUser, :username)`,
-            { currentUser, username },
-            { autoCommit: true }
-        );
-        */
+        const targetUser = userResult.rows[0];
+        const targetUsername = targetUser.USERNAME;
+        const isPrivate = targetUser.VISIBILITY === 'Private';
 
-        res.json({ message: 'Followed successfully' });
+        // Check if already following
+        const existingFollow = await connection.execute(
+            `SELECT 1 FROM Follows 
+             WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+             AND LOWER(FollowedUserName) = LOWER(:targetUsername)`,
+            { currentUser, targetUsername },
+            { outFormat: 4002 }
+        );
+
+        if (existingFollow.rows && existingFollow.rows.length > 0) {
+            return res.status(400).json({ error: 'Already following this user' });
+        }
+
+        // Check if there's already a pending request (row exists = pending)
+        const existingRequest = await connection.execute(
+            `SELECT 1 FROM Requests 
+             WHERE LOWER(SenderUserName) = LOWER(:currentUser) 
+             AND LOWER(ReceiverUserName) = LOWER(:targetUsername)`,
+            { currentUser, targetUsername },
+            { outFormat: 4002 }
+        );
+
+        if (existingRequest.rows && existingRequest.rows.length > 0) {
+            return res.status(400).json({ error: 'Follow request already pending' });
+        }
+
+        if (isPrivate) {
+            // Private account - insert into Requests table
+            await connection.execute(
+                `INSERT INTO Requests (SenderUserName, ReceiverUserName) 
+                 VALUES (:currentUser, :targetUsername)`,
+                { currentUser, targetUsername },
+                { autoCommit: true }
+            );
+            res.json({ requested: true, message: 'Follow request sent' });
+        } else {
+            // Public account - insert directly into Follows table
+            await connection.execute(
+                `INSERT INTO Follows (FollowerUserName, FollowedUserName) 
+                 VALUES (:currentUser, :targetUsername)`,
+                { currentUser, targetUsername },
+                { autoCommit: true }
+            );
+            res.json({ followed: true, message: 'Followed successfully' });
+        }
 
     } catch (error) {
-        // Handle duplicate follow (already following)
+        // Handle duplicate key errors
         if (error.errorNum === 1) {
-            return res.status(400).json({ error: 'Already following this user' });
+            return res.status(400).json({ error: 'Already following this user or request pending' });
         }
         console.error('Error following user:', error);
         res.status(500).json({ error: 'Failed to follow user', details: error.message });
@@ -219,8 +254,7 @@ export const followUser = async (req, res) => {
 };
 
 /**
- * TODO: Implement unfollow functionality when Follows table exists
- * Unfollow a user
+ * Unfollow a user or cancel a pending follow request
  * DELETE /api/profile/:username/follow
  */
 export const unfollowUser = async (req, res) => {
@@ -231,22 +265,33 @@ export const unfollowUser = async (req, res) => {
     try {
         connection = await getPool().getConnection();
 
-        // TODO: Delete follow relationship when Follows table exists
-        /*
-        const result = await connection.execute(
+        // Try to delete from Follows table first
+        const followResult = await connection.execute(
             `DELETE FROM Follows 
-             WHERE LOWER(FollowerUsername) = LOWER(:currentUser) 
-             AND LOWER(FollowingUsername) = LOWER(:username)`,
+             WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+             AND LOWER(FollowedUserName) = LOWER(:username)`,
             { currentUser, username },
             { autoCommit: true }
         );
 
-        if (result.rowsAffected === 0) {
-            return res.status(400).json({ error: 'Not following this user' });
+        if (followResult.rowsAffected > 0) {
+            return res.json({ unfollowed: true, message: 'Unfollowed successfully' });
         }
-        */
 
-        res.json({ message: 'Unfollowed successfully' });
+        // If not following, try to delete pending request (row exists = pending)
+        const requestResult = await connection.execute(
+            `DELETE FROM Requests 
+             WHERE LOWER(SenderUserName) = LOWER(:currentUser) 
+             AND LOWER(ReceiverUserName) = LOWER(:username)`,
+            { currentUser, username },
+            { autoCommit: true }
+        );
+
+        if (requestResult.rowsAffected > 0) {
+            return res.json({ cancelled: true, message: 'Follow request cancelled' });
+        }
+
+        res.status(400).json({ error: 'Not following this user and no pending request' });
 
     } catch (error) {
         console.error('Error unfollowing user:', error);
@@ -259,9 +304,9 @@ export const unfollowUser = async (req, res) => {
 };
 
 /**
- * TODO: Implement follow status check when Follows table exists
- * Get follow status
+ * Get follow status between current user and target user
  * GET /api/profile/:username/follow-status
+ * Returns: isFollowing, isPending, isOwnProfile
  */
 export const getFollowStatus = async (req, res) => {
     const { username } = req.params;
@@ -270,29 +315,37 @@ export const getFollowStatus = async (req, res) => {
 
     // Check if viewing own profile
     if (currentUser.toLowerCase() === username.toLowerCase()) {
-        return res.json({ isFollowing: false, isOwnProfile: true });
+        return res.json({ isFollowing: false, isPending: false, isOwnProfile: true });
     }
 
     try {
         connection = await getPool().getConnection();
 
-        // TODO: Check follow status when Follows table exists
-        /*
-        const result = await connection.execute(
+        // Check if following
+        const followResult = await connection.execute(
             `SELECT 1 FROM Follows 
-             WHERE LOWER(FollowerUsername) = LOWER(:currentUser) 
-             AND LOWER(FollowingUsername) = LOWER(:username)`,
+             WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+             AND LOWER(FollowedUserName) = LOWER(:username)`,
             { currentUser, username },
             { outFormat: 4002 }
         );
 
-        const isFollowing = result.rows && result.rows.length > 0;
-        */
+        const isFollowing = followResult.rows && followResult.rows.length > 0;
 
-        // Placeholder - always return not following
-        const isFollowing = false;
+        // If not following, check for pending request
+        let isPending = false;
+        if (!isFollowing) {
+            const requestResult = await connection.execute(
+                `SELECT 1 FROM Requests 
+                 WHERE LOWER(SenderUserName) = LOWER(:currentUser) 
+                 AND LOWER(ReceiverUserName) = LOWER(:username)`,
+                { currentUser, username },
+                { outFormat: 4002 }
+            );
+            isPending = requestResult.rows && requestResult.rows.length > 0;
+        }
 
-        res.json({ isFollowing, isOwnProfile: false });
+        res.json({ isFollowing, isPending, isOwnProfile: false });
 
     } catch (error) {
         console.error('Error checking follow status:', error);
