@@ -191,8 +191,32 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     `;
 
-    // Inject Sidebar
-    sidebarContainer.innerHTML = sidebarHTML;
+    // Search Panel HTML
+    const searchPanelHTML = `
+        <div class="search-panel" id="searchPanel">
+            <div class="search-header">
+                <h2>Search</h2>
+                <div class="search-input-container">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Search" autocomplete="off">
+                        <button class="search-clear-btn" id="searchClearBtn"><i class="fa-solid fa-circle-xmark"></i></button>
+                        <button class="search-trigger-btn" id="searchTriggerBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="search-results-section">
+                <div class="search-results-list" id="searchResultsList">
+                    <div class="search-empty-state">
+                        <span>Recent</span>
+                        <div class="no-recent-searches">No recent searches.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Inject Sidebar and Panels
+    sidebarContainer.innerHTML = sidebarHTML + searchPanelHTML;
 
     // Highlight Active Link Logic
     const currentPath = window.location.pathname;
@@ -208,9 +232,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutBtn = document.getElementById("logoutBtn");
 
     // Notifications Panel Logic
+    // Notifications Panel Logic
     const notificationsBtn = document.getElementById("nav-notifications");
     const notificationsPanel = document.getElementById("notificationsPanel");
+
+    // Search Panel Logic
+    const searchBtn = document.getElementById("nav-search");
+    const searchPanel = document.getElementById("searchPanel");
+    const searchInput = document.getElementById("searchInput");
+    const searchClearBtn = document.getElementById("searchClearBtn");
+    const searchTriggerBtn = document.getElementById("searchTriggerBtn");
+    const searchResultsList = document.getElementById("searchResultsList");
+
     const sidebar = document.querySelector(".sidebar");
+
+    function closeAllPanels() {
+        if (notificationsPanel) notificationsPanel.classList.remove("open");
+        if (searchPanel) searchPanel.classList.remove("open");
+        sidebar.classList.remove("active-panel"); // Generalized class for resizing sidebar
+        sidebar.classList.remove("notifications-active"); // Keep for backward compatibility if needed, or remove
+    }
 
     if (notificationsBtn && notificationsPanel) {
         notificationsBtn.addEventListener("click", async function (e) {
@@ -218,13 +259,17 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
             const isOpen = notificationsPanel.classList.contains("open");
 
+            // Close updated search panel if open
+            if (searchPanel) searchPanel.classList.remove("open");
+
             if (isOpen) {
-                notificationsPanel.classList.remove("open");
-                sidebar.classList.remove("notifications-active");
+                closeAllPanels();
             } else {
                 // Close more menu if open
                 if (moreMenu) moreMenu.style.display = "none";
+
                 notificationsPanel.classList.add("open");
+                sidebar.classList.add("active-panel");
                 sidebar.classList.add("notifications-active");
 
                 // Fetch notifications when panel opens
@@ -232,16 +277,126 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateNotificationsList();
             }
         });
+    }
 
-        // Close notifications panel when clicking outside
-        document.addEventListener("click", function (e) {
-            if (!notificationsPanel.contains(e.target) &&
-                !notificationsBtn.contains(e.target) &&
-                notificationsPanel.classList.contains("open")) {
-                notificationsPanel.classList.remove("open");
-                sidebar.classList.remove("notifications-active");
+    // Search Panel Event Listeners
+    if (searchBtn && searchPanel) {
+        searchBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = searchPanel.classList.contains("open");
+
+            // Close notification panel if open
+            if (notificationsPanel) notificationsPanel.classList.remove("open");
+
+            if (isOpen) {
+                closeAllPanels();
+            } else {
+                if (moreMenu) moreMenu.style.display = "none";
+                searchPanel.classList.add("open");
+                sidebar.classList.add("active-panel");
+                sidebar.classList.add("notifications-active"); // Reuse this style for collapsed sidebar
+                if (searchInput) searchInput.focus();
             }
         });
+
+        // Search Input Logic - Manual Trigger
+        if (searchInput) {
+            searchInput.addEventListener("input", function (e) {
+                const query = e.target.value.trim();
+                // Toggle clear button
+                if (searchClearBtn) {
+                    searchClearBtn.style.display = query.length > 0 ? "block" : "none";
+                }
+            });
+
+            // Enter key trigger
+            searchInput.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    const query = searchInput.value.trim();
+                    performSearch(query);
+                }
+            });
+        }
+
+        if (searchTriggerBtn) {
+            searchTriggerBtn.addEventListener("click", function () {
+                const query = searchInput ? searchInput.value.trim() : "";
+                performSearch(query);
+            });
+        }
+
+        if (searchClearBtn) {
+            searchClearBtn.addEventListener("click", function () {
+                searchInput.value = "";
+                searchInput.focus();
+                searchClearBtn.style.display = "none";
+                document.getElementById("searchResultsList").innerHTML = `
+                <div class="search-empty-state">
+                    <span>Recent</span>
+                    <div class="no-recent-searches">No recent searches.</div>
+                </div>`;
+            });
+        }
+    }
+
+    // Close panels when clicking outside
+    document.addEventListener("click", function (e) {
+        const isClickInsideNotify = notificationsPanel && notificationsPanel.contains(e.target);
+        const isClickInsideSearch = searchPanel && searchPanel.contains(e.target);
+        const isClickNotifyBtn = notificationsBtn && notificationsBtn.contains(e.target);
+        const isClickSearchBtn = searchBtn && searchBtn.contains(e.target);
+
+        if (!isClickInsideNotify && !isClickInsideSearch && !isClickNotifyBtn && !isClickSearchBtn) {
+            closeAllPanels();
+        }
+    });
+
+    async function performSearch(query) {
+        if (!searchResultsList) return;
+
+        if (!query) {
+            searchResultsList.innerHTML = `
+                <div class="search-empty-state">
+                    <span>Recent</span>
+                    <div class="no-recent-searches">No recent searches.</div>
+                </div>`;
+            return;
+        }
+
+        try {
+            // Show loading state if needed
+            const response = await fetch(`/api/user/search?q=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const results = await response.json();
+                renderSearchResults(results);
+            } else {
+                console.error("Search failed");
+            }
+        } catch (error) {
+            console.error("Error searching:", error);
+        }
+    }
+
+    function renderSearchResults(users) {
+        if (users.length === 0) {
+            searchResultsList.innerHTML = '<div class="search-no-results">No results found.</div>';
+            return;
+        }
+
+        const html = users.map(user => `
+            <a href="/${user.USERNAME || user.userName}" class="search-result-item">
+                <div class="search-avatar">
+                    <img src="${user.PROFILE_PICTURE_URL || user.profile_Picture_URL || '/uploads/default/default-avatar.png'}" alt="${user.USERNAME || user.userName}">
+                </div>
+                <div class="search-user-info">
+                    <span class="search-username">${user.USERNAME || user.userName}</span>
+                    <span class="search-fullname">${user.PROFILE_NAME || user.profile_Name || ''}</span>
+                </div>
+            </a>
+        `).join('');
+
+        searchResultsList.innerHTML = html;
     }
 
     if (moreBtn && moreMenu) {
@@ -249,10 +404,7 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             e.stopPropagation();
             // Close notifications panel if open
-            if (notificationsPanel) {
-                notificationsPanel.classList.remove("open");
-                sidebar.classList.remove("notifications-active");
-            }
+            closeAllPanels();
             const isHidden = moreMenu.style.display === "none";
             moreMenu.style.display = isHidden ? "block" : "none";
         });
