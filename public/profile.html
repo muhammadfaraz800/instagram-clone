@@ -34,7 +34,18 @@
                     <div class="profile-info">
                         <!-- Username Row -->
                         <div class="profile-username-row">
-                            <h1 id="profile-username" class="profile-username"></h1>
+                            <div class="profile-identity-group">
+                                <h1 id="profile-username" class="profile-username"></h1>
+                                <span id="verified-badge" class="verified-badge hidden" title="Verified">
+                                    <svg aria-label="Verified" class="x1lliihq x1n2onr6" fill="rgb(0, 149, 246)"
+                                        height="22" role="img" viewBox="0 0 40 40" width="22">
+                                        <title>Verified</title>
+                                        <path
+                                            d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+                                            fill-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                            </div>
                             <button class="profile-options-btn" id="profile-options-btn">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
@@ -125,6 +136,46 @@
             </div>
             <div class="unfollow-modal-body">
                 <button id="unfollow-confirm-btn" class="unfollow-confirm-btn">Unfollow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Options Modal (Three Dots) -->
+    <div id="options-modal" class="modal-overlay">
+        <div class="modal-content options-modal">
+            <div class="options-list">
+                <button id="btn-apply-verification" class="options-btn">Apply for Registration</button>
+                <button id="btn-cancel-options" class="options-btn cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Application Modal -->
+    <div id="verification-form-modal" class="modal-overlay">
+        <div class="modal-content verification-form-box">
+            <div class="modal-header">
+                <h2>Apply for Verification</h2>
+                <button class="modal-close-btn" id="verification-modal-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="verification-info">Upload a document (ID, Passport, etc.) to verify your identity. Accepted
+                    formats: JPG, PNG.</p>
+                <form id="verification-form">
+                    <div class="file-upload-container">
+                        <label for="verification-doc" class="file-upload-label">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Choose a file...</span>
+                        </label>
+                        <input type="file" id="verification-doc" name="document"
+                            accept="image/jpeg, image/png, image/jpg" required>
+                        <div id="file-name-display" class="file-name-display"></div>
+                    </div>
+                    <div id="verification-status-msg" class="status-msg"></div>
+                    <button type="submit" class="primary-btn submit-btn" id="btn-submit-verification">Submit
+                        Application</button>
+                </form>
             </div>
         </div>
     </div>
