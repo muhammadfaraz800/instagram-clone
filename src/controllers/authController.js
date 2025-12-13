@@ -251,9 +251,11 @@ export const getMe = async (req, res) => {
                 a.profile_name,
                 a.username, 
                 a.profile_picture_url,
-                b.business_type
+                b.business_type,
+                v.Status AS Verification_Status
              FROM Account a
              LEFT JOIN Business b ON a.UserName = b.UserName
+             LEFT JOIN Verification v ON a.UserName = v.UserName
              WHERE a.UserName = :username`,
             { username },
             { outFormat: 4002 }
@@ -267,6 +269,7 @@ export const getMe = async (req, res) => {
                 accountType: accountType,
                 profileName: user.PROFILE_NAME,
                 profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
+                verificationStatus: user.VERIFICATION_STATUS
             });
         } else {
             res.status(404).send({ message: "User not found" });

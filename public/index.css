@@ -800,6 +800,17 @@ textarea {
     font-weight: 300;
 }
 
+.search-username-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.verified-badge-small {
+    display: inline-flex;
+    align-items: center;
+}
+
 .search-input-wrapper {
     position: relative;
     display: flex;

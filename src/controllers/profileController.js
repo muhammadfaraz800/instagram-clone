@@ -69,7 +69,8 @@ export const getProfile = async (req, res) => {
             followersCount: user.FOLLOWERS_COUNT || 0,
             followingCount: user.FOLLOWING_COUNT || 0,
             postsCount: user.POSTS_COUNT || 0,
-            isVerified: user.VERIFICATION_STATUS === 'Verified'
+            isVerified: user.VERIFICATION_STATUS === 'Verified',
+            verificationStatus: user.VERIFICATION_STATUS // 'Pending', 'Verified', 'Rejected', or null
         });
 
     } catch (error) {

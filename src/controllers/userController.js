@@ -219,12 +219,13 @@ export const searchUsers = async (req, res) => {
         // Using Oracle's string concatenation || 
         const result = await connection.execute(
             `SELECT 
-                UserName,
-                Profile_Name,
-                Profile_Picture_URL
-            FROM Account
-            WHERE LOWER(UserName) LIKE '%' || LOWER(:search_input) || '%'
-            FETCH FIRST 20 ROWS ONLY`,
+                a.UserName,
+                a.Profile_Name,
+                a.Profile_Picture_URL,
+                v.Status AS Verification_Status
+            FROM Account a
+            LEFT JOIN Verification v ON a.UserName = v.UserName
+            WHERE LOWER(a.UserName) LIKE '%' || LOWER(:search_input) || '%'`,
             {
                 search_input: searchInput
             },

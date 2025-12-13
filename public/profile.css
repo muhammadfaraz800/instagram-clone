@@ -617,6 +617,17 @@
     flex-direction: column;
 }
 
+.options-info-text {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    cursor: default;
+}
+
 .options-btn {
     width: 100%;
     padding: 14px;

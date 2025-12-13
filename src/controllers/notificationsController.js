@@ -20,9 +20,11 @@ export const getRequests = async (req, res) => {
             `SELECT 
                 r.SenderUserName,
                 a.Profile_Name,
-                a.Profile_Picture_URL
+                a.Profile_Picture_URL,
+                v.Status AS Verification_Status
              FROM Requests r
              JOIN Account a ON LOWER(r.SenderUserName) = LOWER(a.UserName)
+             LEFT JOIN Verification v ON a.UserName = v.UserName
              WHERE LOWER(r.ReceiverUserName) = LOWER(:currentUser)
              ORDER BY r.SenderUserName`,
             { currentUser },
@@ -32,7 +34,8 @@ export const getRequests = async (req, res) => {
         const requests = (result.rows || []).map(row => ({
             username: row.SENDERUSERNAME,
             profileName: row.PROFILE_NAME,
-            profilePictureUrl: row.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
+            profilePictureUrl: row.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
+            verificationStatus: row.VERIFICATION_STATUS
         }));
 
         res.json(requests);

@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const optionsModal = document.getElementById('options-modal');
     const profileOptionsBtn = document.getElementById('profile-options-btn');
     const btnApplyVerification = document.getElementById('btn-apply-verification');
+    const verificationStatusDisplay = document.getElementById('verification-status-display');
     const btnCancelOptions = document.getElementById('btn-cancel-options');
     const verificationFormModal = document.getElementById('verification-form-modal');
     const verificationModalClose = document.getElementById('verification-modal-close');
@@ -418,6 +419,24 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function openOptionsModal() {
         optionsModal.classList.add('active');
+
+        // Update functionality based on status
+        if (profileUser.verificationStatus === 'Pending') {
+            btnApplyVerification.style.display = 'none';
+            verificationStatusDisplay.style.display = 'block';
+            verificationStatusDisplay.textContent = 'Verification Pending';
+            verificationStatusDisplay.style.color = 'var(--text-secondary)';
+        } else if (profileUser.verificationStatus === 'Verified') {
+            btnApplyVerification.style.display = 'none';
+            verificationStatusDisplay.style.display = 'block';
+            verificationStatusDisplay.textContent = 'Verified';
+            verificationStatusDisplay.style.color = 'var(--accent-blue)';
+        } else {
+            // Rejected or null
+            verificationStatusDisplay.style.display = 'none';
+            btnApplyVerification.style.display = 'block';
+            btnApplyVerification.textContent = 'Apply for Verification';
+        }
     }
 
     function closeOptionsModal() {
@@ -447,28 +466,22 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (btnApplyVerification) {
         btnApplyVerification.addEventListener('click', async () => {
-            // Check current status first
-            try {
-                const response = await fetch('/api/verification/status');
-                const data = await response.json();
-
-                if (data.applied && data.status !== 'Rejected') {
-                    openVerificationModal(); // Open to show message? Or just alert?
-                    // Better: Open modal but show status message
-                    verificationFormModal.classList.add('active');
-                    verificationForm.style.display = 'none';
-                    verificationStatusMsg.textContent = `You have already applied. Status: ${data.status}`;
-                    verificationStatusMsg.className = 'status-msg';
-                    if (data.status === 'Verified') {
-                        verificationStatusMsg.classList.add('success');
-                    }
-                } else {
-                    // Not applied or Request Rejected (allow re-apply?)
-                    verificationForm.style.display = 'block';
-                    openVerificationModal();
-                }
-            } catch (err) {
-                console.error(err);
+            if (profileUser.verificationStatus === 'Pending') {
+                closeOptionsModal();
+                verificationFormModal.classList.add('active');
+                verificationForm.style.display = 'none';
+                verificationStatusMsg.textContent = 'Your verification request is pending approval.';
+                verificationStatusMsg.className = 'status-msg';
+                // Ensure file input is cleared or hidden if needed
+            } else if (profileUser.verificationStatus === 'Verified') {
+                closeOptionsModal();
+                verificationFormModal.classList.add('active');
+                verificationForm.style.display = 'none';
+                verificationStatusMsg.textContent = 'Your account is already verified.';
+                verificationStatusMsg.className = 'status-msg success';
+            } else {
+                // Rejected or null: Allow new application
+                verificationForm.style.display = 'block';
                 openVerificationModal();
             }
         });
