@@ -217,8 +217,6 @@ export const searchUsers = async (req, res) => {
         const searchInput = q.trim();
 
         // Using Oracle's string concatenation || 
-        // Note: In some Oracle setups, case-insensitive search might need proper NLS settings or UPPER/LOWER function usage.
-        // We will use LOWER() for case-insensitive matching as requested.
         const result = await connection.execute(
             `SELECT 
                 UserName,
@@ -231,7 +229,7 @@ export const searchUsers = async (req, res) => {
                 search_input: searchInput
             },
             {
-                outFormat: 4002 // OUT_FORMAT_OBJECT
+                outFormat: 4002
             }
         );
 

@@ -60,6 +60,12 @@
     margin: 0;
 }
 
+.profile-identity-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .profile-options-btn {
     padding: 8px;
     border-radius: var(--radius-full);
@@ -583,4 +589,181 @@
     .posts-grid {
         gap: 1px;
     }
+}
+
+/* ---------- Verified Badge ---------- */
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    /* Small gap between username and badge */
+}
+
+.verified-badge.hidden {
+    display: none;
+}
+
+/* ---------- Options Modal ---------- */
+.options-modal {
+    width: 400px;
+    max-width: 90vw;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.options-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.options-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.options-btn:last-child {
+    border-bottom: none;
+}
+
+.options-btn:hover {
+    background: var(--bg-elevated);
+}
+
+.options-btn.cancel-btn {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ---------- Verification Form Modal ---------- */
+.verification-form-box {
+    width: 500px;
+    max-width: 95vw;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    /* Ensure it fits on screen */
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.modal-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.verification-info {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* File Upload Styles */
+.file-upload-container {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    width: 100%;
+    transition: border-color var(--transition-fast);
+}
+
+.file-upload-label:hover {
+    border-color: var(--text-secondary);
+}
+
+.file-upload-label i {
+    font-size: 32px;
+    color: var(--text-secondary);
+}
+
+.file-upload-label span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+input[type="file"]#verification-doc {
+    display: none;
+}
+
+.file-name-display {
+    font-size: 14px;
+    color: var(--text-primary);
+    word-break: break-all;
+    text-align: center;
+}
+
+.status-msg {
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: center;
+    min-height: 20px;
+}
+
+.status-msg.error {
+    color: var(--accent-red);
+}
+
+.status-msg.success {
+    color: var(--accent-green, #009966);
+    /* Fallback if variable missing */
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.submit-btn:hover {
+    background: var(--accent-blue-hover);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }

@@ -3,6 +3,7 @@ import authRoutes from './auth.js';
 import userRoutes from './user.js';
 import profileRoutes from './profile.js';
 import notificationRoutes from './notifications.js';
+import verificationRoutes from './verification.js';
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
 router.use('/profile', profileRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/verification', verificationRoutes);
 
 export default router;
 

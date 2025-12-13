@@ -35,6 +35,7 @@ export const getProfile = async (req, res) => {
                 b.Bio_URL AS Website,
                 b.ContactNo,
                 b.Business_Type,
+                v.Status AS Verification_Status,
                 -- Count total content (Reels + Images)
                 (SELECT COUNT(*) FROM Content c WHERE c.UserName = a.UserName) AS Posts_Count,
                 -- Count how many people follow THIS user
@@ -43,6 +44,7 @@ export const getProfile = async (req, res) => {
                 (SELECT COUNT(*) FROM Follows f WHERE f.FollowerUserName = a.UserName) AS Following_Count
             FROM Account a
             LEFT JOIN Business b ON a.UserName = b.UserName
+            LEFT JOIN Verification v ON a.UserName = v.UserName
             WHERE LOWER(a.UserName) = LOWER(:username)`,
             { username },
             { outFormat: 4002 }
@@ -66,7 +68,8 @@ export const getProfile = async (req, res) => {
             businessType: user.BUSINESS_TYPE,
             followersCount: user.FOLLOWERS_COUNT || 0,
             followingCount: user.FOLLOWING_COUNT || 0,
-            postsCount: user.POSTS_COUNT || 0
+            postsCount: user.POSTS_COUNT || 0,
+            isVerified: user.VERIFICATION_STATUS === 'Verified'
         });
 
     } catch (error) {

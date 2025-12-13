@@ -26,6 +26,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     const unfollowModalClose = document.getElementById('unfollow-modal-close');
     const unfollowConfirmBtn = document.getElementById('unfollow-confirm-btn');
 
+    // Verification Elements
+    const verifiedBadge = document.getElementById('verified-badge');
+    const optionsModal = document.getElementById('options-modal');
+    const profileOptionsBtn = document.getElementById('profile-options-btn');
+    const btnApplyVerification = document.getElementById('btn-apply-verification');
+    const btnCancelOptions = document.getElementById('btn-cancel-options');
+    const verificationFormModal = document.getElementById('verification-form-modal');
+    const verificationModalClose = document.getElementById('verification-modal-close');
+    const verificationForm = document.getElementById('verification-form');
+    const verificationDocInput = document.getElementById('verification-doc');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const verificationStatusMsg = document.getElementById('verification-status-msg');
+    const btnSubmitVerification = document.getElementById('btn-submit-verification');
+
     // ---------- State ----------
     let currentUser = null;      // Logged-in user
     let profileUser = null;      // Profile being viewed - fetched from db below
@@ -129,6 +143,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             profileName.style.display = 'none';
         }
 
+        // Verified Badge
+        if (profileUser.isVerified) {
+            verifiedBadge.classList.remove('hidden');
+        } else {
+            verifiedBadge.classList.add('hidden');
+        }
+
         // Business Type (only for business accounts)
         if (profileUser.businessType) {
             businessType.textContent = profileUser.businessType;
@@ -180,7 +201,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             editBtn.className = 'edit-profile-btn';
             editBtn.textContent = 'Edit profile';
             profileActions.appendChild(editBtn);
+
+            // Enable options button for own profile
+            profileOptionsBtn.style.display = 'block';
+            profileOptionsBtn.onclick = openOptionsModal;
         } else {
+            // Hide options button for others (or implement report/block later)
+            profileOptionsBtn.style.display = 'none';
+
             // Other's profile - show buttons BELOW bio
             if (!profileBioActions) return;
 
@@ -385,6 +413,127 @@ document.addEventListener('DOMContentLoaded', async function () {
             closeUnfollowModal();
         }
     });
+
+    // ---------- Verification Logic ----------
+
+    function openOptionsModal() {
+        optionsModal.classList.add('active');
+    }
+
+    function closeOptionsModal() {
+        optionsModal.classList.remove('active');
+    }
+
+    function openVerificationModal() {
+        closeOptionsModal();
+        verificationFormModal.classList.add('active');
+        verificationForm.reset();
+        fileNameDisplay.textContent = '';
+        verificationStatusMsg.textContent = '';
+        verificationStatusMsg.className = 'status-msg';
+    }
+
+    function closeVerificationModal() {
+        verificationFormModal.classList.remove('active');
+    }
+
+    // Option Modal Listeners
+    if (btnCancelOptions) btnCancelOptions.addEventListener('click', closeOptionsModal);
+    if (optionsModal) {
+        optionsModal.addEventListener('click', (e) => {
+            if (e.target === optionsModal) closeOptionsModal();
+        });
+    }
+
+    if (btnApplyVerification) {
+        btnApplyVerification.addEventListener('click', async () => {
+            // Check current status first
+            try {
+                const response = await fetch('/api/verification/status');
+                const data = await response.json();
+
+                if (data.applied && data.status !== 'Rejected') {
+                    openVerificationModal(); // Open to show message? Or just alert?
+                    // Better: Open modal but show status message
+                    verificationFormModal.classList.add('active');
+                    verificationForm.style.display = 'none';
+                    verificationStatusMsg.textContent = `You have already applied. Status: ${data.status}`;
+                    verificationStatusMsg.className = 'status-msg';
+                    if (data.status === 'Verified') {
+                        verificationStatusMsg.classList.add('success');
+                    }
+                } else {
+                    // Not applied or Request Rejected (allow re-apply?)
+                    verificationForm.style.display = 'block';
+                    openVerificationModal();
+                }
+            } catch (err) {
+                console.error(err);
+                openVerificationModal();
+            }
+        });
+    }
+
+    // Verification Modal Listeners
+    if (verificationModalClose) verificationModalClose.addEventListener('click', closeVerificationModal);
+    if (verificationFormModal) {
+        verificationFormModal.addEventListener('click', (e) => {
+            if (e.target === verificationFormModal) closeVerificationModal();
+        });
+    }
+
+    // File Input Listener
+    if (verificationDocInput) {
+        verificationDocInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                fileNameDisplay.textContent = this.files[0].name;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+    }
+
+    // Verification Form Submit
+    if (verificationForm) {
+        verificationForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('btn-submit-verification');
+
+            verificationStatusMsg.textContent = 'Submitting...';
+            verificationStatusMsg.className = 'status-msg';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/verification/apply', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    verificationStatusMsg.textContent = data.message;
+                    verificationStatusMsg.classList.add('success');
+                    verificationForm.reset();
+                    fileNameDisplay.textContent = '';
+                    setTimeout(() => {
+                        closeVerificationModal();
+                    }, 2000);
+                } else {
+                    verificationStatusMsg.textContent = data.message || 'Submission failed';
+                    verificationStatusMsg.classList.add('error');
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error submitting verification:', error);
+                verificationStatusMsg.textContent = 'An error occurred. Please try again.';
+                verificationStatusMsg.classList.add('error');
+                submitBtn.disabled = false;
+            }
+        });
+    }
 
     // ---------- Tab Switching ----------
     function switchTab(tab) {
