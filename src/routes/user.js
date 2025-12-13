@@ -1,5 +1,5 @@
 import express from 'express';
-import { updateUser, getSettings, deleteAccount } from '../controllers/userController.js';
+import { updateUser, getSettings, deleteAccount, searchUsers } from '../controllers/userController.js';
 import { upload, uploadProfilePicture, removeProfilePicture } from '../controllers/uploadController.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
@@ -17,6 +17,12 @@ router.put('/update', updateUser);
 // @route   GET /api/user/settings
 // @access  Private
 router.get('/settings', getSettings);
+
+// @desc    Search for users
+// @route   GET /api/user/search
+// @access  Private (due to router.use(verifyToken))
+router.get('/search', searchUsers);
+
 
 // @desc    Upload profile picture
 // @route   POST /api/user/upload-pfp

@@ -200,5 +200,53 @@ export const getSettings = async (req, res) => {
             }
         }
     }
+};
 
+
+// Search for users
+export const searchUsers = async (req, res) => {
+    const { q } = req.query;
+
+    if (!q || q.trim() === '') {
+        return res.json([]);
+    }
+
+    let connection;
+    try {
+        connection = await getPool().getConnection();
+        const searchInput = q.trim();
+
+        // Using Oracle's string concatenation || 
+        // Note: In some Oracle setups, case-insensitive search might need proper NLS settings or UPPER/LOWER function usage.
+        // We will use LOWER() for case-insensitive matching as requested.
+        const result = await connection.execute(
+            `SELECT 
+                UserName,
+                Profile_Name,
+                Profile_Picture_URL
+            FROM Account
+            WHERE LOWER(UserName) LIKE '%' || LOWER(:search_input) || '%'
+            FETCH FIRST 20 ROWS ONLY`,
+            {
+                search_input: searchInput
+            },
+            {
+                outFormat: 4002 // OUT_FORMAT_OBJECT
+            }
+        );
+
+        res.json(result.rows);
+
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ error: 'Search failed', details: error.message });
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error('Error closing connection:', err);
+            }
+        }
+    }
 };
