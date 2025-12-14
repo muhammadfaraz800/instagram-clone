@@ -797,13 +797,30 @@ input[type="file"]#verification-doc {
 
 /* Close button positioned outside/corner */
 #post-modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 10;
-    color: white;
-    background: rgba(0, 0, 0, 0.5);
+    display: none;
 }
+
+#post-modal-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.post-options-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+}
+
+.post-options-btn:hover {
+    background: var(--bg-secondary);
+}
+
 
 .post-modal-container {
     display: flex;

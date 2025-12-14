@@ -417,8 +417,105 @@ document.addEventListener('DOMContentLoaded', async function () {
             postModalMediaContainer.appendChild(img);
         }
 
+        // ---------- Delete / Options Logic ----------
+        // Remove functionality of old options button to prevent duplicates
+        const oldOptionsBtn = document.querySelector('.post-modal-header .post-options-btn');
+        if (oldOptionsBtn) oldOptionsBtn.remove();
+
+        if (isOwnProfile) {
+            const header = document.querySelector('.post-modal-header');
+
+            // Create options button
+            const optionsBtn = document.createElement('button');
+            optionsBtn.className = 'post-options-btn';
+            optionsBtn.innerHTML = '<i class="fa-solid fa-ellipsis"></i>';
+            optionsBtn.title = 'Options';
+
+            optionsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openPostOptionsModal(post.contentId);
+            });
+
+            header.appendChild(optionsBtn);
+        }
+
         // Show Modal
         postModal.classList.add('active');
+    }
+
+    // ---------- Post Options Modal (Curtain style) ----------
+    function openPostOptionsModal(contentId) {
+        // Create modal elements dynamically if not already present specially for posts
+        // or reuse existing options modal structure but for posts
+
+        let modal = document.getElementById('post-options-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'post-options-modal';
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content options-modal">
+                    <div class="options-list">
+                        <button class="options-btn delete-btn" id="btn-delete-post" style="color: #ed4956; font-weight: 700;">Delete</button>
+                        <button class="options-btn cancel-btn" id="btn-cancel-post-options">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Add event listeners (delegated or static)
+            const cancelBtn = modal.querySelector('#btn-cancel-post-options');
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+
+        // Update delete button action for current post
+        const deleteBtn = modal.querySelector('#btn-delete-post');
+        // Remove old listeners to avoid duplicates - cloning is a simple way
+        const newDeleteBtn = deleteBtn.cloneNode(true);
+        deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+
+        newDeleteBtn.addEventListener('click', () => {
+            deletePost(contentId);
+            modal.classList.remove('active');
+        });
+
+        // Show modal
+        modal.classList.add('active');
+    }
+
+    async function deletePost(contentId) {
+        try {
+            const response = await fetch(`/api/content/${contentId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                closePostModal();
+                // Reload posts to reflect deletion
+                await loadPosts();
+
+                // Update stats locally
+                if (profileUser) {
+                    profileUser.postsCount = Math.max(0, (profileUser.postsCount || 0) - 1);
+                    const postsCountEl = document.getElementById('posts-count');
+                    if (postsCountEl) postsCountEl.textContent = formatNumber(profileUser.postsCount);
+                }
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Failed to delete post');
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            alert('An error occurred while deleting the post');
+        }
     }
 
     function closePostModal() {

@@ -427,3 +427,80 @@ export const getUploadLimits = async (req, res) => {
         }
     }
 };
+
+/**
+ * Delete content (image or reel)
+ * DELETE /api/content/:contentId
+ */
+export const deleteContent = async (req, res) => {
+    const { contentId } = req.params;
+    const username = req.username;
+
+    if (!username) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    let connection;
+    try {
+        connection = await getPool().getConnection();
+
+        // 1. Check ownership and get file path
+        const result = await connection.execute(
+            `SELECT UserName, Path FROM Content WHERE ContentID = :contentId`,
+            { contentId },
+            { outFormat: 4002 }
+        );
+
+        if (!result.rows || result.rows.length === 0) {
+            return res.status(404).json({ error: 'Content not found' });
+        }
+
+        const content = result.rows[0];
+
+        // Ensure user owns the content
+        if (content.USERNAME.toLowerCase() !== username.toLowerCase()) {
+            return res.status(403).json({ error: 'You are not authorized to delete this content' });
+        }
+
+        const filePath = content.PATH;
+
+        // 2. Delete from database (Cascading delete assumed for related tables)
+        // If your DB doesn't have cascade on delete, you'll need to delete from child tables first.
+        // Assuming ContentID is primary key and other tables FK to it with ON DELETE CASCADE
+        await connection.execute(
+            `DELETE FROM Content WHERE ContentID = :contentId`,
+            { contentId },
+            { autoCommit: true }
+        );
+
+        // 3. Delete file from file system
+        if (filePath) {
+            // Remove leading slash for relative path
+            const relativePath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+            const fullPath = path.resolve(relativePath);
+
+            // Security check: ensure path is within uploads directory
+            if (fullPath.includes('uploads') && fs.existsSync(fullPath)) {
+                try {
+                    fs.unlinkSync(fullPath);
+                } catch (e) {
+                    console.error('Error deleting file from disk:', e);
+                    // Continue even if file delete fails, as DB record is gone
+                }
+            }
+        }
+
+        res.json({ message: 'Content deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting content:', error);
+        res.status(500).json({
+            error: 'Failed to delete content',
+            details: error.message
+        });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+};

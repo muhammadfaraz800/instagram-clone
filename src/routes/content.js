@@ -9,7 +9,8 @@ import {
     uploadReel,
     getUploadLimits,
     uploadImageMiddleware,
-    uploadReelMiddleware
+    uploadReelMiddleware,
+    deleteContent
 } from '../controllers/contentUploadController.js';
 
 const router = Router();
@@ -25,5 +26,8 @@ router.post('/upload-image', uploadImageMiddleware.single('image'), uploadImage)
 
 // Upload reel (POST /api/content/upload-reel)
 router.post('/upload-reel', uploadReelMiddleware.single('reel'), uploadReel);
+
+// Delete content (DELETE /api/content/:contentId)
+router.delete('/:contentId', deleteContent);
 
 export default router;
