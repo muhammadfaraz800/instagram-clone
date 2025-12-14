@@ -90,7 +90,7 @@ export const getProfile = async (req, res) => {
  */
 export const getProfilePosts = async (req, res) => {
     const { username } = req.params;
-    const { type = 'all' } = req.query;
+    const { type = 'image' } = req.query; // Default to 'image' if not specified
     const currentUser = req.username; // From verifyToken middleware
 
     // Validate username parameter
@@ -119,68 +119,115 @@ export const getProfilePosts = async (req, res) => {
         // Safely check if viewing own profile (currentUser may be undefined if not authenticated)
         const isOwnProfile = currentUser && currentUser.toLowerCase() === username.toLowerCase();
 
-        // Check if profile is private and user is not following
-        if (visibility === 'Private' && !isOwnProfile) {
-            // Check if current user follows this private account
-            const followResult = await connection.execute(
-                `SELECT 1 FROM Follows 
-                 WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
-                 AND LOWER(FollowedUserName) = LOWER(:username)`,
-                { currentUser, username },
-                { outFormat: 4002 }
-            );
+        // Default to not fetching (block access) if logic doesn't allow
+        let shouldFetch = false;
 
-            if (!followResult.rows || followResult.rows.length === 0) {
-                return res.json([]); // Return empty array for private profile not following
+        if (isOwnProfile) {
+            shouldFetch = true;
+        } else if (visibility === 'Public') {
+            // Even if not following, public profiles are visible
+            shouldFetch = true;
+        } else if (visibility === 'Private') {
+            // Check if current user follows this private account
+            if (currentUser) {
+                const followResult = await connection.execute(
+                    `SELECT 1 FROM Follows 
+                     WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+                     AND LOWER(FollowedUserName) = LOWER(:username)`,
+                    { currentUser, username },
+                    { outFormat: 4002 }
+                );
+                if (followResult.rows && followResult.rows.length > 0) {
+                    shouldFetch = true;
+                }
             }
         }
 
-        // Build query based on type filter
-        let query = `
-            SELECT 
-                c.ContentID,
-                c.Caption,
-                c.Path,
-                c.ContentDate,
-                CASE 
-                    WHEN i.ContentID IS NOT NULL THEN 'image'
-                    WHEN r.ContentID IS NOT NULL THEN 'reel'
-                    ELSE 'unknown'
-                END AS MediaType,
-                r.ReelDuration,
-                (SELECT LISTAGG(t.TagName, ',') WITHIN GROUP (ORDER BY t.TagName)
-                 FROM Content_Tag ct 
-                 JOIN Tags t ON ct.TagID = t.TagID 
-                 WHERE ct.ContentID = c.ContentID) AS Tags
-            FROM Content c
-            LEFT JOIN Image i ON c.ContentID = i.ContentID
-            LEFT JOIN Reel r ON c.ContentID = r.ContentID
-            WHERE LOWER(c.UserName) = LOWER(:username)`;
-
-        if (type === 'reel') {
-            query += ` AND r.ContentID IS NOT NULL`;
-        } else if (type === 'image') {
-            query += ` AND i.ContentID IS NOT NULL`;
+        if (!shouldFetch) {
+            return res.json([]); // Return empty array for denied access
         }
 
-        query += ` ORDER BY c.ContentDate DESC`;
+        // Execute the specific query based on type
+        let postsResult;
 
-        const postsResult = await connection.execute(query, { username }, { outFormat: 4002 });
+        if (type === 'reel') {
+            // Reels Query
+            const reelQuery = `
+                SELECT 
+                    c.ContentID,
+                    c.Path,             -- The video URL
+                    c.Caption,
+                    r.ReelDuration,     -- Specific to Reels
+                    c.Post_Date,        -- Using verified Post_Date column
+                    -- Like Count
+                    (SELECT COUNT(*) FROM Likes l 
+                     JOIN Action act ON l.ActionID = act.ActionID 
+                     WHERE act.ContentID = c.ContentID) AS Like_Count,
+                    -- Comment Count
+                    (SELECT COUNT(*) FROM Comments com 
+                     JOIN Action act ON com.ActionID = act.ActionID 
+                     WHERE act.ContentID = c.ContentID) AS Comment_Count,
+                    -- Tags
+                    (SELECT LISTAGG(t.TagName, ',') WITHIN GROUP (ORDER BY t.TagName)
+                     FROM Content_Tag ct
+                     JOIN Tags t ON ct.TagID = t.TagID
+                     WHERE ct.ContentID = c.ContentID) AS Tags
+                
+                FROM Content c
+                JOIN Reel r ON c.ContentID = r.ContentID   -- INNER JOIN enforces "Only Reels"
+                WHERE LOWER(c.UserName) = LOWER(:username)
+                ORDER BY c.Post_Date DESC
+            `;
+            postsResult = await connection.execute(reelQuery, { username }, { outFormat: 4002 });
+
+        } else {
+            // Images (Posts) Query - Default
+            const imageQuery = `
+                SELECT 
+                    c.ContentID,
+                    c.Path,             -- The image URL
+                    c.Caption,
+                    c.Post_Date,        -- Using verified Post_Date column
+                    -- Like Count
+                    (SELECT COUNT(*) FROM Likes l 
+                     JOIN Action act ON l.ActionID = act.ActionID 
+                     WHERE act.ContentID = c.ContentID) AS Like_Count,
+                    -- Comment Count
+                    (SELECT COUNT(*) FROM Comments com 
+                     JOIN Action act ON com.ActionID = act.ActionID 
+                     WHERE act.ContentID = c.ContentID) AS Comment_Count,
+                    -- Tags
+                    (SELECT LISTAGG(t.TagName, ',') WITHIN GROUP (ORDER BY t.TagName)
+                     FROM Content_Tag ct
+                     JOIN Tags t ON ct.TagID = t.TagID
+                     WHERE ct.ContentID = c.ContentID) AS Tags
+                
+                FROM Content c
+                JOIN Image i ON c.ContentID = i.ContentID  -- INNER JOIN enforces "Only Images"
+                WHERE LOWER(c.UserName) = LOWER(:username)
+                ORDER BY c.Post_Date DESC
+            `;
+            postsResult = await connection.execute(imageQuery, { username }, { outFormat: 4002 });
+        }
+
 
         const posts = (postsResult.rows || []).map(row => ({
             contentId: row.CONTENTID,
             caption: row.CAPTION,
-            path: row.PATH,
-            mediaType: row.MEDIATYPE,
-            createdAt: row.CONTENTDATE,
+            path: row.PATH, // "mediaUrl" in frontend logic
+            mediaUrl: row.PATH, // Explicitly mapping to mediaUrl as well for frontend compatibility if needed
+            mediaType: type === 'reel' ? 'reel' : 'image',
+            createdAt: row.POST_DATE,
             duration: row.REELDURATION || null,
+            likesCount: row.LIKE_COUNT || 0,
+            commentsCount: row.COMMENT_COUNT || 0,
             tags: row.TAGS ? row.TAGS.split(',') : []
         }));
 
         res.json(posts);
 
     } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching posts detailed:', error);
         res.status(500).json({ error: 'Failed to fetch posts', details: error.message });
     } finally {
         if (connection) {

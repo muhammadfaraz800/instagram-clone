@@ -278,9 +278,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         posts.forEach(post => {
             const postItem = document.createElement('div');
             postItem.className = 'post-item';
+
+            // Handle Media Type (Image vs Video)
+            let mediaContent;
+            if (post.mediaType === 'reel') {
+                mediaContent = `<video src="${post.mediaUrl}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>
+                                <div class="reel-indicator"><i class="fa-solid fa-play"></i></div>`;
+            } else {
+                mediaContent = `<img src="${post.mediaUrl}" alt="Post">`;
+            }
+
             postItem.innerHTML = `
-                <img src="${post.mediaUrl}" alt="Post">
-                ${post.mediaType === 'reel' ? '<div class="reel-indicator"><i class="fa-solid fa-play"></i></div>' : ''}
+                ${mediaContent}
                 <div class="post-overlay">
                     <div class="overlay-stat">
                         <i class="fa-solid fa-heart"></i>
@@ -292,7 +301,114 @@ document.addEventListener('DOMContentLoaded', async function () {
                     </div>
                 </div>
             `;
+
+            // Add Click Event to Open Modal
+            postItem.addEventListener('click', () => openPostModal(post));
+
             postsGrid.appendChild(postItem);
+        });
+    }
+
+    // ---------- Post Detail Modal Logic ----------
+    const postModal = document.getElementById('post-modal');
+    const postModalClose = document.getElementById('post-modal-close');
+    const postModalMediaContainer = document.getElementById('post-modal-media-container');
+    const postModalUserPic = document.getElementById('post-modal-user-pic');
+    const postModalUsername = document.getElementById('post-modal-username');
+    const postModalCaptionPic = document.getElementById('post-modal-caption-pic');
+    const postModalCaptionUsername = document.getElementById('post-modal-caption-username');
+    const postModalCaptionText = document.getElementById('post-modal-caption-text');
+    const postModalTime = document.getElementById('post-modal-time');
+    const postModalLikes = document.getElementById('post-modal-likes');
+    const postModalDate = document.getElementById('post-modal-date');
+
+    function openPostModal(post) {
+        // Populate User Info
+        postModalUserPic.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        postModalUsername.textContent = profileUser.username;
+        postModalCaptionPic.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        postModalCaptionUsername.textContent = profileUser.username;
+
+        // Populate Caption & Stats
+        postModalCaptionText.textContent = post.caption || '';
+
+        // Render Tags
+        const existingTags = postModalCaptionText.parentNode.querySelector('.post-tags');
+        if (existingTags) existingTags.remove();
+
+        if (post.tags && post.tags.length > 0) {
+            const tagsContainer = document.createElement('div');
+            tagsContainer.className = 'post-tags';
+
+            post.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'post-tag';
+                tagSpan.textContent = `#${tag.trim()}`;
+                tagsContainer.appendChild(tagSpan);
+            });
+
+            // Insert tags before the time element if it exists, otherwise append
+            if (postModalTime) {
+                postModalCaptionText.parentNode.insertBefore(tagsContainer, postModalTime);
+            } else {
+                postModalCaptionText.parentNode.appendChild(tagsContainer);
+            }
+        }
+
+        postModalLikes.textContent = `${formatNumber(post.likesCount || 0)} likes`;
+
+        // Format Date
+        const date = new Date(post.createdAt);
+        postModalDate.textContent = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        // Simplified timeago for caption
+        postModalTime.textContent = timeAgo(date);
+
+        // Populate Media (Image vs Video)
+        postModalMediaContainer.innerHTML = '';
+        if (post.mediaType === 'reel') {
+            const video = document.createElement('video');
+            video.src = post.mediaUrl;
+            video.controls = true;
+            video.autoplay = true;
+            video.loop = true;
+            postModalMediaContainer.appendChild(video);
+        } else {
+            const img = document.createElement('img');
+            img.src = post.mediaUrl;
+            postModalMediaContainer.appendChild(img);
+        }
+
+        // Show Modal
+        postModal.classList.add('active');
+    }
+
+    function closePostModal() {
+        postModal.classList.remove('active');
+        // Stop video playback when closed
+        postModalMediaContainer.innerHTML = '';
+    }
+
+    // Utility: Simple Time Ago
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m";
+        return Math.floor(seconds) + "s";
+    }
+
+    // Modal Listeners
+    if (postModalClose) postModalClose.addEventListener('click', closePostModal);
+    if (postModal) {
+        postModal.addEventListener('click', (e) => {
+            if (e.target === postModal) closePostModal();
         });
     }
 
@@ -591,7 +707,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ---------- Load Posts ----------
     async function loadPosts() {
-        const type = currentTab === 'reels' ? 'reel' : 'all';
+        const type = currentTab === 'reels' ? 'reel' : 'image';
 
         // Check if profile is private and user is not following
         if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) {
@@ -617,6 +733,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ---------- Initialize ----------
     async function init() {
+
         // Get username from URL
         const username = getUsernameFromUrl();
         if (!username) {

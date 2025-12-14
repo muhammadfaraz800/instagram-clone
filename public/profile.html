@@ -181,6 +181,71 @@
         </div>
     </div>
 
+    <!-- Post Detail Modal (Lightbox) -->
+    <div id="post-modal" class="modal-overlay">
+        <div class="modal-content post-modal-content">
+            <button class="modal-close-btn" id="post-modal-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="post-modal-container">
+                <!-- Left: Media -->
+                <div class="post-media-container" id="post-modal-media-container">
+                    <!-- Image or Video will be injected here -->
+                </div>
+
+                <!-- Right: Info & Comments -->
+                <div class="post-info-container">
+                    <!-- Header -->
+                    <div class="post-modal-header">
+                        <div class="post-header-user">
+                            <img id="post-modal-user-pic" src="" alt="User">
+                            <span id="post-modal-username" class="post-modal-username"></span>
+                        </div>
+                        <button class="post-options-btn">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                    </div>
+
+                    <!-- Comments / Caption Area -->
+                    <div class="post-comments-section" id="post-comments-section">
+                        <!-- Caption (first item) -->
+                        <div class="comment-item caption-item">
+                            <img id="post-modal-caption-pic" src="" alt="User">
+                            <div class="comment-content">
+                                <span id="post-modal-caption-username" class="comment-username"></span>
+                                <span id="post-modal-caption-text"></span>
+                                <div class="comment-time" id="post-modal-time"></div>
+                            </div>
+                        </div>
+                        <!-- Comments will be loaded here (future) -->
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="post-modal-actions">
+                        <div class="action-buttons-row">
+                            <div class="left-actions">
+                                <button class="action-btn"><i class="fa-regular fa-heart"></i></button>
+                                <button class="action-btn"><i class="fa-regular fa-comment"></i></button>
+                                <button class="action-btn"><i class="fa-regular fa-paper-plane"></i></button>
+                            </div>
+                            <div class="right-actions">
+                                <button class="action-btn"><i class="fa-regular fa-bookmark"></i></button>
+                            </div>
+                        </div>
+                        <div class="post-likes-count" id="post-modal-likes">0 likes</div>
+                        <div class="post-date-small" id="post-modal-date"></div>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <div class="post-add-comment">
+                        <input type="text" placeholder="Add a comment...">
+                        <button disabled>Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/profile.js"></script>
 </body>
 
