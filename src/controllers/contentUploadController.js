@@ -5,8 +5,13 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import { getPool } from "../config/db.js";
 import { REEL_DURATION_VERIFIED, REEL_DURATION_NORMAL } from '../utils/constants.js';
+
+// Set FFmpeg path
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 // Duration limits imported from constants.js
 
@@ -169,6 +174,40 @@ async function isUserVerified(connection, username) {
 }
 
 /**
+ * Trim video file using FFmpeg
+ * @param {string} inputPath - Path to original video file
+ * @param {string} outputPath - Path for trimmed video output
+ * @param {number} startTime - Start time in seconds
+ * @param {number} endTime - End time in seconds
+ * @returns {Promise<void>}
+ */
+async function trimVideo(inputPath, outputPath, startTime, endTime) {
+    return new Promise((resolve, reject) => {
+        const duration = endTime - startTime;
+
+        ffmpeg(inputPath)
+            .setStartTime(startTime)
+            .setDuration(duration)
+            .outputOptions([
+                '-c:v libx264',      // Re-encode video with H.264 codec
+                '-c:a aac',          // Re-encode audio with AAC codec
+                '-preset fast',      // Fast encoding preset
+                '-movflags +faststart' // Enable fast start for web playback
+            ])
+            .output(outputPath)
+            .on('end', () => {
+                console.log(`Video trimmed successfully: ${startTime}s to ${endTime}s`);
+                resolve();
+            })
+            .on('error', (err) => {
+                console.error('FFmpeg error:', err);
+                reject(err);
+            })
+            .run();
+    });
+}
+
+/**
  * Upload Image Handler
  * POST /api/content/upload-image
  */
@@ -289,6 +328,9 @@ export const uploadReel = async (req, res) => {
     }
 
     let connection;
+    let trimmedFilePath = null; // Track trimmed file for cleanup on error
+    const originalFilePath = req.file.path;
+
     try {
         connection = await getPool().getConnection();
 
@@ -297,18 +339,49 @@ export const uploadReel = async (req, res) => {
         const maxDuration = verified ? REEL_DURATION_VERIFIED : REEL_DURATION_NORMAL;
         const maxTags = verified ? 5 : 3;
 
-        // Validate duration (sent from frontend)
-        const duration = parseFloat(req.body.duration) || 0;
+        // Get trim times from request (sent by frontend)
+        const startTime = parseFloat(req.body.startTime) || 0;
+        const endTime = parseFloat(req.body.endTime) || 0;
+        const duration = parseFloat(req.body.duration) || (endTime - startTime);
+
+        // Validate duration
         if (duration > maxDuration) {
             // Clean up uploaded file
-            if (req.file && req.file.path) {
-                try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+            if (originalFilePath) {
+                try { fs.unlinkSync(originalFilePath); } catch (e) { /* ignore */ }
             }
             return res.status(400).json({
                 error: `Reel duration exceeds maximum allowed (${maxDuration} seconds)`,
                 maxDuration,
                 providedDuration: duration
             });
+        }
+
+        // Determine if trimming is needed
+        const needsTrimming = startTime > 0 || (endTime > 0 && endTime !== startTime);
+        let finalFilePath = originalFilePath;
+        let finalFileName = req.file.filename;
+
+        if (needsTrimming && endTime > startTime) {
+            // Create trimmed file path
+            const ext = path.extname(req.file.filename);
+            const baseName = path.basename(req.file.filename, ext);
+            const trimmedFileName = `${baseName}_trimmed${ext}`;
+            trimmedFilePath = path.join(reelUploadDir, trimmedFileName);
+
+            console.log(`Trimming video: ${startTime}s to ${endTime}s`);
+
+            // Perform actual video trimming with FFmpeg
+            await trimVideo(originalFilePath, trimmedFilePath, startTime, endTime);
+
+            // Delete the original untrimmed file
+            try { fs.unlinkSync(originalFilePath); } catch (e) {
+                console.error('Error deleting original file:', e);
+            }
+
+            finalFilePath = trimmedFilePath;
+            finalFileName = trimmedFileName;
+            trimmedFilePath = null; // Clear since it's now the final file
         }
 
         // Parse tags
@@ -330,7 +403,7 @@ export const uploadReel = async (req, res) => {
 
         const caption = req.body.caption || '';
         const contentId = generateContentId();
-        const reelPath = `/uploads/content/reels/${req.file.filename}`;
+        const reelPath = `/uploads/content/reels/${finalFileName}`;
 
         // Insert into Content table
         await connection.execute(
@@ -366,6 +439,7 @@ export const uploadReel = async (req, res) => {
             contentId,
             path: reelPath,
             duration: Math.round(duration),
+            trimmed: needsTrimming && endTime > startTime,
             tagsApplied: tags.length,
             maxTagsAllowed: maxTags
         });
@@ -378,9 +452,12 @@ export const uploadReel = async (req, res) => {
             try { await connection.rollback(); } catch (e) { /* ignore */ }
         }
 
-        // Clean up uploaded file
-        if (req.file && req.file.path) {
-            try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+        // Clean up uploaded files
+        if (originalFilePath) {
+            try { fs.unlinkSync(originalFilePath); } catch (e) { /* ignore */ }
+        }
+        if (trimmedFilePath) {
+            try { fs.unlinkSync(trimmedFilePath); } catch (e) { /* ignore */ }
         }
 
         res.status(500).json({

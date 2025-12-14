@@ -1479,7 +1479,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (uploadState.fileType === 'reel') {
                     formData.append('reel', uploadState.file);
-                    // Send trimmed duration (end - start), not full video duration
+                    // Send trim times for server-side video trimming
+                    formData.append('startTime', uploadState.reelStartTime || 0);
+                    formData.append('endTime', uploadState.reelEndTime || uploadState.reelDuration);
                     const trimmedDuration = uploadState.reelEndTime - uploadState.reelStartTime;
                     formData.append('duration', trimmedDuration || uploadState.reelDuration || '0');
 

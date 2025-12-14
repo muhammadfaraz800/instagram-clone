@@ -1056,6 +1056,23 @@ textarea {
     gap: 12px;
 }
 
+/* Profile Link Wrapper - makes profile section clickable */
+.profile-link-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.profile-link-wrapper:hover {
+    opacity: 0.8;
+}
+
 .profile-pic-large {
     width: 56px;
     height: 56px;

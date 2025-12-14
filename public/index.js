@@ -18,6 +18,12 @@ fetch('/api/auth/me')
                     </span>` : '');
         document.getElementById('sidebar-account-type').textContent = user.profileName || 'XYZ';
 
+        // Set the profile link href
+        const profileLink = document.getElementById('sidebar-profile-link');
+        if (profileLink) {
+            profileLink.href = '/' + user.username;
+        }
+
         // Update profile pictures
         if (user.profilePictureUrl) {
             const largeProfilePic = document.querySelector('.profile-pic-large img');
