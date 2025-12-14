@@ -42,13 +42,13 @@ export const getReelsFeed = async (req, res) => {
                 LEFT JOIN Verification v ON a.UserName = v.UserName
                 
                 WHERE 
-                    c.UserName <> :current_user
+                    c.UserName <> :currentUser
                     AND (
                         a.Visibility = 'Public'
                         OR EXISTS (
                             SELECT 1 FROM Follows f 
-                            WHERE f.Follower = :current_user 
-                            AND f.Following = c.UserName
+                            WHERE f.FollowerUserName = :currentUser 
+                            AND f.FollowedUserName = c.UserName
                         )
                     )
                 ORDER BY c.Post_Date DESC
@@ -56,7 +56,7 @@ export const getReelsFeed = async (req, res) => {
             )
             ORDER BY DBMS_RANDOM.VALUE
             FETCH FIRST 10 ROWS ONLY`,
-            { current_user: currentUser },
+            { currentUser: currentUser },
             { outFormat: 4002 }
         );
 
@@ -142,7 +142,7 @@ export const getReelById = async (req, res) => {
         // Check if user can view this reel (public or following private account)
         if (row.VISIBILITY === 'Private' && row.AUTHOR !== currentUser) {
             const followCheck = await connection.execute(
-                `SELECT 1 FROM Follows WHERE Follower = :currentUser AND Following = :author`,
+                `SELECT 1 FROM Follows WHERE FollowerUserName = :currentUser AND FollowedUserName = :author`,
                 { currentUser, author: row.AUTHOR },
                 { outFormat: 4002 }
             );
