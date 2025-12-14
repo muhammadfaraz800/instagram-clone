@@ -103,6 +103,33 @@ document.addEventListener("DOMContentLoaded", function () {
             notificationsList.innerHTML = generateNotificationItems();
             attachNotificationHandlers();
         }
+        // Update the notification dot based on current followRequests count
+        updateNotificationDot(followRequests.length > 0);
+    }
+
+    // Update the notification dot indicator
+    function updateNotificationDot(hasRequests) {
+        const notificationDot = document.getElementById('notificationDot');
+        if (notificationDot) {
+            if (hasRequests) {
+                notificationDot.classList.add('active');
+            } else {
+                notificationDot.classList.remove('active');
+            }
+        }
+    }
+
+    // Check for pending notifications on page load
+    async function checkPendingNotifications() {
+        try {
+            const response = await fetch('/api/notifications/has-requests');
+            if (response.ok) {
+                const data = await response.json();
+                updateNotificationDot(data.hasRequests);
+            }
+        } catch (error) {
+            console.error('Error checking pending notifications:', error);
+        }
     }
 
     // Attach click handlers to notification buttons
@@ -151,7 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     <span>Reels</span>
                 </a>
                 <a href="#" class="menu-item" id="nav-notifications">
-                    <i class="fa-regular fa-heart"></i>
+                    <span class="notification-dot-container">
+                        <i class="fa-regular fa-heart"></i>
+                        <span class="notification-dot" id="notificationDot"></span>
+                    </span>
                     <span>Notifications</span>
                 </a>
                 <a href="#" class="menu-item" id="nav-create">
@@ -635,6 +665,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     profileLink.href = `/${user.username.trim()}`;
                 }
             }
+            // Check for pending notifications on page load
+            checkPendingNotifications();
         })
         .catch(err => {
             // Check if we are already redirected or if it's a network error that warrants a redirect

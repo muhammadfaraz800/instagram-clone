@@ -491,6 +491,27 @@ textarea {
     font-size: 14px;
 }
 
+/* Notification Dot Indicator */
+.notification-dot-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-red);
+    border-radius: 50%;
+    display: none;
+}
+
+.notification-dot.active {
+    display: block;
+}
+
 /* ==========================================================
    MAIN CONTENT AREA
    ========================================================== */

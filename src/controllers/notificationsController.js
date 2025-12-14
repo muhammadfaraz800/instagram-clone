@@ -52,6 +52,37 @@ export const getRequests = async (req, res) => {
 };
 
 /**
+ * Check if there are pending follow requests (lightweight endpoint)
+ * GET /api/notifications/has-requests
+ */
+export const hasRequests = async (req, res) => {
+    const currentUser = req.username; // From verifyToken middleware
+    let connection;
+
+    try {
+        connection = await getPool().getConnection();
+
+        const result = await connection.execute(
+            `SELECT COUNT(*) AS COUNT FROM Requests 
+             WHERE LOWER(ReceiverUserName) = LOWER(:currentUser)`,
+            { currentUser },
+            { outFormat: 4002 }
+        );
+
+        const count = result.rows?.[0]?.COUNT || 0;
+        res.json({ hasRequests: count > 0, count });
+
+    } catch (error) {
+        console.error('Error checking requests:', error);
+        res.status(500).json({ error: 'Failed to check requests' });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+};
+
+/**
  * Accept a follow request
  * POST /api/notifications/requests/:username/accept
  */

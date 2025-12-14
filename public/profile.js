@@ -185,6 +185,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         postsCount.textContent = formatNumber(profileUser.postsCount || 0);
         followersCount.textContent = formatNumber(profileUser.followersCount || 0);
         followingCount.textContent = formatNumber(profileUser.followingCount || 0);
+
+        // Restrict access for private non-followed profiles
+        if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) {
+            followersCount.parentElement.style.cursor = 'default';
+            followingCount.parentElement.style.cursor = 'default';
+        } else {
+            followersCount.parentElement.style.cursor = 'pointer';
+            followingCount.parentElement.style.cursor = 'pointer';
+        }
     }
 
     // ---------- Render Action Buttons ----------
@@ -794,6 +803,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Open modal for followers
     if (followersStat) {
         followersStat.addEventListener('click', () => {
+            // Restrict access
+            if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) return;
             openFollowListModal('followers');
         });
     }
@@ -801,6 +812,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Open modal for following
     if (followingStat) {
         followingStat.addEventListener('click', () => {
+            // Restrict access
+            if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) return;
             openFollowListModal('following');
         });
     }

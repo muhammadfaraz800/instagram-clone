@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     getRequests,
+    hasRequests,
     acceptRequest,
     rejectRequest
 } from '../controllers/notificationsController.js';
@@ -10,6 +11,11 @@ const router = express.Router();
 
 // Apply authentication middleware to all routes
 router.use(verifyToken);
+
+// @desc    Check if there are pending follow requests
+// @route   GET /api/notifications/has-requests
+// @access  Private
+router.get('/has-requests', hasRequests);
 
 // @desc    Get pending follow requests
 // @route   GET /api/notifications/requests
