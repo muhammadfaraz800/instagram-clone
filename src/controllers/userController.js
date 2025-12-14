@@ -169,10 +169,12 @@ export const getSettings = async (req, res) => {
                     n.Gender,
                     b.Bio_URL AS Website,
                     b.ContactNo,
-                    b.Business_Type
+                    b.Business_Type,
+                    v.Status AS Verification_Status
                 FROM Account a
                 LEFT JOIN Normal n ON a.UserName = n.UserName
                 LEFT JOIN Business b ON a.UserName = b.UserName
+                LEFT JOIN Verification v ON a.UserName = v.UserName
                 WHERE a.UserName = :current_user`,
             {
                 current_user: req.username

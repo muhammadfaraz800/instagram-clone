@@ -1600,3 +1600,550 @@ textarea {
 .verified-badge svg {
     fill: var(--accent-blue);
 }
+
+/* ==========================================================
+   CREATE MENU POPUP
+   ========================================================== */
+.create-menu-popup {
+    position: fixed;
+    left: 12px;
+    bottom: 180px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 250;
+    display: none;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+.create-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 400;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.create-menu-item:hover {
+    background: var(--bg-elevated);
+}
+
+.create-menu-item i {
+    font-size: 20px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+/* ==========================================================
+   UPLOAD MODAL
+   ========================================================== */
+.upload-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.upload-modal {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    max-width: 95vw;
+    max-height: 90vh;
+    box-shadow: var(--shadow-lg);
+}
+
+.upload-step {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Upload Modal Header */
+.upload-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    min-height: 43px;
+}
+
+.upload-modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    flex: 1;
+}
+
+.upload-close-btn,
+.upload-back-btn {
+    font-size: 24px;
+    color: var(--text-primary);
+    cursor: pointer;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.upload-back-btn {
+    font-size: 16px;
+}
+
+.upload-next-btn,
+.upload-share-btn {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.upload-next-btn:hover,
+.upload-share-btn:hover {
+    color: white;
+}
+
+.upload-next-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Upload Content Area */
+.upload-content-area {
+    display: flex;
+    min-height: 400px;
+}
+
+/* Step 1: Select File */
+.upload-select-area {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    gap: 16px;
+    width: 480px;
+}
+
+.upload-icon-large {
+    font-size: 80px;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.upload-select-area h3 {
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--text-primary);
+}
+
+.upload-select-btn {
+    background: var(--accent-blue);
+    color: white;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    margin-top: 16px;
+}
+
+.upload-select-btn:hover {
+    background: var(--accent-blue-hover);
+}
+
+/* Step 2: Crop */
+.upload-crop-area {
+    flex-direction: column;
+    width: 600px;
+}
+
+.upload-canvas-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    min-height: 400px;
+    position: relative;
+}
+
+.upload-canvas-container canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.upload-crop-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    position: relative;
+}
+
+.crop-ratio-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.ratio-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.ratio-btn:hover {
+    background: var(--border-light);
+}
+
+.ratio-options {
+    display: none;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+.ratio-option {
+    padding: 10px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ratio-option:hover {
+    background: var(--bg-elevated);
+}
+
+.ratio-option.active {
+    color: var(--accent-blue);
+}
+
+.zoom-slider-container {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    background: var(--bg-secondary);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+.zoom-slider-container input[type="range"] {
+    width: 120px;
+    cursor: pointer;
+}
+
+/* Step 3: Filters */
+.upload-filter-area {
+    width: 850px;
+}
+
+.upload-preview-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    min-width: 400px;
+}
+
+.upload-preview-container canvas {
+    max-width: 100%;
+    max-height: 400px;
+}
+
+.upload-filters-panel {
+    width: 340px;
+    border-left: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    overflow-y: auto;
+}
+
+.filters-header {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.filter-preview {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    transition: border var(--transition-fast);
+    background-size: cover;
+    background-position: center;
+}
+
+.filter-item.active .filter-preview {
+    border-color: var(--accent-blue);
+}
+
+.filter-item span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.filter-item.active span {
+    color: var(--accent-blue);
+}
+
+/* Step 4: Caption & Tags */
+.upload-caption-area {
+    width: 850px;
+}
+
+.upload-final-preview {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    min-width: 400px;
+}
+
+.upload-final-preview canvas {
+    max-width: 100%;
+    max-height: 400px;
+}
+
+.upload-form-panel {
+    width: 340px;
+    padding: 16px;
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.upload-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.upload-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -4px;
+}
+
+.upload-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+}
+
+.upload-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.upload-caption-input {
+    width: 100%;
+    min-height: 120px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    resize: none;
+}
+
+.upload-caption-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.caption-char-count {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-align: right;
+}
+
+.upload-tags-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.upload-tags-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.upload-tags-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.tags-limit-info {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+/* Loading State */
+.upload-loading-area {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 480px;
+    gap: 24px;
+}
+
+.upload-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.upload-loading-area p {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+/* Success State */
+.upload-success-area {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 480px;
+    gap: 16px;
+}
+
+.upload-success-icon {
+    font-size: 80px;
+    color: var(--accent-green);
+}
+
+.upload-success-area p {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+/* Video Trim Controls */
+.video-trim-controls {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-top: 12px;
+}
+
+.trim-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.trim-range-container {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 8px;
+}
+
+.trim-range-container label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.trim-range-container input[type="number"] {
+    width: 70px;
+    padding: 6px 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.trim-range-container input[type="number"]:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+}
+
+.trim-info {
+    font-size: 13px;
+    color: var(--text-tertiary);
+}
+
+.trim-info span {
+    color: var(--accent-blue);
+    font-weight: 600;
+}

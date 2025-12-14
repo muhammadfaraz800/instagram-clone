@@ -135,37 +135,49 @@ export const getProfilePosts = async (req, res) => {
             }
         }
 
-        // TODO: Fetch posts when Posts table exists
-        // Placeholder response - return empty array
-        /*
-        let query = `SELECT PostId, MediaURL, MediaType, Caption, CreatedAt 
-                     FROM Posts WHERE LOWER(Username) = LOWER(:username)`;
-        
-        if (type === 'reel') {
-            query += ` AND MediaType = 'reel'`;
-        } else if (type === 'image') {
-            query += ` AND MediaType = 'image'`;
-        }
-        
-        query += ` ORDER BY CreatedAt DESC`;
-        
-        const postsResult = await connection.execute(query, { username }, { outFormat: 4002 });
-        
-        const posts = postsResult.rows.map(row => ({
-            postId: row.POSTID,
-            mediaUrl: row.MEDIAURL,
-            mediaType: row.MEDIATYPE,
-            caption: row.CAPTION,
-            createdAt: row.CREATEDAT,
-            likesCount: 0,  // TODO: implement likes count
-            commentsCount: 0 // TODO: implement comments count
-        }));
-        
-        res.json(posts);
-        */
+        // Build query based on type filter
+        let query = `
+            SELECT 
+                c.ContentID,
+                c.Caption,
+                c.Path,
+                c.ContentDate,
+                CASE 
+                    WHEN i.ContentID IS NOT NULL THEN 'image'
+                    WHEN r.ContentID IS NOT NULL THEN 'reel'
+                    ELSE 'unknown'
+                END AS MediaType,
+                r.ReelDuration,
+                (SELECT LISTAGG(t.TagName, ',') WITHIN GROUP (ORDER BY t.TagName)
+                 FROM Content_Tag ct 
+                 JOIN Tags t ON ct.TagID = t.TagID 
+                 WHERE ct.ContentID = c.ContentID) AS Tags
+            FROM Content c
+            LEFT JOIN Image i ON c.ContentID = i.ContentID
+            LEFT JOIN Reel r ON c.ContentID = r.ContentID
+            WHERE LOWER(c.UserName) = LOWER(:username)`;
 
-        // Return empty array as placeholder
-        res.json([]);
+        if (type === 'reel') {
+            query += ` AND r.ContentID IS NOT NULL`;
+        } else if (type === 'image') {
+            query += ` AND i.ContentID IS NOT NULL`;
+        }
+
+        query += ` ORDER BY c.ContentDate DESC`;
+
+        const postsResult = await connection.execute(query, { username }, { outFormat: 4002 });
+
+        const posts = (postsResult.rows || []).map(row => ({
+            contentId: row.CONTENTID,
+            caption: row.CAPTION,
+            path: row.PATH,
+            mediaType: row.MEDIATYPE,
+            createdAt: row.CONTENTDATE,
+            duration: row.REELDURATION || null,
+            tags: row.TAGS ? row.TAGS.split(',') : []
+        }));
+
+        res.json(posts);
 
     } catch (error) {
         console.error('Error fetching posts:', error);

@@ -386,7 +386,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ---------- Handle Contact ----------
     function handleContact() {
-        // TODO: Implement contact functionality
         // Could open email, show phone number, etc.
         if (profileUser.contactNo) {
             alert(`Contact: ${profileUser.contactNo}`);

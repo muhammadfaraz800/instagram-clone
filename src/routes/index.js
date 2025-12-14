@@ -4,6 +4,7 @@ import userRoutes from './user.js';
 import profileRoutes from './profile.js';
 import notificationRoutes from './notifications.js';
 import verificationRoutes from './verification.js';
+import contentRoutes from './content.js';
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ router.use('/user', userRoutes);
 router.use('/profile', profileRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/verification', verificationRoutes);
+router.use('/content', contentRoutes);
 
 export default router;
 
