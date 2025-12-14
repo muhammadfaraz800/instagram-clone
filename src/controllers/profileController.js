@@ -451,3 +451,235 @@ export const getFollowStatus = async (req, res) => {
         }
     }
 };
+
+/**
+ * Get user's followers list
+ * GET /api/profile/:username/followers
+ */
+export const getFollowers = async (req, res) => {
+    const { username } = req.params;
+    const currentUser = req.username; // From verifyToken middleware
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
+    let connection;
+
+    try {
+        connection = await getPool().getConnection();
+
+        // Check visibility logic first? 
+        // If profile is private and not following, strictly speaking shouldn't satisfy "view followers" 
+        // unless it's own profile. But typical Instagram behavior: 
+        // You can click "Followers" but if private, you can't see list.
+        // Let's implement basic visibility check first.
+
+        const profileResult = await connection.execute(
+            `SELECT Visibility FROM Account WHERE LOWER(UserName) = LOWER(:username)`,
+            { username },
+            { outFormat: 4002 }
+        );
+
+        if (!profileResult.rows || profileResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const visibility = profileResult.rows[0].VISIBILITY;
+        const isOwnProfile = currentUser && currentUser.toLowerCase() === username.toLowerCase();
+        let allowed = false;
+
+        if (isOwnProfile) {
+            allowed = true;
+        } else if (visibility === 'Public') {
+            allowed = true;
+        } else {
+            // Private: Must be following
+            if (currentUser) {
+                const followResult = await connection.execute(
+                    `SELECT 1 FROM Follows 
+                     WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+                     AND LOWER(FollowedUserName) = LOWER(:username)`,
+                    { currentUser, username },
+                    { outFormat: 4002 }
+                );
+                if (followResult.rows && followResult.rows.length > 0) {
+                    allowed = true;
+                }
+            }
+        }
+
+        if (!allowed) {
+            return res.status(403).json({ error: 'Private account' });
+        }
+
+        // Fetch Followers
+        const result = await connection.execute(
+            `SELECT 
+                a.UserName,
+                a.Profile_Name,
+                a.Profile_Picture_URL,
+                v.Status AS Verification_Status
+             FROM Account a
+             JOIN Follows f ON a.UserName = f.FollowerUserName
+             LEFT JOIN Verification v ON a.UserName = v.UserName
+             WHERE LOWER(f.FollowedUserName) = LOWER(:username)`,
+            { username },
+            { outFormat: 4002 }
+        );
+
+        const followers = (result.rows || []).map(row => ({
+            username: row.USERNAME,
+            profileName: row.PROFILE_NAME,
+            profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
+            isVerified: row.VERIFICATION_STATUS === 'Verified'
+        }));
+
+        res.json(followers);
+
+    } catch (error) {
+        console.error('Error fetching followers:', error);
+        res.status(500).json({ error: 'Failed to fetch followers' });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+};
+
+/**
+ * Get user's following list
+ * GET /api/profile/:username/following
+ */
+export const getFollowing = async (req, res) => {
+    const { username } = req.params;
+    const currentUser = req.username;
+
+    // Validate username parameter
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+        return res.status(400).json({ error: 'Invalid username parameter' });
+    }
+
+    let connection;
+
+    try {
+        connection = await getPool().getConnection();
+
+        // Visibility check (same as followers)
+        const profileResult = await connection.execute(
+            `SELECT Visibility FROM Account WHERE LOWER(UserName) = LOWER(:username)`,
+            { username },
+            { outFormat: 4002 }
+        );
+
+        if (!profileResult.rows || profileResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const visibility = profileResult.rows[0].VISIBILITY;
+        const isOwnProfile = currentUser && currentUser.toLowerCase() === username.toLowerCase();
+        let allowed = false;
+
+        if (isOwnProfile) {
+            allowed = true;
+        } else if (visibility === 'Public') {
+            allowed = true;
+        } else {
+            // Private: Must be following
+            if (currentUser) {
+                const followResult = await connection.execute(
+                    `SELECT 1 FROM Follows 
+                     WHERE LOWER(FollowerUserName) = LOWER(:currentUser) 
+                     AND LOWER(FollowedUserName) = LOWER(:username)`,
+                    { currentUser, username },
+                    { outFormat: 4002 }
+                );
+                if (followResult.rows && followResult.rows.length > 0) {
+                    allowed = true;
+                }
+            }
+        }
+
+        if (!allowed) {
+            return res.status(403).json({ error: 'Private account' });
+        }
+
+        // Fetch Following
+        // Note: Joining Follows on FollowedUserName to get the accounts the user is following
+        const result = await connection.execute(
+            `SELECT 
+                a.UserName,
+                a.Profile_Name,
+                a.Profile_Picture_URL,
+                v.Status AS Verification_Status
+             FROM Account a
+             JOIN Follows f ON a.UserName = f.FollowedUserName
+             LEFT JOIN Verification v ON a.UserName = v.UserName
+             WHERE LOWER(f.FollowerUserName) = LOWER(:username)`,
+            { username },
+            { outFormat: 4002 }
+        );
+
+        const following = (result.rows || []).map(row => ({
+            username: row.USERNAME,
+            profileName: row.PROFILE_NAME,
+            profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
+            isVerified: row.VERIFICATION_STATUS === 'Verified'
+        }));
+
+        res.json(following);
+
+    } catch (error) {
+        console.error('Error fetching following:', error);
+        res.status(500).json({ error: 'Failed to fetch following' });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+};
+
+/**
+ * Remove a follower (Force unfollow)
+ * DELETE /api/profile/:username/followers/:followerUsername
+ * Removes 'followerUsername' from following 'username' (which is usually currentUser)
+ */
+export const removeFollower = async (req, res) => {
+    // Current user is the one performing the action (The 'Followed' one)
+    const currentUser = req.username;
+    // The user to be removed
+    const { followerUsername } = req.params;
+
+    if (!followerUsername) {
+        return res.status(400).json({ error: 'Follower username required' });
+    }
+
+    let connection;
+
+    try {
+        connection = await getPool().getConnection();
+
+        const result = await connection.execute(
+            `DELETE FROM Follows 
+             WHERE LOWER(FollowedUserName) = LOWER(:currentUser) 
+               AND LOWER(FollowerUserName) = LOWER(:followerUsername)`,
+            { currentUser, followerUsername },
+            { autoCommit: true }
+        );
+
+        if (result.rowsAffected > 0) {
+            res.json({ message: 'Follower removed' });
+        } else {
+            res.status(404).json({ error: 'Follower not found' });
+        }
+
+    } catch (error) {
+        console.error('Error removing follower:', error);
+        res.status(500).json({ error: 'Failed to remove follower' });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+};

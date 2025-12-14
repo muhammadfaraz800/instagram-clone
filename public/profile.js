@@ -799,6 +799,275 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    // ---------- Followers / Following Modal Logic ----------
+    const followListModal = document.getElementById('follow-list-modal');
+    const followListTitle = document.getElementById('follow-list-title');
+    const followListContent = document.getElementById('follow-list-content');
+    const followListEmpty = document.getElementById('follow-list-empty');
+    const followListClose = document.getElementById('follow-list-close');
+    const followListSearchInput = document.getElementById('follow-list-search-input');
+
+    let currentFollowListType = ''; // 'followers' or 'following'
+
+    // Open Modal
+    async function openFollowListModal(type) {
+        // Basic restrictions
+        if (!processFollowListAccess(type)) return;
+
+        currentFollowListType = type;
+        followListTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
+        followListModal.classList.add('active');
+        followListContent.innerHTML = '<div class="loading-spinner"></div>'; // Simple loading state
+        followListEmpty.classList.add('hidden');
+        if (followListSearchInput) followListSearchInput.value = '';
+
+        try {
+            const endpoint = `/api/profile/${profileUser.username}/${type}`;
+            const response = await fetch(endpoint);
+
+            if (response.status === 403) {
+                followListContent.innerHTML = '<p class="error-msg">Private Account</p>';
+                return;
+            }
+
+            if (!response.ok) throw new Error('Failed to fetch list');
+
+            const users = await response.json();
+            renderFollowList(users, type);
+
+        } catch (error) {
+            console.error(`Error fetching ${type}:`, error);
+            followListContent.innerHTML = '<p class="error-msg">Failed to load list.</p>';
+        }
+    }
+
+    // Check if user is allowed to view list (double check client side)
+    function processFollowListAccess(type) {
+        if (!profileUser) return false;
+        if (isOwnProfile) return true;
+        if (profileUser.visibility === 'Public') return true;
+        if (profileUser.visibility === 'Private' && isFollowing) return true;
+        return false;
+    }
+
+    // Render List
+    function renderFollowList(users, type) {
+        followListContent.innerHTML = '';
+
+        if (!users || users.length === 0) {
+            followListEmpty.classList.remove('hidden');
+            document.getElementById('follow-list-empty-text').textContent =
+                type === 'followers' ? 'No followers yet.' : 'Not following anyone yet.';
+            return;
+        }
+
+        users.forEach(user => {
+            const userItem = document.createElement('div');
+            userItem.className = 'follow-list-item';
+
+            const isVerifiedHTML = user.isVerified ?
+                `<span class="verified-badge-small" title="Verified">
+                    <svg aria-label="Verified" class="x1lliihq x1n2onr6" fill="rgb(0, 149, 246)" height="12" role="img" viewBox="0 0 40 40" width="12">
+                        <title>Verified</title>
+                        <path d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" fill-rule="evenodd"></path>
+                    </svg>
+                </span>` : '';
+
+            userItem.innerHTML = `
+                <div class="user-info-group" onclick="window.location.href='/profile/${user.username}'" style="cursor: pointer;">
+                    <img src="${user.profilePictureUrl}" alt="${user.username}" class="user-avatar">
+                    <div class="user-text">
+                        <span class="user-username">${user.username} ${isVerifiedHTML}</span>
+                        <span class="user-fullname">${user.profileName || ''}</span>
+                    </div>
+                </div>
+            `;
+
+            // Action Button Logic
+            let actionBtn = null;
+
+            if (isOwnProfile) {
+                if (type === 'followers') {
+                    // Remove Follower Button
+                    actionBtn = document.createElement('button');
+                    actionBtn.className = 'action-btn-small remove-btn';
+                    actionBtn.textContent = 'Remove';
+                    actionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        removeFollower(user.username, userItem);
+                    };
+                } else {
+                    // Following - Unfollow Button
+                    actionBtn = document.createElement('button');
+                    actionBtn.className = 'action-btn-small following-btn'; // "Following" style
+                    actionBtn.textContent = 'Following';
+                    actionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        // Open main unfollow modal for confirmation (reusing existing logic slightly modified)
+                        openUnfollowModalForList(user);
+                    };
+                }
+            } else {
+                // Viewing someone else's list
+                // If I follow them, show "Following". If not, show "Follow".
+                // BUT, checking "Am I following this person in the list?" requires more data.
+                // Ideally the API should return "isFollowing" boolean for me relative to each user in list.
+                // For now, let's leave this blank or simple. Implementing fully requires `isFollowing` in API response.
+                // Let's implement partial logic if I am viewing someone else's following/followers
+                // Just showing the list is the main requirement. Actions on third parties is bonus/complex.
+            }
+
+            if (actionBtn) {
+                userItem.appendChild(actionBtn);
+            }
+
+            followListContent.appendChild(userItem);
+        });
+    }
+
+    // Remove Follower Logic
+    async function removeFollower(username, itemElement) {
+        if (!confirm(`Remove ${username} as a follower?`)) return;
+
+        try {
+            const response = await fetch(`/api/profile/${profileUser.username}/followers/${username}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                itemElement.remove();
+                // Update stats
+                profileUser.followersCount = Math.max(0, (profileUser.followersCount || 1) - 1);
+                followersCount.textContent = formatNumber(profileUser.followersCount);
+                if (followListContent.children.length === 0) {
+                    followListEmpty.classList.remove('hidden');
+                    document.getElementById('follow-list-empty-text').textContent = 'No followers yet.';
+                }
+            } else {
+                alert('Failed to remove follower');
+            }
+        } catch (error) {
+            console.error('Error removing follower:', error);
+        }
+    }
+
+    // Unfollow from List Logic (Reuse modal but handle specific user)
+    let userToUnfollowFromList = null;
+
+    function openUnfollowModalForList(user) {
+        userToUnfollowFromList = user;
+        // Populate existing modal
+        unfollowModalPicture.src = user.profilePictureUrl || DEFAULT_AVATAR_PATH;
+        unfollowModalUsername.textContent = user.username;
+        unfollowModal.classList.add('active');
+
+        // Temporarily override the confirm button to handle LIST unfollow
+        // But need to be careful not to break the main profile unfollow logic.
+        // A better way is to check `userToUnfollowFromList` in the main handler.
+    }
+
+    // Modify existing handleUnfollow to support list unfollow
+    // We need to change the existing `handleUnfollow` or just make a new one.
+    // The existing `handleUnfollow` uses `profileUser`. 
+    // Let's modify the click listener for `unfollowConfirmBtn`.
+
+    const originalUnfollowHandler = handleUnfollow;
+
+    // Remove old listener
+    unfollowConfirmBtn.removeEventListener('click', handleUnfollow);
+
+    // Add new unified listener
+    unfollowConfirmBtn.addEventListener('click', async () => {
+        if (userToUnfollowFromList) {
+            await handleUnfollowFromList(userToUnfollowFromList);
+            userToUnfollowFromList = null; // Reset
+        } else {
+            await originalUnfollowHandler();
+        }
+    });
+
+    // Add close listener reset
+    const originalCloseUnfollow = closeUnfollowModal;
+    // We need to ensure userToUnfollowFromList is cleared on close
+
+    // Override close function? No, just add listener to modal close
+    unfollowModalClose.addEventListener('click', () => { userToUnfollowFromList = null; });
+    // Also on background click
+    unfollowModal.addEventListener('click', (e) => {
+        if (e.target === unfollowModal) userToUnfollowFromList = null;
+    });
+
+
+    async function handleUnfollowFromList(user) {
+        try {
+            const response = await fetch(`/api/profile/${user.username}/follow`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                closeUnfollowModal();
+                // Remove from DOM list
+                // We need to find the specific item. 
+                // Creating a specific ID for items or re-rendering is easier.
+                // Let's just reload the list or remove the specific element if we had a reference.
+                // Since `openFollowListModal` is async and we are inside `handleUnfollowFromList`,
+                // we'll just reload the list for simplicity.
+                openFollowListModal('following');
+
+                // Update stats
+                profileUser.followingCount = Math.max(0, (profileUser.followingCount || 1) - 1);
+                followingCount.textContent = formatNumber(profileUser.followingCount);
+            }
+        } catch (error) {
+            console.error('Error unfollowing user:', error);
+        }
+    }
+
+
+    // Listeners for Stats
+    const followersStat = document.getElementById('followers-stat');
+    const followingStat = document.getElementById('following-stat');
+
+    if (followersStat) {
+        followersStat.addEventListener('click', () => openFollowListModal('followers'));
+    }
+    if (followingStat) {
+        followingStat.addEventListener('click', () => openFollowListModal('following'));
+    }
+
+    // Close Listener
+    if (followListClose) {
+        followListClose.addEventListener('click', () => {
+            followListModal.classList.remove('active');
+        });
+    }
+
+    // Click outside to close
+    if (followListModal) {
+        followListModal.addEventListener('click', (e) => {
+            if (e.target === followListModal) {
+                followListModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Search Listener
+    if (followListSearchInput) {
+        followListSearchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.follow-list-item');
+            items.forEach(item => {
+                const username = item.querySelector('.user-username').textContent.toLowerCase();
+                const fullname = item.querySelector('.user-fullname').textContent.toLowerCase();
+                if (username.includes(term) || fullname.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
     // ---------- Tab Switching ----------
     function switchTab(tab) {
         currentTab = tab;
@@ -912,148 +1181,4 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Start initialization
     init();
 
-    // ---------- Followers/Following Modal Logic ----------
-    const followListModal = document.getElementById('follow-list-modal');
-    const followListTitle = document.getElementById('follow-list-title');
-    const followListClose = document.getElementById('follow-list-close');
-    const followListContent = document.getElementById('follow-list-content');
-    const followListEmpty = document.getElementById('follow-list-empty');
-    const followListEmptyText = document.getElementById('follow-list-empty-text');
-    const followListSearchInput = document.getElementById('follow-list-search-input');
-    const followersStat = document.getElementById('followers-stat');
-    const followingStat = document.getElementById('following-stat');
-
-    let currentListType = 'followers'; // 'followers' or 'following'
-    let currentListData = [];
-
-    // Open modal for followers
-    if (followersStat) {
-        followersStat.addEventListener('click', () => {
-            // Restrict access
-            if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) return;
-            openFollowListModal('followers');
-        });
-    }
-
-    // Open modal for following
-    if (followingStat) {
-        followingStat.addEventListener('click', () => {
-            // Restrict access
-            if (!isOwnProfile && profileUser.visibility === 'Private' && !isFollowing) return;
-            openFollowListModal('following');
-        });
-    }
-
-    async function openFollowListModal(type) {
-        currentListType = type;
-        followListTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
-        followListEmptyText.textContent = type === 'followers' ? 'No followers yet' : 'Not following anyone yet';
-        followListSearchInput.value = '';
-        followListContent.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Loading...</div>';
-        followListEmpty.classList.add('hidden');
-        followListModal.classList.add('active');
-
-        // Fetch data from API (TODO: Implement backend)
-        try {
-            const response = await fetch(`/api/profile/${profileUser.username}/${type}`);
-            if (response.ok) {
-                currentListData = await response.json();
-            } else {
-                currentListData = [];
-            }
-        } catch (error) {
-            console.error(`Error fetching ${type}:`, error);
-            currentListData = [];
-        }
-
-        renderFollowList(currentListData);
-    }
-
-    function renderFollowList(users) {
-        if (!users || users.length === 0) {
-            followListContent.innerHTML = '';
-            followListEmpty.classList.remove('hidden');
-            return;
-        }
-
-        followListEmpty.classList.add('hidden');
-        followListContent.innerHTML = users.map(user => `
-            <div class="follow-list-item" data-username="${user.username}">
-                <img src="${user.profilePictureUrl || DEFAULT_AVATAR_PATH}" alt="${user.username}" class="follow-list-avatar">
-                <div class="follow-list-user-info">
-                    <a href="/${user.username}" class="follow-list-username">${user.username}</a>
-                    <span class="follow-list-name">${user.profileName || ''}</span>
-                </div>
-                <button class="follow-list-action-btn ${currentListType === 'followers' ? 'remove-btn' : 'following-btn'}" data-username="${user.username}">
-                    ${currentListType === 'followers' ? 'Remove' : 'Following'}
-                </button>
-            </div>
-        `).join('');
-
-        // Attach action button handlers
-        attachFollowListActionHandlers();
-    }
-
-    function attachFollowListActionHandlers() {
-        const actionBtns = followListContent.querySelectorAll('.follow-list-action-btn');
-        actionBtns.forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const username = btn.dataset.username;
-
-                // TODO: Implement backend API for removing follower or unfollowing
-                console.log(`Action clicked for ${username} in ${currentListType}`);
-
-                // Placeholder: Remove from list visually
-                const item = btn.closest('.follow-list-item');
-                if (item) {
-                    item.remove();
-                    currentListData = currentListData.filter(u => u.username !== username);
-
-                    // Check if list is now empty
-                    if (currentListData.length === 0) {
-                        followListEmpty.classList.remove('hidden');
-                    }
-                }
-            });
-        });
-    }
-
-    // Search filter
-    if (followListSearchInput) {
-        followListSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const filtered = currentListData.filter(user =>
-                user.username.toLowerCase().includes(query) ||
-                (user.profileName && user.profileName.toLowerCase().includes(query))
-            );
-            renderFollowList(filtered.length > 0 || query === '' ? filtered : []);
-
-            // If search has results or is empty, hide empty state appropriately
-            if (query === '' && currentListData.length === 0) {
-                followListEmpty.classList.remove('hidden');
-            } else if (filtered.length === 0 && query !== '') {
-                followListEmpty.classList.remove('hidden');
-                followListEmptyText.textContent = 'No results found';
-            }
-        });
-    }
-
-    // Close modal
-    if (followListClose) {
-        followListClose.addEventListener('click', closeFollowListModal);
-    }
-
-    if (followListModal) {
-        followListModal.addEventListener('click', (e) => {
-            if (e.target === followListModal) {
-                closeFollowListModal();
-            }
-        });
-    }
-
-    function closeFollowListModal() {
-        followListModal.classList.remove('active');
-        followListSearchInput.value = '';
-    }
 });

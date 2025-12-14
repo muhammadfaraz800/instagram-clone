@@ -4,7 +4,10 @@ import {
     getProfilePosts,
     followUser,
     unfollowUser,
-    getFollowStatus
+    getFollowStatus,
+    getFollowers,
+    getFollowing,
+    removeFollower
 } from '../controllers/profileController.js';
 import { verifyToken } from '../utils/jwtUtils.js';
 
@@ -32,6 +35,18 @@ router.post('/:username/follow', followUser);
 // @route   DELETE /api/profile/:username/follow
 // @access  Private
 router.delete('/:username/follow', unfollowUser);
+
+// @desc    Get followers
+// @route   GET /api/profile/:username/followers
+router.get('/:username/followers', getFollowers);
+
+// @desc    Get following
+// @route   GET /api/profile/:username/following
+router.get('/:username/following', getFollowing);
+
+// @desc    Remove follower
+// @route   DELETE /api/profile/:username/followers/:followerUsername
+router.delete('/:username/followers/:followerUsername', removeFollower);
 
 // @desc    Get follow status
 // @route   GET /api/profile/:username/follow-status
