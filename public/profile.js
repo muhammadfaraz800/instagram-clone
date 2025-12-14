@@ -3,6 +3,7 @@
  * Handles profile data loading, follow/unfollow, and tab switching
  */
 
+
 document.addEventListener('DOMContentLoaded', async function () {
     // ---------- DOM Elements ----------
     const profilePicture = document.getElementById('profile-picture');
@@ -85,8 +86,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             const response = await fetch(`/api/profile/${username}`);
             if (!response.ok) {
                 if (response.status === 404) {
-                    // User not found - redirect to home
-                    window.location.href = '/index.html';
+                    // User not found - show 404 page
+                    window.location.href = '/404.html';
                     return null;
                 }
                 throw new Error('Failed to fetch profile');
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!profileUser) return;
 
         // Profile Picture
-        profilePicture.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        profilePicture.src = profileUser.profilePictureUrl || DEFAULT_AVATAR_PATH;
 
         // Username
         profileUsername.textContent = profileUser.username;
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (isOwnProfile) {
             // Own profile - show Edit Profile button in header (next to username)
             const editBtn = document.createElement('a');
-            editBtn.href = 'settings.html';
+            editBtn.href = '/settings.html';
             editBtn.className = 'edit-profile-btn';
             editBtn.textContent = 'Edit profile';
             profileActions.appendChild(editBtn);
@@ -324,9 +325,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function openPostModal(post) {
         // Populate User Info
-        postModalUserPic.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        postModalUserPic.src = profileUser.profilePictureUrl || DEFAULT_AVATAR_PATH;
         postModalUsername.textContent = profileUser.username;
-        postModalCaptionPic.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        postModalCaptionPic.src = profileUser.profilePictureUrl || DEFAULT_AVATAR_PATH;
         postModalCaptionUsername.textContent = profileUser.username;
 
         // Populate Caption & Stats
@@ -512,7 +513,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // ---------- Unfollow Modal ----------
     function openUnfollowModal() {
-        unfollowModalPicture.src = profileUser.profilePictureUrl || '/uploads/default/default-avatar.png';
+        unfollowModalPicture.src = profileUser.profilePictureUrl || DEFAULT_AVATAR_PATH;
         unfollowModalUsername.textContent = profileUser.username;
         unfollowModal.classList.add('active');
     }
@@ -775,4 +776,145 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Start initialization
     init();
+
+    // ---------- Followers/Following Modal Logic ----------
+    const followListModal = document.getElementById('follow-list-modal');
+    const followListTitle = document.getElementById('follow-list-title');
+    const followListClose = document.getElementById('follow-list-close');
+    const followListContent = document.getElementById('follow-list-content');
+    const followListEmpty = document.getElementById('follow-list-empty');
+    const followListEmptyText = document.getElementById('follow-list-empty-text');
+    const followListSearchInput = document.getElementById('follow-list-search-input');
+    const followersStat = document.getElementById('followers-stat');
+    const followingStat = document.getElementById('following-stat');
+
+    let currentListType = 'followers'; // 'followers' or 'following'
+    let currentListData = [];
+
+    // Open modal for followers
+    if (followersStat) {
+        followersStat.addEventListener('click', () => {
+            openFollowListModal('followers');
+        });
+    }
+
+    // Open modal for following
+    if (followingStat) {
+        followingStat.addEventListener('click', () => {
+            openFollowListModal('following');
+        });
+    }
+
+    async function openFollowListModal(type) {
+        currentListType = type;
+        followListTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
+        followListEmptyText.textContent = type === 'followers' ? 'No followers yet' : 'Not following anyone yet';
+        followListSearchInput.value = '';
+        followListContent.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Loading...</div>';
+        followListEmpty.classList.add('hidden');
+        followListModal.classList.add('active');
+
+        // Fetch data from API (TODO: Implement backend)
+        try {
+            const response = await fetch(`/api/profile/${profileUser.username}/${type}`);
+            if (response.ok) {
+                currentListData = await response.json();
+            } else {
+                currentListData = [];
+            }
+        } catch (error) {
+            console.error(`Error fetching ${type}:`, error);
+            currentListData = [];
+        }
+
+        renderFollowList(currentListData);
+    }
+
+    function renderFollowList(users) {
+        if (!users || users.length === 0) {
+            followListContent.innerHTML = '';
+            followListEmpty.classList.remove('hidden');
+            return;
+        }
+
+        followListEmpty.classList.add('hidden');
+        followListContent.innerHTML = users.map(user => `
+            <div class="follow-list-item" data-username="${user.username}">
+                <img src="${user.profilePictureUrl || DEFAULT_AVATAR_PATH}" alt="${user.username}" class="follow-list-avatar">
+                <div class="follow-list-user-info">
+                    <a href="/${user.username}" class="follow-list-username">${user.username}</a>
+                    <span class="follow-list-name">${user.profileName || ''}</span>
+                </div>
+                <button class="follow-list-action-btn ${currentListType === 'followers' ? 'remove-btn' : 'following-btn'}" data-username="${user.username}">
+                    ${currentListType === 'followers' ? 'Remove' : 'Following'}
+                </button>
+            </div>
+        `).join('');
+
+        // Attach action button handlers
+        attachFollowListActionHandlers();
+    }
+
+    function attachFollowListActionHandlers() {
+        const actionBtns = followListContent.querySelectorAll('.follow-list-action-btn');
+        actionBtns.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const username = btn.dataset.username;
+
+                // TODO: Implement backend API for removing follower or unfollowing
+                console.log(`Action clicked for ${username} in ${currentListType}`);
+
+                // Placeholder: Remove from list visually
+                const item = btn.closest('.follow-list-item');
+                if (item) {
+                    item.remove();
+                    currentListData = currentListData.filter(u => u.username !== username);
+
+                    // Check if list is now empty
+                    if (currentListData.length === 0) {
+                        followListEmpty.classList.remove('hidden');
+                    }
+                }
+            });
+        });
+    }
+
+    // Search filter
+    if (followListSearchInput) {
+        followListSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = currentListData.filter(user =>
+                user.username.toLowerCase().includes(query) ||
+                (user.profileName && user.profileName.toLowerCase().includes(query))
+            );
+            renderFollowList(filtered.length > 0 || query === '' ? filtered : []);
+
+            // If search has results or is empty, hide empty state appropriately
+            if (query === '' && currentListData.length === 0) {
+                followListEmpty.classList.remove('hidden');
+            } else if (filtered.length === 0 && query !== '') {
+                followListEmpty.classList.remove('hidden');
+                followListEmptyText.textContent = 'No results found';
+            }
+        });
+    }
+
+    // Close modal
+    if (followListClose) {
+        followListClose.addEventListener('click', closeFollowListModal);
+    }
+
+    if (followListModal) {
+        followListModal.addEventListener('click', (e) => {
+            if (e.target === followListModal) {
+                closeFollowListModal();
+            }
+        });
+    }
+
+    function closeFollowListModal() {
+        followListModal.classList.remove('active');
+        followListSearchInput.value = '';
+    }
 });

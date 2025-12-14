@@ -754,8 +754,7 @@ input[type="file"]#verification-doc {
 }
 
 .status-msg.success {
-    color: var(--accent-green, #009966);
-    /* Fallback if variable missing */
+    color: var(--accent-green);
 }
 
 .submit-btn {
@@ -1035,4 +1034,153 @@ input[type="file"]#verification-doc {
 
 .post-tag:hover {
     text-decoration: underline;
+}
+
+/* ---------- Followers/Following List Modal ---------- */
+.follow-list-modal {
+    width: 400px;
+    max-width: 95vw;
+    max-height: 70vh;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.follow-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.follow-list-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.follow-list-search {
+    padding: 8px 16px;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.follow-list-search i {
+    color: var(--text-tertiary);
+    font-size: 14px;
+}
+
+.follow-list-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.follow-list-search input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.follow-list-content {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.follow-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 12px;
+    transition: background var(--transition-fast);
+}
+
+.follow-list-item:hover {
+    background: var(--bg-elevated);
+}
+
+.follow-list-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.follow-list-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.follow-list-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.follow-list-name {
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.follow-list-action-btn {
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.follow-list-action-btn.remove-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: none;
+}
+
+.follow-list-action-btn.remove-btn:hover {
+    background: var(--border-light);
+}
+
+.follow-list-action-btn.following-btn {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: none;
+}
+
+.follow-list-action-btn.following-btn:hover {
+    background: var(--border-light);
+}
+
+.follow-list-empty {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.follow-list-empty.hidden {
+    display: none;
+}
+
+.follow-list-empty p {
+    color: var(--text-secondary);
+    font-size: 14px;
 }

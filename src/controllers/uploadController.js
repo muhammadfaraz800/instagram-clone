@@ -5,6 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { getPool } from "../config/db.js";
+import { DEFAULT_AVATAR_PATH } from '../utils/constants.js';
 
 // Ensure upload directory exists
 const uploadDir = 'uploads/pfp';
@@ -44,8 +45,7 @@ export const upload = multer({
     }
 });
 
-// Default profile picture path
-const DEFAULT_PROFILE_PICTURE = '/uploads/default/default-avatar.png';
+// Default profile picture path - imported from constants
 
 // Remove profile picture (reset to default)
 export const removeProfilePicture = async (req, res) => {
@@ -65,7 +65,7 @@ export const removeProfilePicture = async (req, res) => {
              SET PROFILE_PICTURE_URL = :profile_picture_url
              WHERE USERNAME = :username`,
             {
-                profile_picture_url: DEFAULT_PROFILE_PICTURE,
+                profile_picture_url: DEFAULT_AVATAR_PATH,
                 username: username
             },
             { autoCommit: true }
@@ -78,7 +78,7 @@ export const removeProfilePicture = async (req, res) => {
 
         res.json({
             message: 'Profile picture removed successfully',
-            profilePictureUrl: DEFAULT_PROFILE_PICTURE
+            profilePictureUrl: DEFAULT_AVATAR_PATH
         });
 
     } catch (error) {

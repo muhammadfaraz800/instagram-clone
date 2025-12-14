@@ -3,6 +3,7 @@
  * Handles profile data, posts, and follow/unfollow functionality
  */
 import { getPool } from '../config/db.js';
+import { DEFAULT_AVATAR_PATH } from '../utils/constants.js';
 
 /**
  * Get user profile data
@@ -60,7 +61,7 @@ export const getProfile = async (req, res) => {
         res.json({
             username: user.USERNAME,
             profileName: user.PROFILE_NAME,
-            profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
+            profilePictureUrl: user.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
             bio: user.BIO,
             visibility: user.VISIBILITY,
             website: user.WEBSITE,
@@ -214,8 +215,7 @@ export const getProfilePosts = async (req, res) => {
         const posts = (postsResult.rows || []).map(row => ({
             contentId: row.CONTENTID,
             caption: row.CAPTION,
-            path: row.PATH, // "mediaUrl" in frontend logic
-            mediaUrl: row.PATH, // Explicitly mapping to mediaUrl as well for frontend compatibility if needed
+            mediaUrl: row.PATH,
             mediaType: type === 'reel' ? 'reel' : 'image',
             createdAt: row.POST_DATE,
             duration: row.REELDURATION || null,

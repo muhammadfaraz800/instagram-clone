@@ -3,6 +3,7 @@
  * Handles follow requests and notifications
  */
 import { getPool } from '../config/db.js';
+import { DEFAULT_AVATAR_PATH } from '../utils/constants.js';
 
 /**
  * Get pending follow requests for the logged-in user
@@ -34,7 +35,7 @@ export const getRequests = async (req, res) => {
         const requests = (result.rows || []).map(row => ({
             username: row.SENDERUSERNAME,
             profileName: row.PROFILE_NAME,
-            profilePictureUrl: row.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
+            profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
             verificationStatus: row.VERIFICATION_STATUS
         }));
 

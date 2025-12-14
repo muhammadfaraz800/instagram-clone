@@ -1866,9 +1866,11 @@ textarea {
     z-index: 10;
 }
 
+/* Zoom Slider */
 .zoom-slider-container input[type="range"] {
     width: 120px;
     cursor: pointer;
+    accent-color: var(--accent-blue);
 }
 
 /* Step 3: Filters */
@@ -1950,19 +1952,7 @@ textarea {
     width: 850px;
 }
 
-.upload-final-preview {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-primary);
-    min-width: 400px;
-}
-
-.upload-final-preview canvas {
-    max-width: 100%;
-    max-height: 400px;
-}
+/* Note: .upload-final-preview styles are below with video trim controls */
 
 .upload-form-panel {
     width: 340px;
@@ -2043,6 +2033,105 @@ textarea {
 .tags-limit-info {
     font-size: 12px;
     color: var(--text-tertiary);
+}
+
+/* Video Preview Wrapper - contains video and overlay */
+.video-preview-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Video Message Overlay */
+.video-message-overlay {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    max-width: 90%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.video-message-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Video Trim Controls - Below video */
+.video-trim-controls {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.trim-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.trim-range-container {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+}
+
+.trim-range-container label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.trim-range-container input[type="number"] {
+    width: 60px;
+    padding: 6px 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 13px;
+    text-align: center;
+}
+
+.trim-info {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+/* Updated final preview for vertical stacking */
+.upload-final-preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: var(--bg-primary);
+    min-width: 400px;
+}
+
+.upload-final-preview canvas {
+    max-width: 100%;
+    max-height: 350px;
 }
 
 /* Loading State */

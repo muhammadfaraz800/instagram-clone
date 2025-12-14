@@ -6,12 +6,9 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { getPool } from "../config/db.js";
+import { REEL_DURATION_VERIFIED, REEL_DURATION_NORMAL } from '../utils/constants.js';
 
-// ============================================
-// DURATION LIMITS - Change these values only!
-// ============================================
-const REEL_DURATION_VERIFIED = 60;  // seconds - for verified users
-const REEL_DURATION_NORMAL = 40;    // seconds - for normal users
+// Duration limits imported from constants.js
 
 // Ensure upload directories exist
 const imageUploadDir = 'uploads/content/images';

@@ -1,10 +1,10 @@
 
 // ============================================
-// DURATION LIMITS - Change these values only!
+// CENTRALIZED CONSTANTS
 // ============================================
 const REEL_DURATION_VERIFIED = 60;  // seconds - for verified users
 const REEL_DURATION_NORMAL = 40;    // seconds - for normal users
-
+const DEFAULT_AVATAR_PATH = '/uploads/default/default-avatar.png';
 document.addEventListener("DOMContentLoaded", function () {
     const sidebarContainer = document.getElementById("sidebar-container");
     if (!sidebarContainer) return;
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <h1 class="brand-logo">Instagram</h1>
             </div>
             <div class="sidebar-menu">
-                <a href="index.html" class="menu-item" id="nav-home">
+                <a href="/" class="menu-item" id="nav-home">
                     <i class="fa-solid fa-house"></i>
                     <span>Home</span>
                 </a>
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 <!-- More Dropdown Menu -->
                 <div class="more-options-menu" id="moreOptionsMenu" style="display: none;">
-                    <a href="settings.html" class="more-option-item">
+                    <a href="/settings.html" class="more-option-item">
                         <i class="fa-solid fa-gear"></i>
                         <span>Settings</span>
                     </a>
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <a href="#" class="more-option-item" id="nav-profile-menu">
                          <div class="profile-icon-menu" style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
                              <!-- Image will be updated by JS -->
-                            <img src="/uploads/default/default-avatar.png" alt="Profile" class="sidebar-profile-pic" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="${DEFAULT_AVATAR_PATH}" alt="Profile" class="sidebar-profile-pic" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <span>Profile</span>
                     </a>
@@ -342,8 +342,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                     <div class="upload-content-area upload-caption-area">
                         <div class="upload-final-preview">
-                            <canvas id="uploadFinalCanvas"></canvas>
-                            <video id="uploadReelPreview" controls muted style="display: none; max-width: 100%; max-height: 350px;"></video>
+                            <div class="video-preview-wrapper">
+                                <canvas id="uploadFinalCanvas"></canvas>
+                                <video id="uploadReelPreview" controls muted style="display: none; max-width: 100%; max-height: 300px;"></video>
+                                <!-- Timed overlay message -->
+                                <div class="video-message-overlay" id="videoMessageOverlay"></div>
+                            </div>
+                            <!-- Trim controls moved below video -->
                             <div class="video-trim-controls" id="videoTrimControls" style="display: none;">
                                 <div class="trim-header">Trim Video (Max: <span id="maxDurationDisplay">40</span>s)</div>
                                 <div class="trim-range-container">
@@ -355,7 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                         <div class="upload-form-panel">
                             <div class="upload-user-info">
-                                <img src="/uploads/default/default-avatar.png" alt="User" class="upload-user-avatar">
+                                <img src="${DEFAULT_AVATAR_PATH}" alt="User" class="upload-user-avatar">
                                 <span class="upload-username">username</span>
                                 <span class="upload-verified-badge" id="uploadVerifiedBadge" style="display: none;"></span>
                             </div>
@@ -411,7 +416,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const moreMenu = document.getElementById("moreOptionsMenu");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // Notifications Panel Logic
     // Notifications Panel Logic
     const notificationsBtn = document.getElementById("nav-notifications");
     const notificationsPanel = document.getElementById("notificationsPanel");
@@ -567,7 +571,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const html = users.map(user => `
             <a href="/${user.USERNAME || user.userName}" class="search-result-item">
                 <div class="search-avatar">
-                    <img src="${user.PROFILE_PICTURE_URL || user.profile_Picture_URL || '/uploads/default/default-avatar.png'}" alt="${user.USERNAME || user.userName}">
+                    <img src="${user.PROFILE_PICTURE_URL || user.profile_Picture_URL || DEFAULT_AVATAR_PATH}" alt="${user.USERNAME || user.userName}">
                 </div>
                 <div class="search-user-info">
                     <div class="search-username-row">
@@ -685,7 +689,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reelStartTime: 0,  // For video trimming
         reelEndTime: REEL_DURATION_NORMAL,   // For video trimming
         username: '',
-        profilePicUrl: '/uploads/default/default-avatar.png'
+        profilePicUrl: DEFAULT_AVATAR_PATH
     };
 
     // Filter definitions (simplified set)
@@ -696,6 +700,18 @@ document.addEventListener("DOMContentLoaded", function () {
         'moon': 'grayscale(100%) contrast(110%)',
         'lark': 'brightness(110%) saturate(110%) contrast(90%)'
     };
+
+    // Show video message overlay (auto-hides after 3 seconds)
+    function showVideoMessage(message) {
+        const overlay = document.getElementById('videoMessageOverlay');
+        if (overlay) {
+            overlay.textContent = message;
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+            }, 3000);
+        }
+    }
 
     // Create Menu Toggle
     if (createBtn && createMenuPopup) {
@@ -776,7 +792,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(res => res.json())
             .then(user => {
                 uploadState.username = user.username || '';
-                uploadState.profilePicUrl = user.profilePictureUrl || '/uploads/default/default-avatar.png';
+                uploadState.profilePicUrl = user.profilePictureUrl || DEFAULT_AVATAR_PATH;
 
                 const uploadUsername = document.querySelector('.upload-username');
                 const uploadAvatar = document.querySelector('.upload-user-avatar');
@@ -905,9 +921,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             selectedDurationDisplay.textContent = uploadState.reelEndTime - uploadState.reelStartTime;
                         }
 
-                        // If video is longer than max, it will be trimmed automatically
+                        // If video is longer than max, show message overlay instead of alert
                         if (uploadState.reelDuration > maxDuration) {
-                            alert(`Video is ${uploadState.reelDuration}s. It will be trimmed to the first ${maxDuration}s. Use trim controls to select a different portion.`);
+                            showVideoMessage(`Video is ${uploadState.reelDuration}s. It will be trimmed to the first ${maxDuration}s. Use trim controls below to select a different portion.`);
                         }
                     };
                 }
@@ -961,7 +977,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // Navigation handlers
     document.getElementById('uploadBackBtn2')?.addEventListener('click', () => showStep(1));
     document.getElementById('uploadBackBtn3')?.addEventListener('click', () => showStep(2));
-    document.getElementById('uploadBackBtn4')?.addEventListener('click', () => showStep(3));
+    document.getElementById('uploadBackBtn4')?.addEventListener('click', () => {
+        if (uploadState.fileType === 'reel') {
+            showStep(1);
+        } else {
+            showStep(3);
+        }
+    });
 
     document.getElementById('uploadNextBtn2')?.addEventListener('click', () => showStep(3));
     document.getElementById('uploadNextBtn3')?.addEventListener('click', () => showStep(4));
@@ -975,32 +997,107 @@ document.addEventListener("DOMContentLoaded", function () {
         const ctx = canvas.getContext('2d');
         const img = uploadState.originalImage;
 
-        // Set canvas size based on aspect ratio
+        // Set canvas to full container size to show outside area
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+
+        // Calculate Crop Box Dimensions
+        // We want the crop box to fit within the container with some padding, respecting aspect ratio
         let targetRatio = uploadState.aspectRatio === '1:1' ? 1 : 4 / 5;
-        let containerSize = Math.min(container.clientWidth, container.clientHeight - 60);
 
-        canvas.width = containerSize;
-        canvas.height = containerSize / targetRatio;
+        // Find max available bounds for crop box (leaving space for toolbar if needed, though canvas overlays it?)
+        // The original code used (clientHeight - 60). Let's stick to safe padding.
+        const padding = 20;
+        const availableW = canvas.width - (padding * 2);
+        const availableH = canvas.height - (padding * 2);
 
-        // Calculate scaled dimensions
+        let cropW, cropH;
+
+        if (availableW / availableH > targetRatio) {
+            // Container is wider than needed, height is limiting factor
+            cropH = availableH;
+            cropW = cropH * targetRatio;
+        } else {
+            // Container is taller than needed, width is limiting factor
+            cropW = availableW;
+            cropH = cropW / targetRatio;
+        }
+
+        // Center the crop box
+        const cropX = (canvas.width - cropW) / 2;
+        const cropY = (canvas.height - cropH) / 2;
+
+        // Calculate scaled image dimensions relative to Crop Box
         const scale = uploadState.zoom / 100;
         const imgRatio = img.width / img.height;
 
         let drawW, drawH;
         if (imgRatio > targetRatio) {
-            drawH = canvas.height * scale;
+            drawH = cropH * scale;
             drawW = drawH * imgRatio;
         } else {
-            drawW = canvas.width * scale;
+            drawW = cropW * scale;
             drawH = drawW / imgRatio;
         }
 
-        // Use pan offsets for positioning - user can drag to select crop area
-        const drawX = (canvas.width - drawW) / 2 + uploadState.panX;
-        const drawY = (canvas.height - drawH) / 2 + uploadState.panY;
+        // Store crop dimensions for later scaling
+        uploadState.cropCanvasW = cropW;
+        uploadState.cropCanvasH = cropH;
 
+        // Calculate image position: Start from Crop Center + (Difference in sizes)/2 + Pan
+        // Basically centering the image within the Crop Box, then applying Pan
+        const drawX = cropX + (cropW - drawW) / 2 + uploadState.panX;
+        const drawY = cropY + (cropH - cropH * (drawH / cropH)) / 2 + uploadState.panY;
+        // Wait, the vertical centering logic above was simplified.
+        // Correct logic: Center of Image aligns with Center of Crop Box + Pan.
+        // Image Center X = drawX + drawW/2
+        // Crop Center X = cropX + cropW/2
+        // We want: Image Center X = Crop Center X + PanX
+        // drawX + drawW/2 = cropX + cropW/2 + PanX.
+        // This matches my formula.
+
+        // Correct Y formula:
+        const drawYClean = cropY + (cropH - drawH) / 2 + uploadState.panY;
+
+
+        // 1. Clear Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+        // 2. Draw Full Image (Normal Opacity? User said "Area that will be posted shown normal, other area reduced opacity")
+        // So we draw the image fully header, then overlay the "dim" mask outside the crop box.
+        ctx.drawImage(img, drawX, drawYClean, drawW, drawH);
+
+        // 3. Draw Dimmed Overlay (Mask)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+
+        // Top rect
+        ctx.fillRect(0, 0, canvas.width, cropY);
+        // Bottom rect
+        ctx.fillRect(0, cropY + cropH, canvas.width, canvas.height - (cropY + cropH));
+        // Left rect
+        ctx.fillRect(0, cropY, cropX, cropH);
+        // Right rect
+        ctx.fillRect(cropX + cropW, cropY, canvas.width - (cropX + cropW), cropH);
+
+        // 4. Draw Border around Crop Box
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cropX, cropY, cropW, cropH);
+
+        // 5. Draw Grid Lines (Rule of Thirds) - Optional but nice
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        // Vertical
+        ctx.moveTo(cropX + cropW / 3, cropY);
+        ctx.lineTo(cropX + cropW / 3, cropY + cropH);
+        ctx.moveTo(cropX + 2 * cropW / 3, cropY);
+        ctx.lineTo(cropX + 2 * cropW / 3, cropY + cropH);
+        // Horizontal
+        ctx.moveTo(cropX, cropY + cropH / 3);
+        ctx.lineTo(cropX + cropW, cropY + cropH / 3);
+        ctx.moveTo(cropX, cropY + 2 * cropH / 3);
+        ctx.lineTo(cropX + cropW, cropY + 2 * cropH / 3);
+        ctx.stroke();
     }
 
     // Canvas drag/pan functionality for image positioning
@@ -1137,7 +1234,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Scale pan offsets from crop canvas size to preview canvas size
-        const cropCanvasSize = 400; // Approximate crop canvas size
+        const cropCanvasSize = uploadState.cropCanvasW || 400; // Use actual crop canvas size
         const panScaleX = canvas.width / cropCanvasSize;
         const panScaleY = canvas.height / (cropCanvasSize / targetRatio);
 
@@ -1206,7 +1303,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Scale pan offsets from crop canvas size to final canvas size
-        const cropCanvasSize = 400;
+        const cropCanvasSize = uploadState.cropCanvasW || 400;
         const panScaleX = canvas.width / cropCanvasSize;
         const panScaleY = canvas.height / (cropCanvasSize / targetRatio);
 
@@ -1348,14 +1445,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (uploadState.fileType === 'reel') {
                     formData.append('reel', uploadState.file);
-                    formData.append('duration', uploadState.reelDuration || '0');
+                    // Send trimmed duration (end - start), not full video duration
+                    const trimmedDuration = uploadState.reelEndTime - uploadState.reelStartTime;
+                    formData.append('duration', trimmedDuration || uploadState.reelDuration || '0');
 
                     const response = await fetch('/api/content/upload-reel', {
                         method: 'POST',
                         body: formData
                     });
 
-                    if (!response.ok) throw new Error('Upload failed');
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Upload failed');
+                    }
                 } else {
                     // Create blob from canvas
                     const finalCanvas = document.getElementById('uploadPreviewCanvas');
@@ -1370,7 +1472,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         body: formData
                     });
 
-                    if (!response.ok) throw new Error('Upload failed');
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Upload failed');
+                    }
                 }
 
                 // Show success

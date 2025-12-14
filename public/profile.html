@@ -246,6 +246,28 @@
         </div>
     </div>
 
+    <!-- Followers/Following List Modal -->
+    <div id="follow-list-modal" class="modal-overlay">
+        <div class="modal-content follow-list-modal">
+            <div class="follow-list-header">
+                <h2 id="follow-list-title">Followers</h2>
+                <button class="modal-close-btn" id="follow-list-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="follow-list-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="follow-list-search-input" placeholder="Search">
+            </div>
+            <div class="follow-list-content" id="follow-list-content">
+                <!-- User items will be loaded here -->
+            </div>
+            <div class="follow-list-empty hidden" id="follow-list-empty">
+                <p id="follow-list-empty-text">No followers yet</p>
+            </div>
+        </div>
+    </div>
+
     <script src="/profile.js"></script>
 </body>
 

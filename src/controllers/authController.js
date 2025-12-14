@@ -2,6 +2,7 @@ import { getPool } from '../config/db.js';
 import { logAction } from '../utils/logger.js';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/jwtUtils.js';
+import { DEFAULT_AVATAR_PATH } from '../utils/constants.js';
 
 /**
  * Handle user signup
@@ -80,7 +81,7 @@ export const signup = async (req, res) => {
                 hashed_password: hashedPassword,
                 email: email.toLowerCase(),
                 profile_name: name,
-                profile_picture_url: '/uploads/default/default-avatar.png',
+                profile_picture_url: DEFAULT_AVATAR_PATH,
                 visibility: 'Public'
             },
             { autoCommit: false }
@@ -210,7 +211,7 @@ export const login = async (req, res) => {
                     message: "Login successful",
                     username: user.USERNAME,
                     accountType: accountType,
-                    profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png'
+                    profilePictureUrl: user.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH
                 });
                 loggedInStatus = "success";
                 console.log(`Logged in successfully: ${username}`);
@@ -268,7 +269,7 @@ export const getMe = async (req, res) => {
                 username: user.USERNAME,
                 accountType: accountType,
                 profileName: user.PROFILE_NAME,
-                profilePictureUrl: user.PROFILE_PICTURE_URL || '/uploads/default/default-avatar.png',
+                profilePictureUrl: user.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
                 verificationStatus: user.VERIFICATION_STATUS
             });
         } else {

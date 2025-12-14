@@ -3,13 +3,15 @@ import routes from './routes/index.js';
 
 import cookieParser from 'cookie-parser';
 
+import { verifyToken } from './utils/jwtUtils.js';
+
 const app = express();
 
 // Middleware
-app.use(express.static('public')); // Serve static files
-app.use('/uploads', express.static('uploads')); // Serve uploaded files
-app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
+app.use(express.json()); // Parse JSON bodies
+app.use(express.static('public')); // Serve static files
+app.use('/uploads', verifyToken, express.static('uploads')); // Serve uploaded files
 
 // Routes
 app.use('/api', routes);
@@ -49,7 +51,6 @@ app.get('/:username/reels', (req, res, next) => {
 // Matches /username/reels/anything
 app.get(/^\/([^/]+)\/reels\/(.+)$/, (req, res, next) => {
     const username = req.params[0];
-    // const extraPath = req.params[1];
 
     // Skip if it looks like a static file request
     if (staticExtensions.test(username)) {
@@ -58,6 +59,11 @@ app.get(/^\/([^/]+)\/reels\/(.+)$/, (req, res, next) => {
 
     // Always redirect any subpath back to the main reels page
     res.redirect(`/${username}/reels`);
+});
+
+// 404 Catch-all - must be the last route
+app.use((req, res) => {
+    res.status(404).sendFile('404.html', { root: 'public' });
 });
 
 export default app;
