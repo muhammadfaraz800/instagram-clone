@@ -5,6 +5,7 @@ import profileRoutes from './profile.js';
 import notificationRoutes from './notifications.js';
 import verificationRoutes from './verification.js';
 import contentRoutes from './content.js';
+import reelsRoutes from './reels.js';
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.use('/profile', profileRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/verification', verificationRoutes);
 router.use('/content', contentRoutes);
+router.use('/reels', reelsRoutes);
 
 export default router;
 

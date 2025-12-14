@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="fa-regular fa-compass"></i>
                     <span>Explore</span>
                 </a>
-                <a href="#" class="menu-item" id="nav-reels">
+                <a href="/reels" class="menu-item" id="nav-reels">
                     <i class="fa-solid fa-clapperboard"></i>
                     <span>Reels</span>
                 </a>
@@ -439,6 +439,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Optional: Highlight something if needed, or leave neutral
     } else if (currentPath.includes("index.html") || currentPath === "/") {
         document.getElementById("nav-home").classList.add("active");
+    } else if (currentPath.startsWith("/reels")) {
+        document.getElementById("nav-reels").classList.add("active");
     }
 
     // Toggle More Menu Logic

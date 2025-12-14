@@ -36,6 +36,11 @@ export const signup = async (req, res) => {
     if (username.length > 20) {
         return res.status(400).send({ message: "Username must be at most 20 characters long." });
     }
+    // Block reserved usernames that conflict with application routes
+    const reservedUsernames = ['api', 'uploads', 'explore', 'reels', 'login', 'signup', 'settings', 'index', 'admin', 'static'];
+    if (reservedUsernames.includes(username.toLowerCase())) {
+        return res.status(400).send({ message: "This username is not available." });
+    }
     if (email.length < 5) {
         return res.status(400).send({ message: "Email must be at least 5 characters long." });
     }

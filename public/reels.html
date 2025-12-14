@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reels • Instagram</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="reels.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+
+<body>
+    <div class="reels-app-container">
+        <!-- Left Sidebar - Collapsed State -->
+        <div id="sidebar-container" class="sidebar-collapsed-mode"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- Main Reels Viewer -->
+        <main class="reels-main">
+            <div class="reels-container" id="reelsContainer">
+                <!-- Reels will be loaded dynamically -->
+                <div class="reels-loading">
+                    <div class="reels-spinner"></div>
+                    <p>Loading reels...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Arrows -->
+            <div class="reels-nav-arrows">
+                <button class="reel-nav-btn reel-nav-up" id="reelNavUp" title="Previous reel (↑)">
+                    <i class="fa-solid fa-chevron-up"></i>
+                </button>
+                <button class="reel-nav-btn reel-nav-down" id="reelNavDown" title="Next reel (↓)">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="reels.js"></script>
+</body>
+
+</html>

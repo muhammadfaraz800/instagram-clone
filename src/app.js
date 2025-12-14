@@ -16,6 +16,16 @@ app.use('/uploads', verifyToken, express.static('uploads')); // Serve uploaded f
 // Routes
 app.use('/api', routes);
 
+// Reels page routes - serve reels.html for /reels and /reels/:contentId
+// These must come before profile routes
+app.get('/reels', (req, res) => {
+    res.sendFile('reels.html', { root: 'public' });
+});
+
+app.get('/reels/:contentId', (req, res) => {
+    res.sendFile('reels.html', { root: 'public' });
+});
+
 // Profile page routes - serve profile.html for /{username} and /{username}/reels
 // These must come after static files and API routes
 const staticExtensions = /\.(html|css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i;
