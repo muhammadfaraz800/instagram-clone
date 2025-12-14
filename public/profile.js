@@ -378,10 +378,39 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (post.mediaType === 'reel') {
             const video = document.createElement('video');
             video.src = post.mediaUrl;
-            video.controls = true;
+            video.controls = false;
             video.autoplay = true;
             video.loop = true;
+            video.muted = true; // Start muted
+
+            // Create mute button
+            const muteBtn = document.createElement('button');
+            muteBtn.className = 'reel-mute-btn';
+            muteBtn.dataset.muted = 'true';
+            muteBtn.title = 'Unmute';
+            muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+
+            // Mute button click handler
+            muteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isMuted = muteBtn.dataset.muted === 'true';
+                video.muted = !isMuted;
+                muteBtn.dataset.muted = !isMuted;
+                muteBtn.querySelector('i').className = isMuted ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+                muteBtn.title = isMuted ? 'Mute' : 'Unmute';
+            });
+
+            // Click video to pause/play
+            video.addEventListener('click', () => {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            });
+
             postModalMediaContainer.appendChild(video);
+            postModalMediaContainer.appendChild(muteBtn);
         } else {
             const img = document.createElement('img');
             img.src = post.mediaUrl;

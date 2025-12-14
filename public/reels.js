@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let reels = [];
     let currentReelIndex = 0;
+    let isGlobalMuted = false; // Global mute state - default unmuted
+
+    // Pagination state
+    let offset = 0;
+    const limit = 10;
+    let isLoading = false;
+    let hasMoreReels = true;
+    let seed = Math.random().toString(36).substring(7); // Generate random seed on load
+
     const DEFAULT_AVATAR_PATH = '/uploads/default/default-avatar.png';
 
     // Check if we're accessing a specific reel
@@ -20,9 +29,10 @@ document.addEventListener('DOMContentLoaded', function () {
      * Initialize the reels page
      */
     async function init() {
+        // Initial fetch
         await fetchReels();
+
         if (reels.length > 0) {
-            renderReels();
             setupNavigation();
             setupKeyboardNavigation();
             setupVideoAutoplay();
@@ -38,13 +48,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /**
      * Fetch reels from API
+     * @param {boolean} append - Whether to append to existing reels or replace
      */
-    async function fetchReels() {
-        try {
-            let url = '/api/reels/feed';
+    async function fetchReels(append = false) {
+        if (isLoading || !hasMoreReels) return;
 
-            // If specific content ID, fetch that reel first
-            if (specificContentId) {
+        try {
+            isLoading = true;
+            let url = `/api/reels/feed?offset=${offset}&seed=${seed}`;
+
+            // If specific content ID, fetch that reel first (only on initial load)
+            if (specificContentId && !append && offset === 0) {
                 try {
                     const specificRes = await fetch(`/api/reels/${specificContentId}`);
                     if (specificRes.ok) {
@@ -59,13 +73,33 @@ document.addEventListener('DOMContentLoaded', function () {
             // Fetch feed reels
             const response = await fetch(url);
             if (response.ok) {
-                const feedReels = await response.json();
-                // Merge specific reel with feed, avoiding duplicates
-                if (specificContentId && reels.length > 0) {
-                    const filteredFeed = feedReels.filter(r => r.contentId !== specificContentId);
-                    reels = [...reels, ...filteredFeed];
-                } else {
-                    reels = feedReels;
+                const newReels = await response.json();
+
+                if (newReels.length < limit) {
+                    hasMoreReels = false;
+                }
+
+                if (newReels.length > 0) {
+                    // Update offset for next fetch
+                    offset += newReels.length;
+
+                    if (append) {
+                        // Append new reels
+                        reels = [...reels, ...newReels];
+                        renderReels(newReels, true); // Render only new reels and append
+                    } else {
+                        // Initial load
+                        if (specificContentId && reels.length > 0) {
+                            const filteredFeed = newReels.filter(r => r.contentId !== specificContentId);
+                            reels = [...reels, ...filteredFeed];
+                        } else {
+                            reels = newReels;
+                        }
+                        renderReels(reels, false); // Render all
+                    }
+                } else if (!append && reels.length === 0) {
+                    // Only show empty state if initial load has no reels
+                    showEmptyState();
                 }
             } else if (response.status === 401) {
                 window.location.href = '/login.html';
@@ -73,36 +107,38 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (error) {
             console.error('Error fetching reels:', error);
+        } finally {
+            isLoading = false;
         }
     }
 
     /**
      * Render reels to the container
+     * @param {Array} reelsToRender - The reels to render
+     * @param {boolean} append - Whether to append to container
      */
-    function renderReels() {
-        if (reels.length === 0) {
+    function renderReels(reelsToRender, append = false) {
+        if (reelsToRender.length === 0 && !append) {
             showEmptyState();
             return;
         }
 
-        reelsContainer.innerHTML = reels.map((reel, index) => `
-            <div class="reel-item" data-index="${index}" data-content-id="${reel.contentId}">
+        const reelsHtml = reelsToRender.map((reel, index) => {
+            // Calculate correct global index
+            const globalIndex = append ? (reels.length - reelsToRender.length + index) : index;
+
+            return `
+            <div class="reel-item" data-index="${globalIndex}" data-content-id="${reel.contentId}">
                 <div class="reel-video-container">
                     <video 
                         class="reel-video" 
                         src="${reel.path}" 
                         loop 
-                        muted 
                         playsinline
                         preload="metadata"
                     ></video>
                     
-                    <!-- Mute Button -->
-                    <button class="reel-mute-btn" data-muted="true" title="Unmute">
-                        <i class="fa-solid fa-volume-xmark"></i>
-                    </button>
-                    
-                    <!-- Overlay Content -->
+                    <!-- Overlay Content (bottom-left) -->
                     <div class="reel-overlay">
                         <div class="reel-user-info">
                             <a href="/${reel.author}">
@@ -112,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${reel.author}
                                 ${reel.verificationStatus === 'Verified' ? `
                                     <span class="verified-badge" title="Verified">
-                                        <svg aria-label="Verified" fill="rgb(0, 149, 246)" height="12" viewBox="0 0 40 40" width="12">
+                                        <svg aria-label="Verified" fill="rgb(0, 149, 246)" height="14" viewBox="0 0 40 40" width="14">
                                             <path d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" fill-rule="evenodd"></path>
                                         </svg>
                                     </span>
@@ -128,32 +164,61 @@ document.addEventListener('DOMContentLoaded', function () {
                                 ${reel.tags.map(tag => `<span class="reel-tag">#${tag}</span>`).join('')}
                             </div>
                         ` : ''}
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="reel-actions">
-                        <button class="reel-action-btn like-btn" data-content-id="${reel.contentId}">
-                            <i class="fa-regular fa-heart"></i>
-                            <span class="reel-action-count">${formatCount(reel.likeCount)}</span>
+                        
+                        <!-- Mute Button (bottom-left, next to caption) -->
+                        <button class="reel-mute-btn" data-muted="false" title="Mute">
+                            <i class="fa-solid fa-volume-high"></i>
                         </button>
-                        <button class="reel-action-btn comment-btn" data-content-id="${reel.contentId}">
-                            <i class="fa-regular fa-comment"></i>
-                            <span class="reel-action-count">${formatCount(reel.commentCount)}</span>
-                        </button>
-                        <button class="reel-action-btn share-btn" data-content-id="${reel.contentId}">
-                            <i class="fa-regular fa-paper-plane"></i>
-                        </button>
-                        <div class="reel-action-btn">
-                            <img src="${reel.profilePictureUrl || DEFAULT_AVATAR_PATH}" alt="thumbnail" class="reel-thumbnail">
-                        </div>
                     </div>
                 </div>
+                
+                <!-- Action Buttons (OUTSIDE, right side) -->
+                <div class="reel-actions">
+                    <button class="reel-action-btn like-btn" data-content-id="${reel.contentId}">
+                        <svg aria-label="Like" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Like</title><path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"></path></svg>
+                        <span class="reel-action-count">${formatCount(reel.likeCount)}</span>
+                    </button>
+                    <button class="reel-action-btn comment-btn" data-content-id="${reel.contentId}">
+                        <svg aria-label="Comment" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24"><title>Comment</title><path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path></svg>
+                        <span class="reel-action-count">${formatCount(reel.commentCount)}</span>
+                    </button>
+                </div>
             </div>
-        `).join('');
+        `}).join('');
 
-        // Add event listeners for action buttons
-        setupActionButtons();
-        setupMuteButtons();
+        if (append) {
+            reelsContainer.insertAdjacentHTML('beforeend', reelsHtml);
+
+            // Re-setup observers for ONLY new items? 
+            // Better to re-run observers for all items or optimize to observe only new ones.
+            // For simplicity, we re-run setup for everything, but IntersectionObserver is smart enough 
+            // if we observe the same element again? Actually we should target new ones.
+            // Let's just re-attach observers to newly added items.
+
+            // Get the newly added elements (last N elements)
+            const allItems = reelsContainer.querySelectorAll('.reel-item');
+            const startIndex = reels.length - reelsToRender.length;
+
+            for (let i = startIndex; i < allItems.length; i++) {
+                const item = allItems[i];
+                setupSingleItemObserver(item);
+            }
+
+            // Re-setup mute buttons specifically for new items
+            setupMuteButtonsForNewItems(allItems, startIndex);
+            setupActionButtonsForNewItems(allItems, startIndex);
+
+            // Setup intersection observer for infinite scroll
+            setupInfiniteScrollObserver();
+
+        } else {
+            reelsContainer.innerHTML = reelsHtml;
+            // Setup everything for initial load
+            setupActionButtons();
+            setupMuteButtons();
+            setupVideoAutoplay(); // This sets up observers for all items
+            setupInfiniteScrollObserver();
+        }
     }
 
     /**
@@ -245,6 +310,9 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Setup video autoplay on scroll (Intersection Observer)
      */
+    /**
+     * Setup video autoplay on scroll (Intersection Observer)
+     */
     function setupVideoAutoplay() {
         const options = {
             root: reelsContainer,
@@ -255,8 +323,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const video = entry.target.querySelector('.reel-video');
+                const muteBtn = entry.target.querySelector('.reel-mute-btn');
                 if (video) {
                     if (entry.isIntersecting) {
+                        // Reset video to beginning
+                        video.currentTime = 0;
+                        // Apply global mute state when video becomes visible
+                        video.muted = isGlobalMuted;
+                        if (muteBtn) {
+                            muteBtn.dataset.muted = isGlobalMuted;
+                            const icon = muteBtn.querySelector('i');
+                            icon.className = isGlobalMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+                            muteBtn.title = isGlobalMuted ? 'Unmute' : 'Mute';
+                        }
                         video.play().catch(err => console.log('Autoplay prevented:', err));
                     } else {
                         video.pause();
@@ -265,27 +344,152 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }, options);
 
+        // Expose observer setup for single items
+        window.setupSingleItemObserver = (item) => {
+            observer.observe(item);
+        };
+
         document.querySelectorAll('.reel-item').forEach(item => {
             observer.observe(item);
         });
     }
 
     /**
-     * Setup mute/unmute buttons for videos
+     * Setup infinite scroll observer
+     * Triggers fetch when user reaches 3rd to last item
+     */
+    function setupInfiniteScrollObserver() {
+        if (isLoading || !hasMoreReels) return;
+
+        const options = {
+            root: reelsContainer,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Stop observing this item
+                    observer.unobserve(entry.target);
+                    // Fetch more reels
+                    fetchReels(true);
+                }
+            });
+        }, options);
+
+        const reelItems = document.querySelectorAll('.reel-item');
+        if (reelItems.length > 2) {
+            // Observe the 3rd to last item, or last item if fewer
+            const triggerIndex = Math.max(0, reelItems.length - 3);
+            const triggerItem = reelItems[triggerIndex];
+            observer.observe(triggerItem);
+        } else if (reelItems.length > 0) {
+            observer.observe(reelItems[reelItems.length - 1]);
+        }
+    }
+
+    /**
+     * Handle mute button click
+     */
+    function handleMuteClick(e) {
+        e.stopPropagation();
+
+        // Toggle global mute state
+        isGlobalMuted = !isGlobalMuted;
+
+        // Apply to ALL videos and buttons
+        document.querySelectorAll('.reel-video').forEach(v => {
+            v.muted = isGlobalMuted;
+        });
+
+        document.querySelectorAll('.reel-mute-btn').forEach(b => {
+            b.dataset.muted = isGlobalMuted;
+            const icon = b.querySelector('i');
+            icon.className = isGlobalMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+            b.title = isGlobalMuted ? 'Unmute' : 'Mute';
+        });
+    }
+
+    /**
+     * Setup mute buttons for newly added items
+     */
+    function setupMuteButtonsForNewItems(allItems, startIndex) {
+        // Initialize state
+        for (let i = startIndex; i < allItems.length; i++) {
+            const btn = allItems[i].querySelector('.reel-mute-btn');
+            if (btn) {
+                btn.dataset.muted = isGlobalMuted;
+                const icon = btn.querySelector('i');
+                icon.className = isGlobalMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+                btn.title = isGlobalMuted ? 'Unmute' : 'Mute';
+
+                // Add listener
+                btn.addEventListener('click', handleMuteClick);
+            }
+
+            // Video click listener
+            const video = allItems[i].querySelector('.reel-video');
+            if (video) {
+                video.addEventListener('click', () => {
+                    if (video.paused) video.play();
+                    else video.pause();
+                });
+            }
+        }
+    }
+
+    /**
+     * Setup action buttons for newly added items
+     */
+    function setupActionButtonsForNewItems(allItems, startIndex) {
+        for (let i = startIndex; i < allItems.length; i++) {
+            const item = allItems[i];
+
+            // Like buttons
+            const likeBtn = item.querySelector('.like-btn');
+            if (likeBtn) {
+                likeBtn.addEventListener('click', () => {
+                    likeBtn.classList.toggle('liked');
+                    // TODO: API call
+                });
+            }
+
+            // Comment buttons
+            const commentBtn = item.querySelector('.comment-btn');
+            if (commentBtn) {
+                commentBtn.addEventListener('click', () => {
+                    // TODO: Open comments
+                });
+            }
+        }
+    }
+
+    /**
+     * Setup mute/unmute buttons for videos (Initial load)
      */
     function setupMuteButtons() {
+        // Initialize all mute buttons to show correct state
         document.querySelectorAll('.reel-mute-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const video = btn.closest('.reel-video-container').querySelector('.reel-video');
-                const isMuted = btn.dataset.muted === 'true';
+            btn.dataset.muted = isGlobalMuted;
+            const icon = btn.querySelector('i');
+            icon.className = isGlobalMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+            btn.title = isGlobalMuted ? 'Unmute' : 'Mute';
+        });
 
-                video.muted = !isMuted;
-                btn.dataset.muted = !isMuted;
+        document.querySelectorAll('.reel-mute-btn').forEach(btn => {
+            btn.removeEventListener('click', handleMuteClick);
+            btn.addEventListener('click', handleMuteClick);
+        });
 
-                const icon = btn.querySelector('i');
-                icon.className = isMuted ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
-                btn.title = isMuted ? 'Mute' : 'Unmute';
+        // Click video to pause/play
+        document.querySelectorAll('.reel-video').forEach(video => {
+            video.addEventListener('click', () => {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
             });
         });
     }
@@ -298,12 +502,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.like-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const contentId = btn.dataset.contentId;
-                const icon = btn.querySelector('i');
                 const count = btn.querySelector('.reel-action-count');
 
                 // Toggle like state (UI feedback)
-                const isLiked = btn.classList.toggle('liked');
-                icon.className = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+                btn.classList.toggle('liked');
 
                 // TODO: Implement actual like API call
                 // For now, just update UI

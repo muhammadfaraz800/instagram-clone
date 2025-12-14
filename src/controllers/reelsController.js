@@ -7,6 +7,11 @@ import { DEFAULT_AVATAR_PATH } from '../utils/constants.js';
  */
 export const getReelsFeed = async (req, res) => {
     const currentUser = req.username;
+    // Get pagination params
+    const offset = parseInt(req.query.offset) || 0;
+    const seed = req.query.seed || 'default_seed';
+    const limit = 10;
+
     let connection;
 
     try {
@@ -18,6 +23,7 @@ export const getReelsFeed = async (req, res) => {
                     c.ContentID,
                     c.Path,
                     c.Caption,
+                    c.Post_Date,
                     c.UserName AS Author,
                     a.Profile_Picture_URL,
                     r.ReelDuration,
@@ -51,12 +57,15 @@ export const getReelsFeed = async (req, res) => {
                             AND f.FollowedUserName = c.UserName
                         )
                     )
-                ORDER BY c.Post_Date DESC
-                FETCH FIRST 50 ROWS ONLY
             )
-            ORDER BY DBMS_RANDOM.VALUE
-            FETCH FIRST 10 ROWS ONLY`,
-            { currentUser: currentUser },
+            ORDER BY ORA_HASH(ContentID || :seed)
+            OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`,
+            {
+                currentUser: currentUser,
+                seed: seed,
+                offset: offset,
+                limit: limit
+            },
             { outFormat: 4002 }
         );
 

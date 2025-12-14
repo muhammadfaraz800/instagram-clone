@@ -828,6 +828,34 @@ input[type="file"]#verification-doc {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    cursor: pointer;
+}
+
+/* Mute button for reels in post modal */
+.post-media-container .reel-mute-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(38, 38, 38, 0.8);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 10;
+}
+
+.post-media-container .reel-mute-btn:hover {
+    background: rgba(38, 38, 38, 1);
+}
+
+.post-media-container .reel-mute-btn i {
+    font-size: 16px;
+    color: var(--text-primary);
 }
 
 /* Right Info Container */
