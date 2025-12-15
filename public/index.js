@@ -13,6 +13,10 @@ let isLoadingFeed = false;
 let hasMorePosts = true;
 let currentModalContentId = null;
 let currentModalLiked = false;
+let replyingToCommentId = null;
+
+
+let globalMuted = true; // Default to muted to avoid autoplay issues and inconsistencies
 
 // Verified badge SVG
 const VERIFIED_BADGE_SVG = `<svg aria-label="Verified" class="verified-badge-inline" fill="rgb(0, 149, 246)" height="12" role="img" viewBox="0 0 40 40" width="12" style="margin-left: 4px;"><title>Verified</title><path d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" fill-rule="evenodd"></path></svg>`;
@@ -165,7 +169,10 @@ function renderPosts(posts, append = false) {
             </div>
             <div class="post-image-container" data-content-id="${post.contentId}">
                 ${isVideo ?
-                `<video src="${post.path}" loop muted playsinline></video>` :
+                `<video src="${post.path}" loop playsinline ${globalMuted ? 'muted' : ''}></video>
+                 <button class="volume-control">
+                    <i class="fa-solid ${globalMuted ? 'fa-volume-xmark' : 'fa-volume-high'}"></i>
+                 </button>` :
                 `<img src="${post.path}" alt="Post">`
             }
             </div>
@@ -256,6 +263,25 @@ function setupPostEventListeners(article, post) {
     const video = article.querySelector('video');
     if (video) {
         setupVideoObserver(video);
+
+        // Volume control
+        const volumeBtn = article.querySelector('.volume-control');
+        const icon = volumeBtn.querySelector('i');
+
+        volumeBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent opening modal
+            globalMuted = !globalMuted;
+
+            // Update all videos on page
+            document.querySelectorAll('video').forEach(v => {
+                v.muted = globalMuted;
+            });
+
+            // Update all buttons
+            document.querySelectorAll('.volume-control i').forEach(i => {
+                i.className = `fa-solid ${globalMuted ? 'fa-volume-xmark' : 'fa-volume-high'}`;
+            });
+        });
     }
 }
 
@@ -348,7 +374,26 @@ function setupVideoObserver(video) {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                video.play().catch(() => { });
+                // Ensure muted state follows global preference
+                video.muted = globalMuted;
+                const volumeBtn = video.parentElement.querySelector('.volume-control i');
+
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Autoplay blocked, falling back to muted:", error);
+                        // Fallback: Mute and play
+                        globalMuted = true;
+                        video.muted = true;
+
+                        // Update icons to reflect forced mute
+                        document.querySelectorAll('.volume-control i').forEach(i => {
+                            i.className = 'fa-solid fa-volume-xmark';
+                        });
+
+                        video.play().catch(e => console.error("Video play failed even after mute:", e));
+                    });
+                }
             } else {
                 video.pause();
             }
@@ -495,6 +540,11 @@ async function openPostModal(contentId) {
             imageEl.style.display = 'none';
             videoEl.style.display = 'block';
             videoEl.src = post.path;
+
+            // Pause the feed video to prevent double audio
+            const feedVideo = document.querySelector(`.post[data-content-id="${contentId}"] video`);
+            if (feedVideo) feedVideo.pause();
+
             videoEl.play().catch(() => { });
         } else {
             videoEl.style.display = 'none';
@@ -665,8 +715,8 @@ function renderModalComments(comments, container) {
                     <div class="replies-container" data-comment-id="${comment.commentId}"></div>` : ''
             }
             </div>
-            <button class="comment-like-btn" data-comment-id="${comment.commentId}">
-                <i class="fa-regular fa-heart"></i>
+            <button class="comment-like-btn ${comment.isLiked ? 'liked' : ''}" data-comment-id="${comment.commentId}">
+                <i class="${comment.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
             </button>
         `;
 
@@ -676,6 +726,20 @@ function renderModalComments(comments, container) {
             viewRepliesBtn.addEventListener('click', () => {
                 loadCommentReplies(comment.commentId, commentEl.querySelector('.replies-container'));
                 viewRepliesBtn.style.display = 'none';
+            });
+        }
+
+        // Comment like button
+        const likeBtn = commentEl.querySelector('.comment-like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', () => toggleCommentLike(likeBtn));
+        }
+
+        // Reply button
+        const replyBtn = commentEl.querySelector('.comment-reply-btn');
+        if (replyBtn) {
+            replyBtn.addEventListener('click', () => {
+                setReplyMode(comment.commentId, comment.username);
             });
         }
 
@@ -708,11 +772,29 @@ async function loadCommentReplies(commentId, container) {
                         <div class="reply-meta">
                             <span class="reply-time">${timeAgo}</span>
                             ${reply.likesCount > 0 ? `<span class="reply-likes-count">${reply.likesCount} likes</span>` : ''}
+                            <button class="reply-reply-btn" data-comment-id="${commentId}" data-username="${reply.username}">Reply</button>
                         </div>
                     </div>
+                    <button class="reply-like-btn ${reply.isLiked ? 'liked' : ''}" data-comment-id="${reply.commentId}">
+                        <i class="${reply.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                    </button>
                 `;
 
                 container.appendChild(replyEl);
+
+                // Reply button event listener (uses parent commentId)
+                const replyBtn = replyEl.querySelector('.reply-reply-btn');
+                if (replyBtn) {
+                    replyBtn.addEventListener('click', () => {
+                        setReplyMode(commentId, reply.username);
+                    });
+                }
+
+                // Like button event listener
+                const likeBtn = replyEl.querySelector('.reply-like-btn');
+                if (likeBtn) {
+                    likeBtn.addEventListener('click', () => toggleCommentLike(likeBtn));
+                }
             });
         }
     } catch (error) {
@@ -732,6 +814,15 @@ function closePostModal() {
     if (videoEl) {
         videoEl.pause();
         videoEl.src = '';
+    }
+
+    // Resume feed video if it exists
+    if (currentModalContentId) {
+        const feedVideo = document.querySelector(`.post[data-content-id="${currentModalContentId}"] video`);
+        if (feedVideo) {
+            feedVideo.muted = globalMuted;
+            feedVideo.play().catch(() => { });
+        }
     }
 
     currentModalContentId = null;
@@ -790,15 +881,27 @@ async function postModalComment() {
     btn.disabled = true;
 
     try {
+        const body = { text };
+        if (replyingToCommentId) {
+            body.parentCommentId = replyingToCommentId;
+        }
+
         const response = await fetch(`/api/actions/comment/${currentModalContentId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
+            body: JSON.stringify(body)
         });
 
         if (response.ok) {
             input.value = '';
+            input.placeholder = 'Add a comment...';
             btn.disabled = true;
+
+            // Clear reply mode
+            replyingToCommentId = null;
+            const indicator = document.querySelector('.reply-indicator');
+            if (indicator) indicator.remove();
+
             await fetchModalComments(currentModalContentId);
 
             // Update comment count in feed
@@ -813,6 +916,127 @@ async function postModalComment() {
         }
     } catch (error) {
         console.error('Error posting comment:', error);
+    }
+}
+
+async function postComment(contentId, text, inlineBtn = null) {
+    try {
+        const response = await fetch(`/api/actions/comment/${contentId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Refresh comments for modal
+            const currentModal = document.getElementById('homePostModal');
+            const homeModalComments = currentModal?.querySelector('.home-modal-comments');
+            if (homeModalComments && currentModal.classList.contains('active')) {
+                fetchModalComments(currentModalContentId, homeModalComments);
+            }
+
+            // Update count in feed if inline button provided
+            if (inlineBtn) {
+                const commentLink = inlineBtn.closest('.post').querySelector(`.post-comments-link[data-content-id="${contentId}"]`);
+                if (commentLink) {
+                    const currentText = commentLink.textContent;
+                    const currentCount = parseInt(currentText.replace(/\D/g, '')) || 0;
+                    const newCount = currentCount + 1;
+                    commentLink.textContent = `View all ${newCount} comments`;
+                }
+            }
+
+            return true;
+        }
+    } catch (error) {
+        console.error('Error posting comment:', error);
+    }
+    return false;
+}
+
+async function toggleCommentLike(btn) {
+    const commentId = btn.dataset.commentId;
+    const isLiked = btn.classList.contains('liked');
+    const icon = btn.querySelector('i');
+
+    // Optimistic UI update
+    btn.classList.toggle('liked');
+    if (icon) {
+        icon.className = btn.classList.contains('liked') ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+    }
+
+    try {
+        let response;
+        if (isLiked) {
+            response = await fetch(`/api/actions/comment-like/${commentId}`, {
+                method: 'DELETE'
+            });
+        } else {
+            response = await fetch(`/api/actions/comment-like/${commentId}`, {
+                method: 'POST'
+            });
+        }
+
+        if (response.ok) {
+            const data = await response.json();
+            btn.classList.toggle('liked', data.liked);
+            if (icon) {
+                icon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+            }
+        } else {
+            // Revert on failure
+            btn.classList.toggle('liked', isLiked);
+            if (icon) {
+                icon.className = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling comment like:', error);
+        // Revert on error
+        btn.classList.toggle('liked', isLiked);
+        if (icon) {
+            icon.className = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        }
+    }
+}
+
+/**
+ * Set reply mode for a comment
+ */
+function setReplyMode(commentId, username) {
+    replyingToCommentId = commentId;
+
+    // Remove existing indicator
+    const existingIndicator = document.querySelector('.reply-indicator');
+    if (existingIndicator) existingIndicator.remove();
+
+    // Add reply indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'reply-indicator';
+    indicator.style.cssText = 'padding: 8px 16px; background: #363636; font-size: 13px; color: #fafafa; display: flex; align-items: center; justify-content: space-between;';
+    indicator.innerHTML = `
+        Replying to <strong>@${username}</strong>
+        <span class="cancel-reply" style="cursor: pointer; font-size: 18px; margin-left: auto;">&times;</span>
+    `;
+
+    const inputContainer = document.querySelector('.home-post-modal-add-comment');
+    const commentInput = document.getElementById('homePostModalCommentInput');
+
+    if (inputContainer && commentInput) {
+        inputContainer.parentElement.insertBefore(indicator, inputContainer);
+
+        // Cancel reply event
+        indicator.querySelector('.cancel-reply').addEventListener('click', () => {
+            replyingToCommentId = null;
+            indicator.remove();
+            commentInput.placeholder = 'Add a comment...';
+        });
+
+        // Focus input
+        commentInput.focus();
+        commentInput.placeholder = `Reply to @${username}...`;
     }
 }
 

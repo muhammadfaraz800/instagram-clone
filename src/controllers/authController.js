@@ -36,6 +36,10 @@ export const signup = async (req, res) => {
     if (username.length > 20) {
         return res.status(400).send({ message: "Username must be at most 20 characters long." });
     }
+    // Check for spaces in username
+    if (/\s/.test(username)) {
+        return res.status(400).send({ message: "Username cannot contain spaces." });
+    }
     // Block reserved usernames that conflict with application routes
     const reservedUsernames = ['api', 'uploads', 'explore', 'reels', 'login', 'signup', 'settings', 'index', 'admin', 'static'];
     if (reservedUsernames.includes(username.toLowerCase())) {
@@ -133,6 +137,9 @@ export const signup = async (req, res) => {
 
         res.status(201).send({ message: "Account Created", username: username });
 
+        // Log signup action
+        logAction('account', 'signup', username.toLowerCase(), { account_type });
+
     } catch (err) {
         console.error("Error executing signup transaction", err);
 
@@ -220,7 +227,7 @@ export const login = async (req, res) => {
                 });
                 loggedInStatus = "success";
                 console.log(`Logged in successfully: ${username}`);
-                logAction('user', 'User Logged In', username, { status: loggedInStatus, role: accountType });
+                logAction('account', 'signin', username, { status: loggedInStatus, role: accountType });
             } else {
                 res.status(401).send({ message: "Invalid username or password" });
                 loggedInStatus = "failed";

@@ -48,8 +48,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     let isOwnProfile = false;
     let isFollowing = false;
     let isPending = false;       // Follow request pending (for private accounts)
-    let currentTab = 'posts';
-
+    let currentTab = 'posts';    // Default to posts tab
+    let currentContentId = null; // For modal
+    let replyingToCommentId = null; // Track reply state
     // ---------- Get Username from URL ----------
     function getUsernameFromUrl() {
         const path = window.location.pathname;
@@ -551,13 +552,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Fetch and Render Comments
         fetchPostComments(contentId);
 
-        // Check Like Status
-        checkPostLikeStatus(contentId, likeBtn);
-
         // Like Button Listener
         // Remove old listener by cloning
         const newLikeBtn = likeBtn.cloneNode(true);
         likeBtn.parentNode.replaceChild(newLikeBtn, likeBtn);
+
+        // Check Like Status AFTER cloning the button
+        checkPostLikeStatus(contentId, newLikeBtn);
 
         newLikeBtn.addEventListener('click', () => togglePostLike(newLikeBtn, contentId));
 
@@ -607,11 +608,34 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <span class="comment-username">${comment.username}</span>
                     <span class="comment-text">${escapeHtml(comment.text)}</span>
                     <div class="comment-time">${timeAgo(new Date(comment.actionDate))}</div>
+                    <button class="comment-reply-btn" data-comment-id="${comment.actionId}" data-username="${comment.username}">Reply</button>
                 </div>
+                <button class="comment-like-btn ${comment.isLiked ? 'liked' : ''}" data-comment-id="${comment.actionId}">
+                    <svg aria-label="Like" fill="${comment.isLiked ? '#ff3040' : 'none'}" height="12" role="img" viewBox="0 0 24 24" width="12">
+                        <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z" stroke="currentColor" stroke-width="1"></path>
+                    </svg>
+                </button>
+                <span class="comment-like-count" data-comment-id="${comment.actionId}">${comment.likeCount > 0 ? comment.likeCount + ' likes' : ''}</span>
             `;
             container.appendChild(el);
 
-            // Nested replies could be recursive here, but for now simple list is better than nothing
+            // Add event listener for like button
+            const likeBtn = el.querySelector('.comment-like-btn');
+            if (likeBtn) {
+                likeBtn.addEventListener('click', () => toggleCommentLike(likeBtn, comment.actionId));
+            }
+
+            // Add event listener for reply button
+            const replyBtn = el.querySelector('.comment-reply-btn');
+            if (replyBtn) {
+                replyBtn.addEventListener('click', () => {
+                    const commentId = replyBtn.dataset.commentId;
+                    const username = replyBtn.dataset.username;
+                    setReplyMode(commentId, username);
+                });
+            }
+
+            // Nested replies
             if (comment.replies && comment.replies.length > 0) {
                 comment.replies.forEach(reply => {
                     const replyEl = document.createElement('div');
@@ -623,9 +647,32 @@ document.addEventListener('DOMContentLoaded', async function () {
                             <span class="comment-username">${reply.username}</span>
                             <span class="comment-text">${escapeHtml(reply.text)}</span>
                             <div class="comment-time">${timeAgo(new Date(reply.actionDate))}</div>
+                            <button class="comment-reply-btn" data-comment-id="${comment.actionId}" data-username="${reply.username}">Reply</button>
                         </div>
+                        <button class="comment-like-btn ${reply.isLiked ? 'liked' : ''}" data-comment-id="${reply.actionId}">
+                            <svg aria-label="Like" fill="${reply.isLiked ? '#ff3040' : 'none'}" height="12" role="img" viewBox="0 0 24 24" width="12">
+                                <path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z" stroke="currentColor" stroke-width="1"></path>
+                            </svg>
+                        </button>
+                        <span class="comment-like-count" data-comment-id="${reply.actionId}">${reply.likeCount > 0 ? reply.likeCount + ' likes' : ''}</span>
                     `;
                     container.appendChild(replyEl);
+
+                    // Add event listener for reply like button
+                    const replyLikeBtn = replyEl.querySelector('.comment-like-btn');
+                    if (replyLikeBtn) {
+                        replyLikeBtn.addEventListener('click', () => toggleCommentLike(replyLikeBtn, reply.actionId));
+                    }
+
+                    // Add event listener for reply button
+                    const replyBtn = replyEl.querySelector('.comment-reply-btn');
+                    if (replyBtn) {
+                        replyBtn.addEventListener('click', () => {
+                            const commentId = replyBtn.dataset.commentId;
+                            const username = replyBtn.dataset.username;
+                            setReplyMode(commentId, username);
+                        });
+                    }
                 });
             }
         });
@@ -722,15 +769,27 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!text) return;
 
         try {
+            const body = { text };
+            if (replyingToCommentId) {
+                body.parentCommentId = replyingToCommentId;
+            }
+
             const response = await fetch(`/api/actions/comment/${contentId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
+                body: JSON.stringify(body)
             });
 
             if (response.ok) {
                 input.value = '';
+                input.placeholder = 'Add a comment...';
                 btn.disabled = true;
+
+                // Clear reply mode
+                replyingToCommentId = null;
+                const indicator = document.querySelector('.reply-indicator');
+                if (indicator) indicator.remove();
+
                 // Refresh comments
                 fetchPostComments(contentId);
             }
@@ -739,11 +798,103 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    async function toggleCommentLike(btn, commentId) {
+        const isLiked = btn.classList.contains('liked');
+        const svg = btn.querySelector('svg');
+        const countSpan = btn.parentElement.querySelector(`.comment-like-count[data-comment-id="${commentId}"]`);
+
+        // Optimistic UI update
+        btn.classList.toggle('liked');
+        updateCommentLikeSvg(svg, !isLiked);
+
+        try {
+            let response;
+            if (isLiked) {
+                response = await fetch(`/api/actions/comment-like/${commentId}`, {
+                    method: 'DELETE'
+                });
+            } else {
+                response = await fetch(`/api/actions/comment-like/${commentId}`, {
+                    method: 'POST'
+                });
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                btn.classList.toggle('liked', data.liked);
+                updateCommentLikeSvg(svg, data.liked);
+
+                // Update like count
+                if (countSpan && data.likeCount !== undefined) {
+                    countSpan.textContent = data.likeCount > 0 ? data.likeCount + ' likes' : '';
+                }
+            } else {
+                // Revert on failure
+                btn.classList.toggle('liked', isLiked);
+                updateCommentLikeSvg(svg, isLiked);
+            }
+        } catch (error) {
+            console.error('Error toggling comment like:', error);
+            // Revert on error
+            btn.classList.toggle('liked', isLiked);
+            updateCommentLikeSvg(svg, isLiked);
+        }
+    }
+
+
+    function updateCommentLikeSvg(svg, isLiked) {
+        if (!svg) return;
+
+        if (isLiked) {
+            svg.setAttribute('fill', '#ff3040');
+            svg.removeAttribute('stroke');
+        } else {
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+        }
+    }
+
+    // Set reply mode function
+    function setReplyMode(commentId, username) {
+        replyingToCommentId = commentId;
+
+        // Remove existing indicator
+        const existingIndicator = document.querySelector('.reply-indicator');
+        if (existingIndicator) existingIndicator.remove();
+
+        // Add reply indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'reply-indicator';
+        indicator.style.cssText = 'padding: 8px 16px; background: #363636; font-size: 13px; color: #fafafa; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;';
+        indicator.innerHTML = `
+            Replying to <strong>@${username}</strong>
+            <span class="cancel-reply" style="cursor: pointer; font-size: 18px; margin-left: auto;">&times;</span>
+        `;
+
+        const addCommentContainer = document.querySelector('.post-add-comment');
+        const commentInput = addCommentContainer?.querySelector('input');
+        if (addCommentContainer && commentInput) {
+            addCommentContainer.parentElement.insertBefore(indicator, addCommentContainer);
+
+            // Cancel reply event
+            indicator.querySelector('.cancel-reply').addEventListener('click', () => {
+                replyingToCommentId = null;
+                indicator.remove();
+                commentInput.placeholder = 'Add a comment...';
+            });
+
+            // Focus input
+            commentInput.focus();
+            commentInput.placeholder = `Reply to @${username}...`;
+        }
+    }
+
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
+
 
 
     // Utility: Simple Time Ago

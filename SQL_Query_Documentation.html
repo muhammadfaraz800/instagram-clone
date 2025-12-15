@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Documentation</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #f1f5f9;
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+        }
+
+        #sidebar h2 {
+            font-size: 1.25rem;
+            padding: 0 1.5rem 1rem;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: #334155;
+            color: #fff;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Main Content Styling */
+        #main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem 3rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--heading-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h2.section-title {
+            color: var(--primary-color);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            scroll-margin-top: 2rem;
+            /* Smooth scroll offset */
+        }
+
+        h3.query-title {
+            color: var(--heading-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        h3.query-title::before {
+            content: '#';
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+            opacity: 0.6;
+        }
+
+        .query-meta {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .query-meta ul {
+            list-style: none;
+        }
+
+        .query-meta li {
+            margin-bottom: 0.5rem;
+        }
+
+        .query-meta strong {
+            color: var(--heading-color);
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        /* Code Block Styling */
+        .code-wrapper {
+            background-color: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-header {
+            background-color: #2d2d2d;
+            padding: 0.5rem 1rem;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        pre {
+            padding: 1.25rem;
+            overflow-x: auto;
+            color: var(--code-text);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Syntax Highlighting Sim (Basic) */
+        .sql-keyword {
+            color: #569cd6;
+            font-weight: bold;
+        }
+
+        .sql-string {
+            color: #ce9178;
+        }
+
+        .sql-comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+
+        .sql-func {
+            color: #dcdcaa;
+        }
+
+        /* Mobile Responsive */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
+
+            #main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+    <nav id="sidebar">
+        <h2>Documentation</h2>
+        <ul class="nav-links">
+            <li><a href="#section-1" onclick="closeSidebar()">1. Actions Controller</a></li>
+            <li><a href="#section-2" onclick="closeSidebar()">2. Auth Controller</a></li>
+            <li><a href="#section-3" onclick="closeSidebar()">3. Content Upload Controller</a></li>
+            <li><a href="#section-4" onclick="closeSidebar()">4. Explore Controller</a></li>
+            <li><a href="#section-5" onclick="closeSidebar()">5. Feed Controller</a></li>
+            <li><a href="#section-6" onclick="closeSidebar()">6. Notifications Controller</a></li>
+            <li><a href="#section-7" onclick="closeSidebar()">7. Profile Controller</a></li>
+            <li><a href="#section-8" onclick="closeSidebar()">8. Reels Controller</a></li>
+            <li><a href="#section-9" onclick="closeSidebar()">9. Upload Controller</a></li>
+            <li><a href="#section-10" onclick="closeSidebar()">10. User Controller</a></li>
+            <li><a href="#section-11" onclick="closeSidebar()">11. Verification Controller</a></li>
+        </ul>
+    </nav>
+
+    <main id="main-content">
+        <h1>SQL Query Documentation</h1>
+        <p>This document contains a formal record of every SQL query used in the application's controllers.</p>
+
+        <!-- 1. Actions Controller -->
+        <h2 id="section-1" class="section-title">1. Actions Controller</h2>
+
+        <h3 class="query-title">1.1 Check if Content Already Liked</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>likeContent</code></li>
+                <li><strong>Context:</strong> Verifies if the user has already liked the specific content.</li>
+                <li><strong>Transaction:</strong> Part of likeContent transaction.</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.2 Insert Action Record (Like Content)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>likeContent</code></li>
+                <li><strong>Context:</strong> Creates the base Action record for the like event.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Action (ActionID, UserName, ContentID, ActionDate)
+VALUES (:actionId, :username, :contentId, CURRENT_TIMESTAMP)</code></pre>
+        </div>
+
+        <h3 class="query-title">1.3 Insert Like Record</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>likeContent</code></li>
+                <li><strong>Context:</strong> Creates the specific Like record linked to the Action.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Likes (ActionID) VALUES (:actionId)</code></pre>
+        </div>
+
+        <h3 class="query-title">1.4 Get Updated Like Count</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>likeContent</code></li>
+                <li><strong>Context:</strong> Retrieves the new total like count for the content after insertion.</li>
+                <li><strong>Transaction:</strong> Yes (After commit)</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT COUNT(*) AS LIKE_COUNT FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.5 Find Existing Like (For Unlike)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>unlikeContent</code></li>
+                <li><strong>Context:</strong> Retrieves the ActionID of the like to be deleted.</li>
+                <li><strong>Transaction:</strong> Part of unlikeContent logic</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.6 Delete Action (Unlike Content)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>unlikeContent</code></li>
+                <li><strong>Context:</strong> Deletes the Action record (Cascades to Likes).</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>DELETE FROM Action WHERE ActionID = :actionId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.7 Get Updated Like Count (After Unlike)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>unlikeContent</code></li>
+                <li><strong>Context:</strong> Retrieves the new total like count after deletion.</li>
+                <li><strong>Transaction:</strong> Yes (After commit)</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT COUNT(*) AS LIKE_COUNT FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.8 Check User Liked Status</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>checkUserLikedContent</code></li>
+                <li><strong>Context:</strong> Checks if the current user has liked a specific content.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.9 Insert Action Record (Add Comment)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>addComment</code></li>
+                <li><strong>Context:</strong> Creates the base Action record for the comment.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Action (ActionID, UserName, ContentID, ActionDate)
+VALUES (:actionId, :username, :contentId, CURRENT_TIMESTAMP)</code></pre>
+        </div>
+
+        <h3 class="query-title">1.10 Insert Comment Record</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>addComment</code></li>
+                <li><strong>Context:</strong> Creates the specific Comment record linked to the Action.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Comments (ActionID, CommentText, ParentCommentID)
+VALUES (:actionId, :text, :parentCommentId)</code></pre>
+        </div>
+
+        <h3 class="query-title">1.11 Fetch Created Comment</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>addComment</code></li>
+                <li><strong>Context:</strong> Retrieves the newly created comment details with user info.</li>
+                <li><strong>Transaction:</strong> Yes (After commit)</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    c.ActionID,
+    c.CommentText,
+    c.ParentCommentID,
+    a.ActionDate,
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status
+FROM Comments c
+JOIN Action a ON c.ActionID = a.ActionID
+JOIN Account acc ON a.UserName = acc.UserName
+LEFT JOIN Verification v ON acc.UserName = v.UserName
+WHERE c.ActionID = :actionId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.12 Verify Comment Ownership</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>deleteComment</code></li>
+                <li><strong>Context:</strong> Checks who owns the comment before deletion.</li>
+                <li><strong>Transaction:</strong> Part of deleteComment logic.</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT a.UserName FROM Action a WHERE a.ActionID = :actionId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.13 Delete Action (Delete Comment)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>deleteComment</code></li>
+                <li><strong>Context:</strong> Deletes the Action record (Cascades to Comments).</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>DELETE FROM Action WHERE ActionID = :actionId</code></pre>
+        </div>
+
+        <h3 class="query-title">1.14 Get Content Comments</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getContentComments</code></li>
+                <li><strong>Context:</strong> Retrieves all comments for a content with like counts and user liked
+                    status.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    c.ActionID,
+    c.CommentText,
+    c.ParentCommentID,
+    a.ActionDate,
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status,
+    (SELECT COUNT(*) FROM Comment_Like cl WHERE cl.Liked_Comment_ID = c.ActionID) AS Like_Count,
+    (SELECT COUNT(*) FROM Comment_Like cl 
+     JOIN Action cla ON cl.ActionID = cla.ActionID 
+     WHERE cl.Liked_Comment_ID = c.ActionID AND cla.UserName = :username) AS Is_Liked
+FROM Comments c
+JOIN Action a ON c.ActionID = a.ActionID
+JOIN Account acc ON a.UserName = acc.UserName
+LEFT JOIN Verification v ON acc.UserName = v.UserName
+WHERE a.ContentID = :contentId
+ORDER BY a.ActionDate ASC</code></pre>
+        </div>
+
+        <!-- 2. Auth Controller -->
+        <h2 id="section-2" class="section-title">2. Auth Controller</h2>
+
+        <h3 class="query-title">2.1 Insert New Account</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>signup</code></li>
+                <li><strong>Context:</strong> Inserts the main account details into the Account table.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Account (USERNAME, BIO, HASHED_PASSWORD, EMAIL, PROFILE_NAME, PROFILE_PICTURE_URL, VISIBILITY) 
+VALUES (:username, :bio, :hashed_password, :email, :profile_name, :profile_picture_url, :visibility)</code></pre>
+        </div>
+
+        <h3 class="query-title">2.2 Insert Business Details</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>signup</code></li>
+                <li><strong>Context:</strong> Inserts additional details if the account type is Business.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Business (USERNAME, BIO_URL, CONTACTNO, BUSINESS_TYPE) 
+VALUES (:username, :bio_url, :contact_no, :business_type)</code></pre>
+        </div>
+
+        <h3 class="query-title">2.3 Insert Normal Details</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>signup</code></li>
+                <li><strong>Context:</strong> Inserts additional details if the account type is Normal.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Normal (USERNAME, GENDER) 
+VALUES (:username, :gender)</code></pre>
+        </div>
+
+        <h3 class="query-title">2.4 Login User</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>login</code></li>
+                <li><strong>Context:</strong> Retrieves user credentials and type for authentication.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    a.username, 
+    a.hashed_password, 
+    a.profile_picture_url,
+    b.business_type
+FROM Account a
+LEFT JOIN Business b ON a.UserName = b.UserName
+WHERE a.UserName = :username</code></pre>
+        </div>
+
+        <h3 class="query-title">2.5 Get Current User Profile (Me)</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getMe</code></li>
+                <li><strong>Context:</strong> Retrieves the logged-in user's basic profile information.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    a.profile_name,
+    a.username, 
+    a.profile_picture_url,
+    b.business_type,
+    v.Status AS Verification_Status
+FROM Account a
+LEFT JOIN Business b ON a.UserName = b.UserName
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE a.UserName = :username</code></pre>
+        </div>
+
+        <!-- 3. Content Upload Controller -->
+        <h2 id="section-3" class="section-title">3. Content Upload Controller</h2>
+
+        <h3 class="query-title">3.1 Check Tag Exists</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>processTags</code></li>
+                <li><strong>Context:</strong> Checks if a tag already exists in the database.</li>
+                <li><strong>Transaction:</strong> Part of transaction.</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT TagID FROM Tags WHERE LOWER(TagName) = LOWER(:tagName)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.2 Insert New Tag</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>processTags</code></li>
+                <li><strong>Context:</strong> Creates a new tag if it doesn't exist.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Tags (TagID, TagName) VALUES (:tagId, :tagName)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.3 Link Content to Tag</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>linkContentToTags</code></li>
+                <li><strong>Context:</strong> Creates a relationship between the content and the tag.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Content_Tag (ContentID, TagID) VALUES (:contentId, :tagId)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.4 Check User Verification</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>isUserVerified</code></li>
+                <li><strong>Context:</strong> Checks the verification status of the user to determine upload limits.
+                </li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT Status FROM Verification WHERE LOWER(UserName) = LOWER(:username)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.5 Insert Content Record</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>uploadImage</code> / <code>uploadReel</code></li>
+                <li><strong>Context:</strong> Inserts the base Content record.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Content (ContentID, UserName, Caption, Path) 
+VALUES (:contentId, :userName, :caption, :path)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.6 Insert Image Record</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>uploadImage</code></li>
+                <li><strong>Context:</strong> Inserts the Image specific record.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Image (ContentID) VALUES (:contentId)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.7 Insert Reel Record</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>uploadReel</code></li>
+                <li><strong>Context:</strong> Inserts the Reel specific record with duration.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Reel (ContentID, ReelDuration) VALUES (:contentId, :reelDuration)</code></pre>
+        </div>
+
+        <h3 class="query-title">3.8 Check Content Ownership</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>deleteContent</code></li>
+                <li><strong>Context:</strong> Verifies the user owns the content before deletion.</li>
+                <li><strong>Transaction:</strong> Part of deleteContent transaction.</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT UserName, Path FROM Content WHERE ContentID = :contentId</code></pre>
+        </div>
+
+        <h3 class="query-title">3.9 Delete Content</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>deleteContent</code></li>
+                <li><strong>Context:</strong> Deletes the content record (cascades to child tables assumed).</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>DELETE FROM Content WHERE ContentID = :contentId</code></pre>
+        </div>
+
+        <!-- 4. Explore Controller -->
+        <h2 id="section-4" class="section-title">4. Explore Controller</h2>
+
+        <h3 class="query-title">4.1 Get Explore Grid</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getExploreGrid</code></li>
+                <li><strong>Context:</strong> Fetches a randomized grid of content (Images and Reels) from public or
+                    followed accounts (excluding own content).</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT * FROM (
+    SELECT 
+        c.ContentID,
+        c.Path,
+        
+        CASE 
+            WHEN r.ContentID IS NOT NULL THEN 'Reel'
+            WHEN i.ContentID IS NOT NULL THEN 'Image'
+            ELSE 'Unknown'
+        END AS Content_Type,
+        
+        r.ReelDuration
+
+    FROM Content c
+    LEFT JOIN Reel r ON c.ContentID = r.ContentID
+    LEFT JOIN Image i ON c.ContentID = i.ContentID
+    JOIN Account a ON c.UserName = a.UserName
+    
+    WHERE 
+        c.UserName <> :currentUser
+        AND (
+            a.Visibility = 'Public'
+            OR EXISTS (
+                SELECT 1 FROM Follows f 
+                WHERE f.FollowerUserName = :currentUser 
+                AND f.FollowedUserName = c.UserName
+            )
+        )
+)
+ORDER BY ORA_HASH(ContentID || :seed)
+OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY</code></pre>
+        </div>
+
+        <h3 class="query-title">4.2 Get Post Details</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getPostDetails</code></li>
+                <li><strong>Context:</strong> Retrieves detailed information for a specific post (Image or Reel).</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    c.ContentID,
+    c.Path,
+    c.Caption,
+    c.Post_Date,
+    
+    a.UserName,
+    a.Profile_Name,
+    a.Profile_Picture_URL,
+    v.Status AS Author_Verification,
+    
+    CASE 
+        WHEN r.ContentID IS NOT NULL THEN 'Reel'
+        WHEN i.ContentID IS NOT NULL THEN 'Image'
+        ELSE 'Unknown'
+    END AS Content_Type,
+    
+    r.ReelDuration,
+    
+    (SELECT LISTAGG(t.TagName, ', ') WITHIN GROUP (ORDER BY t.TagName)
+     FROM Content_Tag ct
+     JOIN Tags t ON ct.TagID = t.TagID
+     WHERE ct.ContentID = c.ContentID) AS Tags,
+    
+    (SELECT COUNT(*) FROM Likes l 
+     JOIN Action act ON l.ActionID = act.ActionID 
+     WHERE act.ContentID = c.ContentID) AS Total_Likes,
+
+    (SELECT COUNT(*) FROM Comments com 
+     JOIN Action act ON com.ActionID = act.ActionID 
+     WHERE act.ContentID = c.ContentID) AS Total_Comments,
+     
+    (SELECT COUNT(*) FROM Likes l 
+     JOIN Action act ON l.ActionID = act.ActionID 
+     WHERE act.ContentID = c.ContentID AND act.UserName = :currentUser) AS User_Liked
+
+FROM Content c
+JOIN Account a ON c.UserName = a.UserName
+LEFT JOIN Verification v ON a.UserName = v.UserName
+LEFT JOIN Reel r ON c.ContentID = r.ContentID
+LEFT JOIN Image i ON c.ContentID = i.ContentID
+
+WHERE c.ContentID = :contentId</code></pre>
+        </div>
+
+        <!-- 5. Feed Controller -->
+        <h2 id="section-5" class="section-title">5. Feed Controller</h2>
+
+        <h3 class="query-title">5.1 Get Home Feed</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getHomeFeed</code></li>
+                <li><strong>Context:</strong> Fetches the main feed posts (mix of all types).</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    c.ContentID,
+    c.Path,
+    c.Caption,
+    c.Post_Date,
+    c.UserName,
+    CASE 
+        WHEN r.ContentID IS NOT NULL THEN 'Reel'
+        WHEN i.ContentID IS NOT NULL THEN 'Image'
+        ELSE 'Unknown'
+    END AS Content_Type,
+    r.ReelDuration,
+    a.Profile_Name,
+    a.Profile_Picture_URL,
+    v.Status AS Verification_Status,
+    (SELECT COUNT(*) FROM Likes l JOIN Action act ON l.ActionID = act.ActionID WHERE act.ContentID = c.ContentID) AS Total_Likes,
+    (SELECT COUNT(*) FROM Comments com JOIN Action act ON com.ActionID = act.ActionID WHERE act.ContentID = c.ContentID) AS Total_Comments
+FROM Content c
+LEFT JOIN Reel r ON c.ContentID = r.ContentID
+LEFT JOIN Image i ON c.ContentID = i.ContentID
+JOIN Account a ON c.UserName = a.UserName
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE c.UserName <> :current_user
+ORDER BY ORA_HASH(c.ContentID || :seed_value)
+OFFSET :offset_value ROWS FETCH NEXT :limit_value ROWS ONLY</code></pre>
+        </div>
+
+        <!-- 6. Notifications Controller -->
+        <h2 id="section-6" class="section-title">6. Notifications Controller</h2>
+
+        <h3 class="query-title">6.1 Get Pending Requests</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getRequests</code></li>
+                <li><strong>Context:</strong> Retrieves pending follow requests for the logged-in user.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    r.SenderUserName,
+    a.Profile_Name,
+    a.Profile_Picture_URL,
+    v.Status AS Verification_Status
+FROM Requests r
+JOIN Account a ON LOWER(r.SenderUserName) = LOWER(a.UserName)
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE LOWER(r.ReceiverUserName) = LOWER(:currentUser)
+ORDER BY r.SenderUserName</code></pre>
+        </div>
+
+        <!-- 7. Profile Controller -->
+        <h2 id="section-7" class="section-title">7. Profile Controller</h2>
+
+        <h3 class="query-title">7.1 Get Profile Data</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getProfile</code></li>
+                <li><strong>Context:</strong> Retrieves full profile details including stats commands.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    a.UserName,
+    a.Profile_Name,
+    a.Profile_Picture_URL,
+    a.Bio,
+    a.Email,
+    a.Visibility,
+    b.Bio_URL AS Website,
+    b.ContactNo,
+    b.Business_Type,
+    v.Status AS Verification_Status,
+    -- Count total content (Reels + Images)
+    (SELECT COUNT(*) FROM Content c WHERE c.UserName = a.UserName) AS Posts_Count,
+    -- Count how many people follow THIS user
+    (SELECT COUNT(*) FROM Follows f WHERE f.FollowedUserName = a.UserName) AS Followers_Count,
+    -- Count how many people THIS user follows
+    (SELECT COUNT(*) FROM Follows f WHERE f.FollowerUserName = a.UserName) AS Following_Count
+FROM Account a
+LEFT JOIN Business b ON a.UserName = b.UserName
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE LOWER(a.UserName) = LOWER(:username)</code></pre>
+        </div>
+
+        <!-- 8. Reels Controller -->
+        <h2 id="section-8" class="section-title">8. Reels Controller</h2>
+
+        <h3 class="query-title">8.1 Get Reels Feed</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>getReelsFeed</code></li>
+                <li><strong>Context:</strong> Fetches reels feed (public or followed private accounts).</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT * FROM (
+    SELECT 
+        c.ContentID,
+        c.Path,
+        c.Caption,
+        c.Post_Date,
+        c.UserName AS Author,
+        a.Profile_Picture_URL,
+        r.ReelDuration,
+        v.Status AS Author_Verification_Status,
+        
+        (SELECT LISTAGG(t.TagName, ', ') WITHIN GROUP (ORDER BY t.TagName)
+         FROM Content_Tag ct
+         JOIN Tags t ON ct.TagID = t.TagID
+         WHERE ct.ContentID = c.ContentID) AS Tags,
+         
+        (SELECT COUNT(*) FROM Likes l 
+        JOIN Action act ON l.ActionID = act.ActionID 
+        WHERE act.ContentID = c.ContentID) AS Like_Count,
+        
+        (SELECT COUNT(*) FROM Comments com 
+        JOIN Action act ON com.ActionID = act.ActionID 
+        WHERE act.ContentID = c.ContentID) AS Comment_Count
+        
+    FROM Content c
+    JOIN Reel r ON c.ContentID = r.ContentID
+    JOIN Account a ON c.UserName = a.UserName
+    LEFT JOIN Verification v ON a.UserName = v.UserName
+    
+    WHERE 
+        c.UserName <> :currentUser
+        AND (
+            a.Visibility = 'Public'
+            OR EXISTS (
+                SELECT 1 FROM Follows f 
+                WHERE f.FollowerUserName = :currentUser 
+                AND f.FollowedUserName = c.UserName
+            )
+        )
+)
+ORDER BY ORA_HASH(ContentID || :seed)
+OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY</code></pre>
+        </div>
+
+        <!-- 9. Upload Controller -->
+        <h2 id="section-9" class="section-title">9. Upload Controller</h2>
+
+        <h3 class="query-title">9.1 Remove Profile Picture</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>removeProfilePicture</code></li>
+                <li><strong>Context:</strong> Sets profile picture URL to default.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>UPDATE Account 
+SET PROFILE_PICTURE_URL = :profile_picture_url
+WHERE USERNAME = :username</code></pre>
+        </div>
+
+        <!-- 10. User Controller -->
+        <h2 id="section-10" class="section-title">10. User Controller</h2>
+
+        <h3 class="query-title">10.1 Update Account Details</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>updateUser</code></li>
+                <li><strong>Context:</strong> Updates common account fields.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>UPDATE Account 
+SET 
+    PROFILE_NAME = NVL(:profile_name, PROFILE_NAME), 
+    EMAIL = NVL(:email, EMAIL), 
+    VISIBILITY = NVL(:visibility, VISIBILITY),
+    BIO = :bio
+WHERE USERNAME = :username</code></pre>
+        </div>
+
+        <h3 class="query-title">10.5 Search Users</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>searchUsers</code></li>
+                <li><strong>Context:</strong> Searches users by username.</li>
+                <li><strong>Transaction:</strong> No</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>SELECT 
+    a.UserName,
+    a.Profile_Name,
+    a.Profile_Picture_URL,
+    v.Status AS Verification_Status
+FROM Account a
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE LOWER(a.UserName) LIKE '%' || LOWER(:search_input) || '%'</code></pre>
+        </div>
+
+        <!-- 11. Verification Controller -->
+        <h2 id="section-11" class="section-title">11. Verification Controller</h2>
+
+        <h3 class="query-title">11.2 Submit Verification Application</h3>
+        <div class="query-meta">
+            <ul>
+                <li><strong>Function:</strong> <code>applyForVerification</code></li>
+                <li><strong>Context:</strong> Inserts new verification request.</li>
+                <li><strong>Transaction:</strong> Yes</li>
+            </ul>
+        </div>
+        <div class="code-wrapper">
+            <div class="code-header">SQL</div>
+            <pre><code>INSERT INTO Verification (
+    UserName, 
+    Veri_Doc_URL, 
+    VerifiedAt, 
+    Status
+) VALUES (
+    :userName, 
+    :veriDocUrl, 
+    NULL, 
+    'Pending'
+)</code></pre>
+        </div>
+
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        // Highlight Keywords (Offline)
+        document.addEventListener('DOMContentLoaded', () => {
+            const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'GROUP', 'BY', 'ORDER', 'HAVING', 'LIMIT', 'OFFSET', 'FETCH', 'NEXT', 'ROWS', 'ONLY', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'AS', 'IS', 'NOT', 'NULL', 'LIKE', 'EXISTS', 'COUNT', 'LISTAGG', 'WITHIN', 'NVL', 'LOWER', 'CURRENT_TIMESTAMP'];
+
+            document.querySelectorAll('pre code').forEach(block => {
+                let html = block.innerHTML;
+                keywords.forEach(kw => {
+                    const regex = new RegExp(`\\b${kw}\\b`, 'g');
+                    html = html.replace(regex, `<span class="sql-keyword">${kw}</span>`);
+                });
+                // Simple string coloring
+                html = html.replace(/'([^']*)'/g, '<span class="sql-string">\'$1\'</span>');
+                block.innerHTML = html;
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const seed = Math.random().toString(36).substring(2, 15);
     let currentPostId = null;
     let isGlobalMuted = true; // Track global mute state - default to muted
+    let replyingToCommentId = null; // Track reply state
 
     // Elements
     const exploreGrid = document.getElementById('exploreGrid');
@@ -424,11 +425,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="explore-comment-actions">
                         <span class="explore-comment-action">${formatTimeAgo(comment.commentDate)}</span>
                         ${comment.likesCount > 0 ? `<span class="explore-comment-action">${comment.likesCount} likes</span>` : ''}
-                        <span class="explore-comment-action">Reply</span>
+                        <span class="explore-comment-action reply-action" data-comment-id="${comment.commentId}" data-username="${comment.username}">Reply</span>
                     </div>
                 </div>
-                <button class="explore-comment-like-btn">
-                    <i class="fa-regular fa-heart"></i>
+                <button class="explore-comment-like-btn ${comment.isLiked ? 'liked' : ''}">
+                    <i class="${comment.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
                 </button>
             </div>
             ${comment.replyCount > 0 ? `
@@ -447,6 +448,22 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 const commentId = btn.dataset.commentId;
                 toggleReplies(commentId, btn);
+            });
+        });
+
+        // Attach comment like handlers
+        const commentLikeBtns = commentsList.querySelectorAll('.explore-comment-like-btn');
+        commentLikeBtns.forEach(btn => {
+            btn.addEventListener('click', () => toggleCommentLike(btn));
+        });
+
+        // Attach reply handlers
+        const replyBtns = commentsList.querySelectorAll('.reply-action');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const commentId = btn.dataset.commentId;
+                const username = btn.dataset.username;
+                setReplyMode(commentId, username);
             });
         });
     }
@@ -489,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function renderReplies(replies, container) {
         const html = replies.map(reply => `
-            <div class="explore-reply">
+            <div class="explore-reply" data-comment-id="${reply.replyId}">
                 <a href="/${reply.username}">
                     <img src="${reply.profilePictureUrl || DEFAULT_AVATAR_PATH}" alt="" class="explore-comment-avatar">
                 </a>
@@ -508,12 +525,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="explore-comment-actions">
                         <span class="explore-comment-action">${formatTimeAgo(reply.replyDate)}</span>
                         ${reply.likesCount > 0 ? `<span class="explore-comment-action">${reply.likesCount} likes</span>` : ''}
+                        <span class="explore-comment-action reply-action" data-comment-id="${reply.replyId}" data-username="${reply.username}">Reply</span>
                     </div>
                 </div>
+                <button class="explore-comment-like-btn ${reply.isLiked ? 'liked' : ''}">
+                    <i class="${reply.isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                </button>
             </div>
         `).join('');
 
         container.innerHTML = html;
+
+        // Attach event listeners to reply like buttons
+        const replyLikeBtns = container.querySelectorAll('.explore-comment-like-btn');
+        replyLikeBtns.forEach(btn => {
+            btn.addEventListener('click', () => toggleCommentLike(btn));
+        });
+
+        // Attach event listeners to reply-to-reply buttons
+        const replyBtns = container.querySelectorAll('.reply-action');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const commentId = btn.dataset.commentId;
+                const username = btn.dataset.username;
+                setReplyMode(commentId, username);
+            });
+        });
     }
 
     /**
@@ -525,25 +562,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLiked = likeBtn.classList.contains('liked');
 
         try {
-            const response = await fetch(`/api/actions/${contentId}/like`, {
-                method: 'POST'
-            });
+            const method = isLiked ? 'DELETE' : 'POST';
+            const response = await fetch(`/api/actions/like/${contentId}`, { method });
 
             if (response.ok) {
-                if (isLiked) {
-                    likeBtn.classList.remove('liked');
-                    likeBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
-                    // Decrement likes
-                    const currentLikes = parseInt(likesCount.textContent) || 0;
-                    likesCount.textContent = `${Math.max(0, currentLikes - 1).toLocaleString()} likes`;
-                } else {
-                    likeBtn.classList.add('liked');
-                    likeBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-                    // Increment likes
-                    const currentLikes = parseInt(likesCount.textContent) || 0;
-                    likesCount.textContent = `${(currentLikes + 1).toLocaleString()} likes`;
+                const data = await response.json();
 
-                    // Add pop animation
+                // Update button state
+                likeBtn.classList.toggle('liked', data.liked);
+                likeBtn.innerHTML = data.liked ?
+                    '<i class="fa-solid fa-heart"></i>' :
+                    '<i class="fa-regular fa-heart"></i>';
+
+                // Update count
+                likesCount.textContent = `${data.likeCount.toLocaleString()} likes`;
+
+                // Add pop animation when liking
+                if (data.liked) {
                     likeBtn.style.transform = 'scale(1.2)';
                     setTimeout(() => {
                         likeBtn.style.transform = 'scale(1)';
@@ -565,17 +600,28 @@ document.addEventListener('DOMContentLoaded', () => {
         postCommentBtn.disabled = true;
 
         try {
-            const response = await fetch(`/api/actions/${contentId}/comment`, {
+            const body = { text };
+            if (replyingToCommentId) {
+                body.parentCommentId = replyingToCommentId;
+            }
+
+            const response = await fetch(`/api/actions/comment/${contentId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ comment: text })
+                body: JSON.stringify(body)
             });
 
             if (response.ok) {
                 commentInput.value = '';
+                commentInput.placeholder = 'Add a comment...';
                 postCommentBtn.classList.remove('active');
+
+                // Clear reply mode
+                replyingToCommentId = null;
+                const indicator = document.querySelector('.reply-indicator');
+                if (indicator) indicator.remove();
 
                 // Refresh comments
                 await fetchComments(contentId);
@@ -586,6 +632,84 @@ document.addEventListener('DOMContentLoaded', () => {
             postCommentBtn.disabled = false;
         }
     }
+
+    /**
+     * Toggle like on comment
+     */
+    async function toggleCommentLike(btn) {
+        const commentId = btn.closest('[data-comment-id]').dataset.commentId;
+        const isLiked = btn.classList.contains('liked');
+        const icon = btn.querySelector('i');
+
+        // Optimistic UI update
+        btn.classList.toggle('liked');
+        if (icon) {
+            icon.className = btn.classList.contains('liked') ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        }
+
+        try {
+            const method = isLiked ? 'DELETE' : 'POST';
+            const response = await fetch(`/api/actions/comment-like/${commentId}`, { method });
+
+            if (response.ok) {
+                const data = await response.json();
+                btn.classList.toggle('liked', data.liked);
+                if (icon) {
+                    icon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+                }
+            } else {
+                // Revert on failure
+                btn.classList.toggle('liked', isLiked);
+                if (icon) {
+                    icon.className = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling comment like:', error);
+            // Revert on error
+            btn.classList.toggle('liked', isLiked);
+            if (icon) {
+                icon.className = isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+            }
+        }
+    }
+
+
+    /**
+     * Set reply mode for a comment
+     */
+    function setReplyMode(commentId, username) {
+        replyingToCommentId = commentId;
+
+        // Remove existing indicator
+        const existingIndicator = document.querySelector('.reply-indicator');
+        if (existingIndicator) existingIndicator.remove();
+
+        // Add reply indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'reply-indicator';
+        indicator.style.cssText = 'padding: 8px 16px; background: #363636; font-size: 13px; color: #fafafa; display: flex; align-items: center; justify-content: space-between;';
+        indicator.innerHTML = `
+            Replying to <strong>@${username}</strong>
+            <span class="cancel-reply" style="cursor: pointer; font-size: 18px; margin-left: auto;">&times;</span>
+        `;
+
+        const inputContainer = document.querySelector('#commentInput').parentElement;
+        inputContainer.parentElement.insertBefore(indicator, inputContainer);
+
+        // Cancel reply event
+        indicator.querySelector('.cancel-reply').addEventListener('click', () => {
+            replyingToCommentId = null;
+            indicator.remove();
+            document.getElementById('commentInput').placeholder = 'Add a comment...';
+        });
+
+        // Focus input
+        const commentInput = document.getElementById('commentInput');
+        commentInput.focus();
+        commentInput.placeholder = `Reply to @${username}...`;
+    }
+
 
     /**
      * Format time ago

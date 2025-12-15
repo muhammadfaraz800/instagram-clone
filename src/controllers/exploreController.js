@@ -188,6 +188,7 @@ export const getPostDetails = async (req, res) => {
  */
 export const getPostComments = async (req, res) => {
     const { contentId } = req.params;
+    const currentUser = req.username;
     let connection;
 
     try {
@@ -209,7 +210,12 @@ export const getPostComments = async (req, res) => {
 
                 (SELECT COUNT(*) 
                  FROM Comments reply 
-                 WHERE reply.ParentCommentID = com.ActionID) AS Reply_Count
+                 WHERE reply.ParentCommentID = com.ActionID) AS Reply_Count,
+                 
+                (SELECT COUNT(*) 
+                 FROM Comment_Like cl
+                 JOIN Action cla ON cl.ActionID = cla.ActionID
+                 WHERE cl.Liked_Comment_ID = com.ActionID AND cla.UserName = :currentUser) AS Is_Liked
 
             FROM Comments com
             JOIN Action act ON com.ActionID = act.ActionID
@@ -223,7 +229,7 @@ export const getPostComments = async (req, res) => {
             ORDER BY 
                 Comment_Likes_Count DESC,
                 act.ActionDate DESC`,
-            { contentId },
+            { contentId, currentUser },
             { outFormat: 4002 }
         );
 
@@ -235,7 +241,8 @@ export const getPostComments = async (req, res) => {
             profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
             verificationStatus: row.VERIFICATION_STATUS,
             likesCount: row.COMMENT_LIKES_COUNT || 0,
-            replyCount: row.REPLY_COUNT || 0
+            replyCount: row.REPLY_COUNT || 0,
+            isLiked: row.IS_LIKED > 0
         }));
 
         res.json(comments);
@@ -259,6 +266,7 @@ export const getPostComments = async (req, res) => {
  */
 export const getCommentReplies = async (req, res) => {
     const { commentId } = req.params;
+    const currentUser = req.username;
     let connection;
 
     try {
@@ -273,7 +281,12 @@ export const getCommentReplies = async (req, res) => {
                 a.Profile_Picture_URL,
                 v.Status AS Verification_Status,
                 
-                (SELECT COUNT(*) FROM Comment_Like cl WHERE cl.Liked_Comment_ID = reply.ActionID) AS Reply_Likes_Count
+                (SELECT COUNT(*) FROM Comment_Like cl WHERE cl.Liked_Comment_ID = reply.ActionID) AS Reply_Likes_Count,
+                
+                (SELECT COUNT(*) 
+                 FROM Comment_Like cl
+                 JOIN Action cla ON cl.ActionID = cla.ActionID
+                 WHERE cl.Liked_Comment_ID = reply.ActionID AND cla.UserName = :currentUser) AS Is_Liked
 
             FROM Comments reply
             JOIN Action act ON reply.ActionID = act.ActionID
@@ -284,7 +297,7 @@ export const getCommentReplies = async (req, res) => {
                 reply.ParentCommentID = :commentId
                 
             ORDER BY act.ActionDate ASC`,
-            { commentId },
+            { commentId, currentUser },
             { outFormat: 4002 }
         );
 
@@ -295,7 +308,8 @@ export const getCommentReplies = async (req, res) => {
             username: row.USERNAME,
             profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
             verificationStatus: row.VERIFICATION_STATUS,
-            likesCount: row.REPLY_LIKES_COUNT || 0
+            likesCount: row.REPLY_LIKES_COUNT || 0,
+            isLiked: row.IS_LIKED > 0
         }));
 
         res.json(replies);

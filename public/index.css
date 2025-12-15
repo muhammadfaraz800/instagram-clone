@@ -814,6 +814,37 @@ textarea {
     object-fit: cover;
 }
 
+/* Volume Control Button */
+.volume-control {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s ease, transform 0.2s ease;
+    padding: 0;
+    border: none;
+}
+
+.volume-control:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.volume-control i {
+    color: white;
+    font-size: 12px;
+    pointer-events: none;
+    /* Let clicks pass through to button */
+}
+
 
 /* ==========================================================
    SEARCH PANEL - Slides out from sidebar
@@ -3132,6 +3163,7 @@ textarea {
 .modal-comment {
     display: flex;
     gap: 12px;
+    align-items: flex-start;
 }
 
 .comment-avatar {
@@ -3198,6 +3230,15 @@ textarea {
     color: var(--text-primary);
 }
 
+.comment-like-btn.liked {
+    color: #ff3040;
+}
+
+.comment-like-btn.liked i {
+    color: #ff3040;
+}
+
+
 /* View Replies Button */
 .view-replies-btn {
     background: none;
@@ -3226,6 +3267,7 @@ textarea {
 .modal-reply {
     display: flex;
     gap: 10px;
+    align-items: flex-start;
 }
 
 .reply-avatar {
@@ -3258,6 +3300,43 @@ textarea {
     font-size: 11px;
     color: var(--text-tertiary);
     margin-top: 2px;
+}
+
+/* Reply button on replies (reply-to-reply) */
+.reply-reply-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.reply-reply-btn:hover {
+    color: var(--text-secondary);
+}
+
+/* Like button on replies */
+.reply-like-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    padding: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.reply-like-btn:hover {
+    color: var(--text-primary);
+}
+
+.reply-like-btn.liked {
+    color: #ff3040;
+}
+
+.reply-like-btn.liked i {
+    color: #ff3040;
 }
 
 .replies-loading,

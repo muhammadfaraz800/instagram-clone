@@ -247,6 +247,15 @@ export const uploadImage = async (req, res) => {
             tags = tags.slice(0, maxTags);
         }
 
+        // Validate tag length (max 50 characters per tag for database column)
+        for (const tag of tags) {
+            if (tag.length > 50) {
+                return res.status(400).json({
+                    message: `Tag "${tag}" exceeds maximum length of 50 characters`
+                });
+            }
+        }
+
         const caption = req.body.caption || '';
         const contentId = generateContentId();
         const imagePath = `/uploads/content/images/${req.file.filename}`;
@@ -288,7 +297,7 @@ export const uploadImage = async (req, res) => {
             maxTagsAllowed: maxTags
         });
 
-        logAction('user', 'User Uploaded Content (Image)', username, { contentId, type: 'image' });
+        logAction('upload', 'content', username, { contentId, type: 'image' });
 
     } catch (error) {
         console.error('Error uploading image:', error);
@@ -405,6 +414,21 @@ export const uploadReel = async (req, res) => {
             tags = tags.slice(0, maxTags);
         }
 
+        // Validate tag length (max 50 characters per tag for database column)
+        for (const tag of tags) {
+            if (tag.length > 50) {
+                // Clean up uploaded files before returning error
+                try {
+                    if (trimmedFilePath) fs.unlinkSync(trimmedFilePath);
+                    if (finalFilePath) fs.unlinkSync(finalFilePath);
+                } catch (e) { /* ignore */ }
+
+                return res.status(400).json({
+                    message: `Tag "${tag}" exceeds maximum length of 50 characters`
+                });
+            }
+        }
+
         const caption = req.body.caption || '';
         const contentId = generateContentId();
         const reelPath = `/uploads/content/reels/${finalFileName}`;
@@ -448,7 +472,7 @@ export const uploadReel = async (req, res) => {
             maxTagsAllowed: maxTags
         });
 
-        logAction('user', 'User Uploaded Content (Reel)', username, { contentId, type: 'reel', duration });
+        logAction('upload', 'content', username, { contentId, type: 'reel', duration });
 
 
 
@@ -576,7 +600,7 @@ export const deleteContent = async (req, res) => {
         }
 
         console.log(`${username} deleted content: ${contentId}`);
-        logAction('user', 'User Deleted Content', username, { contentId });
+        logAction('delete', 'post', username, { contentId });
         res.json({ message: 'Content deleted successfully' });
 
     } catch (error) {

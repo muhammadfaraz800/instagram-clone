@@ -8,7 +8,7 @@ import {
     likeContent,
     unlikeContent,
     checkUserLikedContent,
-    getContentLikes,
+    // getContentLikes,
     addComment,
     deleteComment,
     getContentComments,
@@ -43,7 +43,7 @@ router.get('/like/:contentId/check', checkUserLikedContent);
 // @desc    Get users who liked content
 // @route   GET /api/actions/like/:contentId/users
 // @access  Private
-router.get('/like/:contentId/users', getContentLikes);
+// router.get('/like/:contentId/users', getContentLikes);
 
 // ==================== COMMENTS ====================
 

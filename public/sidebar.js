@@ -399,6 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <div class="upload-tags-section">
                                 <input type="text" class="upload-tags-input" id="uploadTagsInput" placeholder="Insert tags separated by comma">
                                 <div class="tags-limit-info">Remaining: <span id="remainingTagsDisplay">3</span> of <span id="maxTagsDisplay">3</span> tags</div>
+                                <div class="tags-char-limit-info" style="font-size: 12px; color: #8e8e8e; margin-top: 4px;">Each tag must not exceed 50 characters</div>
                             </div>
                         </div>
                     </div>
@@ -1718,6 +1719,24 @@ document.addEventListener("DOMContentLoaded", function () {
             const tagsValue = this.value;
             const tags = tagsValue.split(',').map(t => t.trim()).filter(t => t);
 
+            // Check if any tag exceeds 50 characters
+            const charLimitInfo = document.querySelector('.tags-char-limit-info');
+            const hasLongTag = tags.some(tag => tag.length > 50);
+
+            if (hasLongTag) {
+                if (charLimitInfo) {
+                    charLimitInfo.style.color = '#ed4956';
+                    charLimitInfo.style.fontWeight = 'bold';
+                    charLimitInfo.textContent = 'Error: One or more tags exceed 50 characters!';
+                }
+            } else {
+                if (charLimitInfo) {
+                    charLimitInfo.style.color = '#8e8e8e';
+                    charLimitInfo.style.fontWeight = 'normal';
+                    charLimitInfo.textContent = 'Each tag must not exceed 50 characters';
+                }
+            }
+
             // If over limit, remove the excess tags
             if (tags.length > uploadState.maxTags) {
                 // Keep only the allowed number of tags
@@ -1751,6 +1770,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const caption = document.getElementById('uploadCaptionInput')?.value || '';
             const tagsValue = document.getElementById('uploadTagsInput')?.value || '';
             const tags = tagsValue.split(',').map(t => t.trim()).filter(t => t).slice(0, uploadState.maxTags);
+
+            // Validate tag length before submission
+            const hasLongTag = tags.some(tag => tag.length > 50);
+            if (hasLongTag) {
+                alert('Error: Each tag must not exceed 50 characters. Please shorten your tags and try again.');
+                return;
+            }
 
             // Show loading
             showStep('Loading');

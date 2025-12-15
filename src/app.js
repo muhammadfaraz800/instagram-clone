@@ -87,7 +87,7 @@ app.use((err, req, res, next) => {
     console.error('Global Error Handler:', err);
 
     // Log error to MongoDB
-    logAction('error', 'Database/Server Error', req.username || null, {
+    logAction('error', 'oracle', req.username || null, {
         message: err.message,
         stack: err.stack,
         url: req.url,

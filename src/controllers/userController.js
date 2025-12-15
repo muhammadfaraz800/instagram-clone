@@ -135,7 +135,7 @@ export const deleteAccount = async (req, res) => {
         });
         await connection.commit();
         console.log(`Account deleted: ${username}`);
-        logAction('user', 'User Deleted Account', username, { status: 'deleted' });
+        logAction('delete', 'account', username, { status: 'deleted' });
         res.json({ message: 'Account deleted successfully' });
 
     } catch (error) {

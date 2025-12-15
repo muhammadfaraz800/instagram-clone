@@ -966,6 +966,36 @@ input[type="file"]#verification-doc {
     margin-top: 4px;
 }
 
+/* Comment like button */
+.comment-like-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.comment-like-btn svg {
+    width: 12px;
+    height: 12px;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.comment-like-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.comment-like-btn.liked svg {
+    color: #ff3040;
+    fill: #ff3040;
+}
+
+
 /* Modal Actions */
 .post-modal-actions {
     padding: 12px 16px;

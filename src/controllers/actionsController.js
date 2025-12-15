@@ -183,49 +183,49 @@ export const checkUserLikedContent = async (req, res) => {
  * Get users who liked content
  * GET /api/actions/like/:contentId/users
  */
-export const getContentLikes = async (req, res) => {
-    const { contentId } = req.params;
-    let connection;
+//  export const getContentLikes = async (req, res) => {
+//     const { contentId } = req.params;
+//     let connection;
 
-    try {
-        connection = await getPool().getConnection();
+//     try {
+//         connection = await getPool().getConnection();
 
-        const result = await connection.execute(
-            `SELECT 
-                acc.UserName,
-                acc.Profile_Name,
-                acc.Profile_Picture_URL,
-                v.Status AS Verification_Status
-             FROM Likes l
-             JOIN Action a ON l.ActionID = a.ActionID
-             JOIN Account acc ON a.UserName = acc.UserName
-             LEFT JOIN Verification v ON acc.UserName = v.UserName
-             WHERE a.ContentID = :contentId
-             ORDER BY 
-                CASE WHEN v.Status = 'Verified' THEN 1 ELSE 2 END,
-                a.ActionDate DESC`,
-            { contentId },
-            { outFormat: 4002 }
-        );
+//         const result = await connection.execute(
+//             `SELECT 
+//                 acc.UserName,
+//                 acc.Profile_Name,
+//                 acc.Profile_Picture_URL,
+//                 v.Status AS Verification_Status
+//              FROM Likes l
+//              JOIN Action a ON l.ActionID = a.ActionID
+//              JOIN Account acc ON a.UserName = acc.UserName
+//              LEFT JOIN Verification v ON acc.UserName = v.UserName
+//              WHERE a.ContentID = :contentId
+//              ORDER BY 
+//                 CASE WHEN v.Status = 'Verified' THEN 1 ELSE 2 END,
+//                 a.ActionDate DESC`,
+//             { contentId },
+//             { outFormat: 4002 }
+//         );
 
-        const likes = result.rows.map(row => ({
-            username: row.USERNAME,
-            profileName: row.PROFILE_NAME,
-            profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
-            verificationStatus: row.VERIFICATION_STATUS
-        }));
+//         const likes = result.rows.map(row => ({
+//             username: row.USERNAME,
+//             profileName: row.PROFILE_NAME,
+//             profilePictureUrl: row.PROFILE_PICTURE_URL || DEFAULT_AVATAR_PATH,
+//             verificationStatus: row.VERIFICATION_STATUS
+//         }));
 
-        res.json(likes);
+//         res.json(likes);
 
-    } catch (err) {
-        console.error('Error getting likes:', err);
-        res.status(500).json({ message: 'Error getting likes' });
-    } finally {
-        if (connection) {
-            try { await connection.close(); } catch (e) { }
-        }
-    }
-};
+//     } catch (err) {
+//         console.error('Error getting likes:', err);
+//         res.status(500).json({ message: 'Error getting likes' });
+//     } finally {
+//         if (connection) {
+//             try { await connection.close(); } catch (e) { }
+//         }
+//     }
+// };
 
 // ==================== COMMENTS ====================
 

@@ -160,6 +160,13 @@
       const password = document.getElementById('password').value;
 
       if (name && username && email && password) {
+        // Check for spaces in username
+        if (/\s/.test(username)) {
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = 'Username cannot contain spaces.';
+          return;
+        }
+
         step1.classList.add('hidden');
         step2.classList.remove('hidden');
         messageDiv.textContent = ''; // Clear error
