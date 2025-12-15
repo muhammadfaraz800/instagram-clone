@@ -2,6 +2,7 @@
  * Update user details
  */
 import { getPool } from "../config/db.js";
+import { logAction } from '../utils/logger.js';
 
 export const updateUser = async (req, res) => {
     const { profile_name, email, bio, business_type } = req.body;
@@ -133,6 +134,8 @@ export const deleteAccount = async (req, res) => {
             sameSite: 'strict'
         });
         await connection.commit();
+        console.log(`Account deleted: ${username}`);
+        logAction('user', 'User Deleted Account', username, { status: 'deleted' });
         res.json({ message: 'Account deleted successfully' });
 
     } catch (error) {

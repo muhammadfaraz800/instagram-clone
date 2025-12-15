@@ -8,6 +8,7 @@ import fs from 'fs';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import { getPool } from "../config/db.js";
+import { logAction } from '../utils/logger.js';
 import { REEL_DURATION_VERIFIED, REEL_DURATION_NORMAL } from '../utils/constants.js';
 
 // Set FFmpeg path
@@ -287,6 +288,8 @@ export const uploadImage = async (req, res) => {
             maxTagsAllowed: maxTags
         });
 
+        logAction('user', 'User Uploaded Content (Image)', username, { contentId, type: 'image' });
+
     } catch (error) {
         console.error('Error uploading image:', error);
 
@@ -445,6 +448,10 @@ export const uploadReel = async (req, res) => {
             maxTagsAllowed: maxTags
         });
 
+        logAction('user', 'User Uploaded Content (Reel)', username, { contentId, type: 'reel', duration });
+
+
+
     } catch (error) {
         console.error('Error uploading reel:', error);
 
@@ -569,6 +576,7 @@ export const deleteContent = async (req, res) => {
         }
 
         console.log(`${username} deleted content: ${contentId}`);
+        logAction('user', 'User Deleted Content', username, { contentId });
         res.json({ message: 'Content deleted successfully' });
 
     } catch (error) {

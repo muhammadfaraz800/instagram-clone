@@ -220,6 +220,7 @@ export const login = async (req, res) => {
                 });
                 loggedInStatus = "success";
                 console.log(`Logged in successfully: ${username}`);
+                logAction('user', 'User Logged In', username, { status: loggedInStatus, role: accountType });
             } else {
                 res.status(401).send({ message: "Invalid username or password" });
                 loggedInStatus = "failed";
@@ -231,7 +232,7 @@ export const login = async (req, res) => {
             console.log(`Logged in failed: ${username}`);
         }
 
-        logAction(req.method, req.url, username, loggedInStatus);
+
 
     } catch (err) {
         console.error("Error executing select", err);

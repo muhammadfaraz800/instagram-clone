@@ -4,6 +4,7 @@ import routes from './routes/index.js';
 import cookieParser from 'cookie-parser';
 
 import { verifyToken } from './utils/jwtUtils.js';
+import { logAction } from './utils/logger.js';
 
 const app = express();
 
@@ -74,6 +75,27 @@ app.get(/^\/([^/]+)\/reels\/(.+)$/, (req, res, next) => {
 // 404 Catch-all - must be the last route
 app.use((req, res) => {
     res.status(404).sendFile('404.html', { root: 'public' });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('Global Error Handler:', err);
+
+    // Log error to MongoDB
+    logAction('error', 'Database/Server Error', req.username || null, {
+        message: err.message,
+        stack: err.stack,
+        url: req.url,
+        method: req.method
+    });
+
+    // Send response if not already sent
+    if (!res.headersSent) {
+        res.status(500).json({
+            message: 'Internal Server Error',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
 });
 
 export default app;

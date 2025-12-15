@@ -1,18 +1,25 @@
-import fs from 'fs';
-import path from 'path';
-
-const logFilePath = path.join(process.cwd(), 'log.txt');
+import Log from '../models/Log.js';
 
 /**
- * Logs user actions to a file.
- * @param {string} method - HTTP method
- * @param {string} url - Request URL
- * @param {string} username - Username associated with the action
- * @param {string} status - Status of the action (e.g., 'success', 'failed')
+ * Logs an action to MongoDB
+ * @param {string} type - The type of log (e.g., 'user', 'error')
+ * @param {string} description - Description of the event
+ * @param {string|object} user - User ID or username (optional)
+ * @param {object} meta - Additional metadata (optional)
  */
-export const logAction = (method, url, username, status) => {
-    const logMessage = `${Date.now()} ${method} ${url} ${username} ${status} \n`;
-    fs.appendFile(logFilePath, logMessage, (err) => {
-        if (err) console.error('Failed to write to log file:', err);
-    });
+export const logAction = async (type, description, user = null, meta = {}) => {
+    try {
+        await Log.create({
+            log_type: type,
+            description,
+            user,
+            meta
+        });
+        // Console log for debug (optional, can be removed)
+        // console.log(`[LOG - ${type}] ${description}`);
+    } catch (error) {
+        console.error('Logging failed:', error);
+        console.error('Failed Log Details:', { type, description, user, meta });
+        // Fail silently so it doesn't break the main flow
+    }
 };
