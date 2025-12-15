@@ -2392,6 +2392,217 @@ textarea {
         z-index: 1002 !important;
     }
 
+    /* ==========================================================
+       UPLOAD MODAL - MOBILE RESPONSIVE STYLES
+       ========================================================== */
+
+    .upload-modal-overlay {
+        padding: 0;
+        z-index: 1003;
+    }
+
+    .upload-modal {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .upload-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .upload-modal-header {
+        padding: 10px 12px;
+        min-height: 44px;
+        flex-shrink: 0;
+    }
+
+    .upload-modal-header h3 {
+        font-size: 14px;
+    }
+
+    /* Step 1: Select File - Mobile */
+    .upload-select-area {
+        width: 100% !important;
+        padding: 40px 20px;
+        flex: 1;
+    }
+
+    .upload-icon-large {
+        font-size: 60px;
+    }
+
+    .upload-select-area h3 {
+        font-size: 18px;
+        text-align: center;
+    }
+
+    /* Step 2: Crop Area - Mobile */
+    .upload-crop-area {
+        width: 100% !important;
+        flex: 1;
+    }
+
+    .upload-canvas-container {
+        min-height: 300px;
+        flex: 1;
+    }
+
+    .upload-crop-controls {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    /* Step 3: Filters - Mobile */
+    .upload-filter-area {
+        width: 100% !important;
+        flex-direction: column !important;
+        flex: 1;
+    }
+
+    .upload-preview-container {
+        min-width: 100%;
+        max-height: 45vh;
+        flex-shrink: 0;
+    }
+
+    .upload-preview-container canvas {
+        max-height: 45vh;
+    }
+
+    .upload-filters-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+
+    .filters-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .filter-item span {
+        font-size: 10px;
+    }
+
+    /* Step 4: Caption & Tags - Mobile */
+    .upload-caption-area {
+        width: 100% !important;
+        flex-direction: column !important;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .upload-content-area {
+        display: block !important;
+        min-height: auto;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    /* Video/Image preview section - mobile */
+    .upload-final-preview {
+        min-width: unset !important;
+        width: 100% !important;
+        max-height: none;
+        flex-shrink: 0;
+        overflow: visible;
+        display: block;
+    }
+
+    .upload-final-preview canvas {
+        max-height: 200px;
+        width: auto;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .upload-final-preview video {
+        max-height: 200px;
+        width: auto;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* Video preview wrapper - ensure proper stacking */
+    .video-preview-wrapper {
+        display: block;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Form panel section - mobile */
+    .upload-form-panel {
+        width: 100% !important;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        padding: 12px 16px;
+        flex-shrink: 0;
+        overflow-y: auto;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+        background: var(--bg-secondary);
+        display: block;
+    }
+
+    .upload-caption-input {
+        min-height: 80px;
+    }
+
+    .upload-tags-section {
+        padding-top: 10px;
+    }
+
+    /* Video Trim Controls - Mobile - ensure proper stacking */
+    .video-trim-controls {
+        padding: 10px 12px;
+        position: relative;
+        z-index: 0;
+        width: 100% !important;
+        box-sizing: border-box;
+        display: block;
+    }
+
+    .trim-range-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .trim-range-container label {
+        flex: 0 0 auto;
+    }
+
+    .video-message-overlay {
+        font-size: 12px;
+        bottom: 40px;
+        padding: 10px 14px;
+    }
+
+    /* Loading and Success states - Mobile */
+    .upload-loading-area,
+    .upload-success-area {
+        width: 100% !important;
+        padding: 40px 20px;
+    }
+
+    .upload-success-icon {
+        font-size: 60px;
+    }
+
     /* Mobile Bottom Navigation Bar */
     .mobile-bottom-nav {
         position: fixed;

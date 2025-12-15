@@ -1042,9 +1042,10 @@ document.addEventListener("DOMContentLoaded", function () {
             createMenuPopup.style.display = isVisible ? "none" : "flex";
         });
 
-        // Close menu when clicking outside
+        // Close menu when clicking outside (check both desktop and mobile create buttons)
         document.addEventListener("click", function (e) {
-            if (createMenuPopup && !createMenuPopup.contains(e.target) && !createBtn.contains(e.target)) {
+            const isMobileCreateBtn = mobileCreateBtn && mobileCreateBtn.contains(e.target);
+            if (createMenuPopup && !createMenuPopup.contains(e.target) && !createBtn.contains(e.target) && !isMobileCreateBtn) {
                 createMenuPopup.style.display = "none";
             }
         });
