@@ -27,9 +27,9 @@ export const signup = async (req, res) => {
             return res.status(400).send({ message: "Gender is required." });
         }
     }
-    // if (password.length < 8) {
-    //     return res.status(400).send({ message: "Password must be at least 8 characters long." });
-    // }
+    if (password.length < 8) {
+        return res.status(400).send({ message: "Password must be at least 8 characters long." });
+    }
     if (username.length < 3) {
         return res.status(400).send({ message: "Username must be at least 3 characters long." });
     }
