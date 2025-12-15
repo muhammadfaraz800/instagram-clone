@@ -7,6 +7,7 @@ import verificationRoutes from './verification.js';
 import contentRoutes from './content.js';
 import reelsRoutes from './reels.js';
 import actionsRoutes from './actions.js';
+import exploreRoutes from './explore.js';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.use('/verification', verificationRoutes);
 router.use('/content', contentRoutes);
 router.use('/reels', reelsRoutes);
 router.use('/actions', actionsRoutes);
+router.use('/explore', exploreRoutes);
 
 export default router;
 

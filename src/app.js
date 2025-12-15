@@ -17,6 +17,11 @@ app.use('/uploads', verifyToken, express.static('uploads')); // Serve uploaded f
 // Routes
 app.use('/api', routes);
 
+// Explore page route - serve explore.html for /explore
+app.get('/explore', (req, res) => {
+    res.sendFile('explore.html', { root: 'public' });
+});
+
 // Reels page routes - serve reels.html for /reels and /reels/:contentId
 // These must come before profile routes
 app.get('/reels', (req, res) => {

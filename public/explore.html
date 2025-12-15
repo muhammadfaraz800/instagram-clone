@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore • Instagram</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="explore.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+
+<body>
+    <div class="explore-app-container">
+        <!-- Left Sidebar -->
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- Main Explore Content -->
+        <main class="explore-main">
+            <div class="explore-grid" id="exploreGrid">
+                <!-- Grid items will be loaded dynamically -->
+                <div class="explore-loading" id="exploreLoading">
+                    <div class="explore-spinner"></div>
+                    <p>Loading explore...</p>
+                </div>
+            </div>
+
+            <!-- Infinite scroll sentinel -->
+            <div class="explore-scroll-sentinel" id="scrollSentinel"></div>
+        </main>
+    </div>
+
+    <!-- Post Detail Modal -->
+    <div class="explore-modal-overlay hidden" id="postModal">
+        <div class="explore-modal">
+            <button class="explore-modal-close" id="modalClose">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="explore-modal-content">
+                <!-- Media Section (Left) -->
+                <div class="explore-modal-media" id="modalMedia">
+                    <!-- Image or video will be inserted here -->
+                </div>
+
+                <!-- Info Section (Right) -->
+                <div class="explore-modal-info">
+                    <!-- Header - Author Info -->
+                    <div class="explore-modal-header" id="modalHeader">
+                        <div class="explore-author-info">
+                            <img src="/uploads/default/default-avatar.png" alt="" class="explore-author-avatar"
+                                id="authorAvatar">
+                            <div class="explore-author-details">
+                                <a href="#" class="explore-author-username" id="authorUsername">username</a>
+                                <span class="explore-verified-badge" id="authorVerified" style="display: none;">
+                                    <svg aria-label="Verified" fill="rgb(0, 149, 246)" height="12" role="img"
+                                        viewBox="0 0 40 40" width="12">
+                                        <title>Verified</title>
+                                        <path
+                                            d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+                                            fill-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <button class="explore-more-btn">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                    </div>
+
+                    <!-- Caption & Comments -->
+                    <div class="explore-modal-comments" id="modalComments">
+                        <!-- Caption -->
+                        <div class="explore-caption" id="postCaption">
+                            <img src="/uploads/default/default-avatar.png" alt="" class="explore-comment-avatar"
+                                id="captionAvatar">
+                            <div class="explore-comment-content">
+                                <span class="explore-comment-username" id="captionUsername">username</span>
+                                <span class="explore-caption-text" id="captionText"></span>
+                                <div class="explore-caption-tags" id="captionTags"></div>
+                                <span class="explore-comment-time" id="captionTime"></span>
+                            </div>
+                        </div>
+
+                        <!-- Comments List -->
+                        <div class="explore-comments-list" id="commentsList">
+                            <!-- Comments will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="explore-modal-actions">
+                        <div class="explore-action-buttons">
+                            <button class="explore-action-btn" id="likeBtn">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <button class="explore-action-btn" id="commentBtn">
+                                <i class="fa-regular fa-comment"></i>
+                            </button>
+                        </div>
+                        <div class="explore-likes-count" id="likesCount">0 likes</div>
+                        <div class="explore-post-time" id="postTime"></div>
+                    </div>
+
+                    <!-- Add Comment -->
+                    <div class="explore-add-comment">
+                        <input type="text" placeholder="Add a comment..." id="commentInput">
+                        <button class="explore-post-comment-btn" id="postCommentBtn">Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="explore.js"></script>
+</body>
+
+</html>

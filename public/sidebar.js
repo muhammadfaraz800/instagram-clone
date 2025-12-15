@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <span>Search</span>
                 </a>
-                <a href="#" class="menu-item" id="nav-explore">
+                <a href="/explore" class="menu-item" id="nav-explore">
                     <i class="fa-regular fa-compass"></i>
                     <span>Explore</span>
                 </a>
@@ -197,10 +197,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         <i class="fa-solid fa-gear"></i>
                         <span>Settings</span>
                     </a>
-                    <a href="#" class="more-option-item">
+                    <!--<a href="#" class="more-option-item">
                         <i class="fa-solid fa-ban"></i>
                         <span>Blocked accounts</span>
-                    </a>
+                    </a>-->
                      <!-- Profile with Picture -->
                     <a href="#" class="more-option-item" id="nav-profile-menu">
                          <div class="profile-icon-menu" style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
@@ -462,7 +462,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <a href="#" class="mobile-more-item" id="mobile-nav-explore">
+            <a href="/explore" class="mobile-more-item" id="mobile-nav-explore">
                 <i class="fa-regular fa-compass"></i>
                 <span>Explore</span>
             </a>
@@ -526,6 +526,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("nav-home").classList.add("active");
     } else if (currentPath.startsWith("/reels")) {
         document.getElementById("nav-reels").classList.add("active");
+    } else if (currentPath.startsWith("/explore")) {
+        document.getElementById("nav-explore").classList.add("active");
     }
 
     // Toggle More Menu Logic
