@@ -430,8 +430,93 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     `;
 
+    // Mobile Bottom Navigation HTML
+    const mobileBottomNavHTML = `
+        <!-- Mobile Bottom Navigation -->
+        <div class="mobile-bottom-nav" id="mobileBottomNav">
+            <a href="/" class="mobile-nav-item" id="mobile-nav-home">
+                <i class="fa-solid fa-house"></i>
+            </a>
+            <a href="#" class="mobile-nav-item" id="mobile-nav-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </a>
+            <a href="#" class="mobile-nav-item" id="mobile-nav-create">
+                <i class="fa-regular fa-square-plus"></i>
+            </a>
+            <a href="/reels" class="mobile-nav-item" id="mobile-nav-reels">
+                <i class="fa-solid fa-clapperboard"></i>
+            </a>
+            <a href="#" class="mobile-nav-item" id="mobile-nav-more">
+                <i class="fa-solid fa-bars"></i>
+            </a>
+        </div>
+        
+        <!-- Mobile More Menu Overlay -->
+        <div class="mobile-more-overlay" id="mobileMoreOverlay"></div>
+        
+        <!-- Mobile More Menu -->
+        <div class="mobile-more-menu" id="mobileMoreMenu">
+            <div class="mobile-more-header">
+                <span>Menu</span>
+                <button class="mobile-more-close" id="mobileMoreClose">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <a href="#" class="mobile-more-item" id="mobile-nav-explore">
+                <i class="fa-regular fa-compass"></i>
+                <span>Explore</span>
+            </a>
+            <a href="#" class="mobile-more-item" id="mobile-nav-notifications">
+                <i class="fa-regular fa-heart"></i>
+                <span>Notifications</span>
+            </a>
+            <a href="#" class="mobile-more-item" id="mobile-nav-profile">
+                <i class="fa-regular fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/settings.html" class="mobile-more-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+            <div class="mobile-more-divider"></div>
+            <a href="#" class="mobile-more-item" id="mobile-logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </a>
+        </div>
+        
+        <!-- Mobile Notifications Panel -->
+        <div class="mobile-notifications-panel" id="mobileNotificationsPanel">
+            <div class="mobile-notifications-header">
+                <h3>Notifications</h3>
+                <button class="mobile-notifications-close" id="mobileNotificationsClose">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="mobile-notifications-content" id="mobileNotificationsContent">
+                <div class="notif-empty">Loading notifications...</div>
+            </div>
+        </div>
+        
+        <!-- Mobile Search Panel -->
+        <div class="mobile-search-panel" id="mobileSearchPanel">
+            <div class="mobile-search-header">
+                <button class="mobile-search-back" id="mobileSearchBack">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Search">
+            </div>
+            <div class="mobile-search-results" id="mobileSearchResults">
+                <div class="search-empty-state">
+                    <span>Recent</span>
+                    <div class="no-recent-searches">No recent searches.</div>
+                </div>
+            </div>
+        </div>
+    `;
+
     // Inject Sidebar and Panels
-    sidebarContainer.innerHTML = sidebarHTML + searchPanelHTML + createMenuHTML + uploadModalHTML;
+    sidebarContainer.innerHTML = sidebarHTML + searchPanelHTML + createMenuHTML + uploadModalHTML + mobileBottomNavHTML;
 
     // Highlight Active Link Logic
     const currentPath = window.location.pathname;
@@ -693,6 +778,202 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error logging out:', error);
             }
         });
+    }
+
+    // ========================================
+    // MOBILE NAVIGATION FUNCTIONALITY
+    // ========================================
+
+    const mobileMoreBtn = document.getElementById("mobile-nav-more");
+    const mobileMoreMenu = document.getElementById("mobileMoreMenu");
+    const mobileMoreOverlay = document.getElementById("mobileMoreOverlay");
+    const mobileMoreClose = document.getElementById("mobileMoreClose");
+    const mobileNotificationsBtn = document.getElementById("mobile-nav-notifications");
+    const mobileNotificationsPanel = document.getElementById("mobileNotificationsPanel");
+    const mobileNotificationsClose = document.getElementById("mobileNotificationsClose");
+    const mobileNotificationsContent = document.getElementById("mobileNotificationsContent");
+    const mobileSearchBtn = document.getElementById("mobile-nav-search");
+    const mobileSearchPanel = document.getElementById("mobileSearchPanel");
+    const mobileSearchBack = document.getElementById("mobileSearchBack");
+    const mobileSearchInput = document.getElementById("mobileSearchInput");
+    const mobileSearchResults = document.getElementById("mobileSearchResults");
+    const mobileNavProfile = document.getElementById("mobile-nav-profile");
+    const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
+    const mobileCreateBtn = document.getElementById("mobile-nav-create");
+
+    // Helper to close all mobile panels
+    function closeMobilePanels() {
+        if (mobileMoreMenu) mobileMoreMenu.classList.remove("open");
+        if (mobileMoreOverlay) mobileMoreOverlay.classList.remove("open");
+        if (mobileNotificationsPanel) mobileNotificationsPanel.classList.remove("open");
+        if (mobileSearchPanel) mobileSearchPanel.classList.remove("open");
+    }
+
+    // Mobile More Menu Toggle
+    if (mobileMoreBtn && mobileMoreMenu && mobileMoreOverlay) {
+        mobileMoreBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const isOpen = mobileMoreMenu.classList.contains("open");
+            closeMobilePanels();
+            if (!isOpen) {
+                mobileMoreMenu.classList.add("open");
+                mobileMoreOverlay.classList.add("open");
+            }
+        });
+
+        mobileMoreClose.addEventListener("click", function () {
+            closeMobilePanels();
+        });
+
+        mobileMoreOverlay.addEventListener("click", function () {
+            closeMobilePanels();
+        });
+    }
+
+    // Mobile Notifications
+    if (mobileNotificationsBtn && mobileNotificationsPanel) {
+        mobileNotificationsBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+            closeMobilePanels();
+            mobileNotificationsPanel.classList.add("open");
+
+            // Fetch and render notifications
+            await fetchFollowRequests();
+            if (mobileNotificationsContent) {
+                mobileNotificationsContent.innerHTML = generateNotificationItems();
+                // Attach handlers to the mobile notification buttons
+                attachMobileNotificationHandlers();
+            }
+        });
+
+        if (mobileNotificationsClose) {
+            mobileNotificationsClose.addEventListener("click", function () {
+                mobileNotificationsPanel.classList.remove("open");
+            });
+        }
+    }
+
+    // Attach handlers to mobile notification buttons
+    function attachMobileNotificationHandlers() {
+        const confirmBtns = mobileNotificationsContent.querySelectorAll('.notif-btn-confirm');
+        const deleteBtns = mobileNotificationsContent.querySelectorAll('.notif-btn-delete');
+
+        confirmBtns.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const username = btn.dataset.username;
+                await handleAcceptRequest(username);
+                // Re-render mobile notifications
+                mobileNotificationsContent.innerHTML = generateNotificationItems();
+                attachMobileNotificationHandlers();
+            });
+        });
+
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const username = btn.dataset.username;
+                await handleRejectRequest(username);
+                // Re-render mobile notifications
+                mobileNotificationsContent.innerHTML = generateNotificationItems();
+                attachMobileNotificationHandlers();
+            });
+        });
+    }
+
+    // Mobile Search
+    if (mobileSearchBtn && mobileSearchPanel) {
+        mobileSearchBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeMobilePanels();
+            mobileSearchPanel.classList.add("open");
+            if (mobileSearchInput) mobileSearchInput.focus();
+        });
+
+        if (mobileSearchBack) {
+            mobileSearchBack.addEventListener("click", function () {
+                mobileSearchPanel.classList.remove("open");
+            });
+        }
+
+        // Mobile search input handler
+        if (mobileSearchInput) {
+            mobileSearchInput.addEventListener("keypress", async function (e) {
+                if (e.key === "Enter") {
+                    const query = mobileSearchInput.value.trim();
+                    if (query && mobileSearchResults) {
+                        try {
+                            const response = await fetch(`/api/user/search?q=${encodeURIComponent(query)}`);
+                            if (response.ok) {
+                                const results = await response.json();
+                                if (results.length === 0) {
+                                    mobileSearchResults.innerHTML = '<div class="search-no-results">No results found.</div>';
+                                } else {
+                                    mobileSearchResults.innerHTML = results.map(user => `
+                                        <a href="/${user.USERNAME || user.userName}" class="search-result-item">
+                                            <div class="search-avatar">
+                                                <img src="${user.PROFILE_PICTURE_URL || user.profile_Picture_URL || DEFAULT_AVATAR_PATH}" alt="${user.USERNAME || user.userName}">
+                                            </div>
+                                            <div class="search-user-info">
+                                                <span class="search-username">${user.USERNAME || user.userName}</span>
+                                                <span class="search-fullname">${user.PROFILE_NAME || user.profile_Name || ''}</span>
+                                            </div>
+                                        </a>
+                                    `).join('');
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Mobile search error:", error);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Mobile Profile Link - update with current user's username
+    fetch('/api/auth/me')
+        .then(res => res.ok ? res.json() : null)
+        .then(user => {
+            if (user && user.username && mobileNavProfile) {
+                mobileNavProfile.href = `/${user.username}`;
+            }
+        })
+        .catch(() => { });
+
+    // Mobile Create - opens the same create menu popup
+    if (mobileCreateBtn) {
+        mobileCreateBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeMobilePanels();
+            const popup = document.getElementById("createMenuPopup");
+            if (popup) {
+                const isVisible = popup.style.display !== "none";
+                popup.style.display = isVisible ? "none" : "flex";
+            }
+        });
+    }
+
+    // Mobile Logout
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/auth/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Mobile logout error:', error);
+            }
+        });
+    }
+
+    // Highlight active mobile nav item
+    if (currentPath === "/" || currentPath.includes("index.html")) {
+        document.getElementById("mobile-nav-home")?.classList.add("active");
+    } else if (currentPath.startsWith("/reels")) {
+        document.getElementById("mobile-nav-reels")?.classList.add("active");
     }
 
     // ========================================

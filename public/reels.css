@@ -501,6 +501,8 @@
 @media (max-width: 768px) {
     .reels-main {
         margin-left: 0;
+        padding-bottom: 60px;
+        /* Space for mobile bottom nav */
     }
 
     .sidebar-collapsed-mode .sidebar {
@@ -509,20 +511,28 @@
 
     .reels-container {
         max-width: 100%;
+        height: calc(100vh - 60px);
+        /* Account for bottom nav */
+        padding-bottom: 10px;
     }
 
     .reel-item {
         gap: 8px;
         padding: 10px;
+        height: calc(100vh - 70px);
+        /* Account for bottom nav */
     }
 
     .reel-video-container {
         max-width: calc(100% - 60px);
+        height: calc(100vh - 90px);
+        /* Account for bottom nav */
     }
 
     .reel-actions {
         gap: 12px;
-        padding-bottom: 40px;
+        padding-bottom: 80px;
+        /* Extra space above bottom nav */
     }
 
     .reel-action-btn i {
@@ -531,5 +541,14 @@
 
     .reels-nav-arrows {
         display: none;
+    }
+
+    /* Skeleton loading adjustments for mobile */
+    .reel-skeleton {
+        height: calc(100vh - 70px);
+    }
+
+    .reel-skeleton-video {
+        height: calc(100vh - 90px);
     }
 }
