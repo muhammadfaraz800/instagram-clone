@@ -23,7 +23,7 @@ const logSchema = new mongoose.Schema({
         default: {}
     }
 }, {
-    collection: 'user_logs' // Strictly using this collection as requested
+    collection: 'user_logs'
 });
 
 const Log = mongoose.model('Log', logSchema);
