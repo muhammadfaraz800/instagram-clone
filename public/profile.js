@@ -242,10 +242,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
 
                 // Suggest button
-                const suggestBtn = document.createElement('button');
-                suggestBtn.className = 'suggest-btn';
-                suggestBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
-                profileBioActions.appendChild(suggestBtn);
+                // const suggestBtn = document.createElement('button');
+                // suggestBtn.className = 'suggest-btn';
+                // suggestBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+                // profileBioActions.appendChild(suggestBtn);
             } else if (isPending) {
                 // Requested button - pending follow request for private account
                 const requestedBtn = document.createElement('button');
