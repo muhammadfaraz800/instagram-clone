@@ -41,6 +41,43 @@
         </main>
     </div>
 
+    <!-- Likes Modal (popup overlay) -->
+    <div class="modal-overlay hidden" id="likes-modal">
+        <div class="likes-modal-content">
+            <div class="likes-modal-header">
+                <button class="likes-modal-close" id="likes-modal-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <h3>Likes</h3>
+                <div class="spacer"></div>
+            </div>
+            <div class="likes-modal-body" id="likes-list">
+                <!-- User items loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Panel (slide-in from right) -->
+    <div class="comments-panel" id="comments-panel">
+        <div class="comments-panel-header">
+            <button class="comments-panel-close" id="comments-panel-close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3>Comments</h3>
+            <div class="spacer"></div>
+        </div>
+        <div class="comments-list" id="comments-list">
+            <!-- Comments loaded dynamically -->
+        </div>
+        <div class="comments-input-container">
+            <img class="comment-user-avatar" id="comment-user-avatar" src="/uploads/default/default-avatar.png" alt="">
+            <input type="text" placeholder="Add a comment..." id="comment-input">
+            <button class="post-comment-btn" id="post-comment-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
     <script src="reels.js"></script>
 </body>
 

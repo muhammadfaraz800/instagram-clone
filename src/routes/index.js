@@ -6,6 +6,7 @@ import notificationRoutes from './notifications.js';
 import verificationRoutes from './verification.js';
 import contentRoutes from './content.js';
 import reelsRoutes from './reels.js';
+import actionsRoutes from './actions.js';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/verification', verificationRoutes);
 router.use('/content', contentRoutes);
 router.use('/reels', reelsRoutes);
+router.use('/actions', actionsRoutes);
 
 export default router;
 
