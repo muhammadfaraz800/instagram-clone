@@ -441,6 +441,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Show Modal
         postModal.classList.add('active');
+        setupPostModalInteractions(post);
     }
 
     // ---------- Post Options Modal (Curtain style) ----------
@@ -522,7 +523,228 @@ document.addEventListener('DOMContentLoaded', async function () {
         postModal.classList.remove('active');
         // Stop video playback when closed
         postModalMediaContainer.innerHTML = '';
+
+        // Reset listeners/state if needed
+        const likeBtn = postModal.querySelector('.action-btn:first-child');
+        if (likeBtn) {
+            const newBtn = likeBtn.cloneNode(true);
+            likeBtn.parentNode.replaceChild(newBtn, likeBtn);
+        }
     }
+
+    // ---------- Post Modal Interactions (Like & Comment) ----------
+
+    function setupPostModalInteractions(post) {
+        const contentId = post.contentId;
+        const likeBtn = postModal.querySelector('.action-btn:first-child');
+        const commentInput = postModal.querySelector('.post-add-comment input');
+        const postBtn = postModal.querySelector('.post-add-comment button');
+        const commentsSection = document.getElementById('post-comments-section');
+
+        // Reset Comment Input
+        commentInput.value = '';
+        postBtn.disabled = true;
+
+        // Reset Like Button (to outline initially, update after check)
+        updateModalLikeButton(likeBtn, false);
+
+        // Fetch and Render Comments
+        fetchPostComments(contentId);
+
+        // Check Like Status
+        checkPostLikeStatus(contentId, likeBtn);
+
+        // Like Button Listener
+        // Remove old listener by cloning
+        const newLikeBtn = likeBtn.cloneNode(true);
+        likeBtn.parentNode.replaceChild(newLikeBtn, likeBtn);
+
+        newLikeBtn.addEventListener('click', () => togglePostLike(newLikeBtn, contentId));
+
+        // Post Comment Listener
+        const newPostBtn = postBtn.cloneNode(true);
+        postBtn.parentNode.replaceChild(newPostBtn, postBtn);
+
+        newPostBtn.addEventListener('click', () => postNewComment(contentId, commentInput, newPostBtn));
+
+        // Input Listener
+        commentInput.oninput = () => {
+            newPostBtn.disabled = commentInput.value.trim().length === 0;
+        };
+        // Enter key to post
+        commentInput.onkeypress = (e) => {
+            if (e.key === 'Enter' && !newPostBtn.disabled) {
+                postNewComment(contentId, commentInput, newPostBtn);
+            }
+        };
+    }
+
+    async function fetchPostComments(contentId) {
+        const section = document.getElementById('post-comments-section');
+        // Keep caption, remove others
+        const captionItem = section.querySelector('.caption-item');
+        section.innerHTML = '';
+        if (captionItem) section.appendChild(captionItem);
+
+        try {
+            const response = await fetch(`/api/actions/comment/${contentId}`);
+            if (response.ok) {
+                const comments = await response.json();
+                renderPostComments(comments, section);
+            }
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    }
+
+    function renderPostComments(comments, container) {
+        comments.forEach(comment => {
+            const el = document.createElement('div');
+            el.className = 'comment-item';
+            el.innerHTML = `
+                <img src="${comment.profilePictureUrl || '/uploads/default/default-avatar.png'}" alt="${comment.username}" class="comment-avatar">
+                <div class="comment-content">
+                    <span class="comment-username">${comment.username}</span>
+                    <span class="comment-text">${escapeHtml(comment.text)}</span>
+                    <div class="comment-time">${timeAgo(new Date(comment.actionDate))}</div>
+                </div>
+            `;
+            container.appendChild(el);
+
+            // Nested replies could be recursive here, but for now simple list is better than nothing
+            if (comment.replies && comment.replies.length > 0) {
+                comment.replies.forEach(reply => {
+                    const replyEl = document.createElement('div');
+                    replyEl.className = 'comment-item reply-item';
+                    replyEl.style.marginLeft = '40px';
+                    replyEl.innerHTML = `
+                        <img src="${reply.profilePictureUrl || '/uploads/default/default-avatar.png'}" alt="${reply.username}" class="comment-avatar" style="width: 24px; height: 24px;">
+                        <div class="comment-content">
+                            <span class="comment-username">${reply.username}</span>
+                            <span class="comment-text">${escapeHtml(reply.text)}</span>
+                            <div class="comment-time">${timeAgo(new Date(reply.actionDate))}</div>
+                        </div>
+                    `;
+                    container.appendChild(replyEl);
+                });
+            }
+        });
+    }
+
+    async function checkPostLikeStatus(contentId, btn) {
+        try {
+            const response = await fetch(`/api/actions/like/${contentId}/check`);
+            if (response.ok) {
+                const data = await response.json();
+                updateModalLikeButton(btn, data.liked);
+                if (data.liked) btn.classList.add('liked');
+            }
+        } catch (error) {
+            console.error('Error checking like status:', error);
+        }
+    }
+
+    async function togglePostLike(btn, contentId) {
+        const isLiked = btn.classList.contains('liked');
+        const countEl = document.getElementById('post-modal-likes');
+
+        // Optimistic Update
+        btn.classList.toggle('liked');
+        updateModalLikeButton(btn, !isLiked);
+
+        // Parse current count
+        let currentCount = parseInt(countEl.textContent.replace(/\D/g, '')) || 0;
+        currentCount = isLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
+        countEl.textContent = `${formatNumber(currentCount)} likes`;
+
+        try {
+            const method = isLiked ? 'DELETE' : 'POST';
+            const response = await fetch(`/api/actions/like/${contentId}`, { method });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Ensure synced
+                const newLiked = data.liked !== undefined ? data.liked : !isLiked;
+                btn.classList.toggle('liked', newLiked);
+                updateModalLikeButton(btn, newLiked);
+                if (data.likeCount !== undefined) {
+                    countEl.textContent = `${formatNumber(data.likeCount)} likes`;
+                }
+            } else {
+                // Revert
+                btn.classList.toggle('liked', isLiked);
+                updateModalLikeButton(btn, isLiked);
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            // Revert
+            btn.classList.toggle('liked', isLiked);
+            updateModalLikeButton(btn, isLiked);
+        }
+    }
+
+    function updateModalLikeButton(btn, isLiked) {
+        const icon = btn.querySelector('i');
+        const svg = btn.querySelector('svg');
+
+        // If it's using FontAwesome <i> tag
+        if (icon) {
+            // Replace <i> with <svg> for consistency with reels or just style the <i>
+            // But user wants filled red heart.
+            // Let's replace <i> with the SVG used in reels.
+            const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            newSvg.setAttribute('aria-label', isLiked ? 'Unlike' : 'Like');
+            newSvg.setAttribute('height', '24');
+            newSvg.setAttribute('width', '24');
+            newSvg.setAttribute('viewBox', '0 0 24 24');
+            btn.innerHTML = '';
+            btn.appendChild(newSvg);
+            fillSvgContent(newSvg, isLiked);
+        } else if (svg) {
+            fillSvgContent(svg, isLiked);
+        }
+    }
+
+    function fillSvgContent(svg, isLiked) {
+        if (isLiked) {
+            svg.innerHTML = '<title>Unlike</title><path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938Z"></path>';
+            svg.setAttribute('fill', '#ff3040');
+            svg.removeAttribute('stroke');
+        } else {
+            svg.innerHTML = '<title>Like</title><path d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z"></path>';
+            svg.setAttribute('fill', 'currentColor');
+            svg.removeAttribute('stroke');
+        }
+    }
+
+    async function postNewComment(contentId, input, btn) {
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+            const response = await fetch(`/api/actions/comment/${contentId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+
+            if (response.ok) {
+                input.value = '';
+                btn.disabled = true;
+                // Refresh comments
+                fetchPostComments(contentId);
+            }
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
 
     // Utility: Simple Time Ago
     function timeAgo(date) {
