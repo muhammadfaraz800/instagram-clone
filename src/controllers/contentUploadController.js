@@ -196,7 +196,6 @@ async function trimVideo(inputPath, outputPath, startTime, endTime) {
             ])
             .output(outputPath)
             .on('end', () => {
-                console.log(`Video trimmed successfully: ${startTime}s to ${endTime}s`);
                 resolve();
             })
             .on('error', (err) => {
@@ -369,10 +368,12 @@ export const uploadReel = async (req, res) => {
             const trimmedFileName = `${baseName}_trimmed${ext}`;
             trimmedFilePath = path.join(reelUploadDir, trimmedFileName);
 
-            console.log(`Trimming video: ${startTime}s to ${endTime}s`);
+            console.log(`${username} trimming video: ${startTime}s to ${endTime}s`);
 
             // Perform actual video trimming with FFmpeg
             await trimVideo(originalFilePath, trimmedFilePath, startTime, endTime);
+
+            console.log(`${username} successfully trimmed video from ${startTime}s to ${endTime}s (${endTime - startTime}s duration)`);
 
             // Delete the original untrimmed file
             try { fs.unlinkSync(originalFilePath); } catch (e) {
@@ -567,6 +568,7 @@ export const deleteContent = async (req, res) => {
             }
         }
 
+        console.log(`${username} deleted content: ${contentId}`);
         res.json({ message: 'Content deleted successfully' });
 
     } catch (error) {

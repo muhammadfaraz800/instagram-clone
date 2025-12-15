@@ -26,11 +26,80 @@ document.addEventListener('DOMContentLoaded', function () {
     const specificContentId = pathParts.length > 2 ? pathParts[2] : null;
 
     /**
+     * Render skeleton loading items
+     * @param {number} count - Number of skeleton items to render
+     */
+    function renderSkeletons(count = 3) {
+        const skeletonHtml = Array(count).fill(0).map(() => `
+            <div class="reel-skeleton">
+                <div class="reel-skeleton-video">
+                    <div class="reel-skeleton-overlay">
+                        <div class="reel-skeleton-user">
+                            <div class="reel-skeleton-avatar skeleton"></div>
+                            <div class="reel-skeleton-username skeleton"></div>
+                        </div>
+                        <div class="reel-skeleton-caption skeleton"></div>
+                        <div class="reel-skeleton-caption-short skeleton"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        reelsContainer.innerHTML = skeletonHtml;
+    }
+
+    /**
+     * Remove skeleton loading items
+     */
+    function removeSkeletons() {
+        const skeletons = reelsContainer.querySelectorAll('.reel-skeleton');
+        skeletons.forEach(skeleton => skeleton.remove());
+    }
+
+    /**
+     * Preload video files to ensure smooth playback
+     * @param {Array} reelsToPreload - Array of reel objects with video paths
+     * @returns {Promise} - Resolves when all videos are preloaded
+     */
+    function preloadVideos(reelsToPreload) {
+        const preloadPromises = reelsToPreload.map(reel => {
+            return new Promise((resolve) => {
+                const video = document.createElement('video');
+                video.preload = 'auto';
+
+                // Resolve when video can play through without buffering
+                video.oncanplaythrough = () => {
+                    resolve();
+                };
+
+                // Also resolve on error to not block forever
+                video.onerror = () => {
+                    console.warn('Failed to preload video:', reel.path);
+                    resolve();
+                };
+
+                // Timeout fallback - don't wait more than 10 seconds per video
+                setTimeout(() => {
+                    resolve();
+                }, 10000);
+
+                video.src = reel.path;
+                video.load();
+            });
+        });
+
+        return Promise.all(preloadPromises);
+    }
+
+    /**
      * Initialize the reels page
      */
     async function init() {
-        // Initial fetch
-        await fetchReels();
+        // Show skeleton while loading
+        renderSkeletons(3);
+
+        // Initial fetch (this will handle preloading internally)
+        await fetchReels(false, true); // Pass flag to indicate initial load with preload
 
         if (reels.length > 0) {
             setupNavigation();
@@ -49,8 +118,9 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Fetch reels from API
      * @param {boolean} append - Whether to append to existing reels or replace
+     * @param {boolean} preload - Whether to preload videos before rendering (for initial load)
      */
-    async function fetchReels(append = false) {
+    async function fetchReels(append = false, preload = false) {
         if (isLoading || !hasMoreReels) return;
 
         try {
@@ -95,6 +165,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             reels = newReels;
                         }
+
+                        // If preload flag is set, wait for videos to buffer before rendering
+                        if (preload) {
+                            console.log('Preloading videos for smooth playback...');
+                            await preloadVideos(reels);
+                            console.log('Videos preloaded, rendering reels...');
+                        }
+
                         renderReels(reels, false); // Render all
                     }
                 } else if (!append && reels.length === 0) {

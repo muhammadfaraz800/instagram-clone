@@ -1,4 +1,14 @@
 
+// Hide splash screen when ready
+function hideSplashScreen() {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+        splash.classList.add('hidden');
+        // Remove from DOM after transition
+        setTimeout(() => splash.remove(), 400);
+    }
+}
+
 // Auth Check
 fetch('/api/auth/me')
     .then(res => {
@@ -35,6 +45,13 @@ fetch('/api/auth/me')
             if (smallProfilePic) {
                 smallProfilePic.src = user.profilePictureUrl;
             }
+        }
+
+        // Hide splash screen after content is ready
+        if (document.readyState === 'complete') {
+            hideSplashScreen();
+        } else {
+            window.addEventListener('load', hideSplashScreen);
         }
     })
     .catch(err => {
