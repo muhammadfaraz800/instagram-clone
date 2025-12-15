@@ -110,8 +110,8 @@ The application will run at `http://localhost:3000`.
 
 ```
 ├── public/                 # Static frontend files (HTML, CSS, JS)
-│   ├── css/                # Stylesheets
-│   ├── js/                 # Client-side scripts
+│   ├── .css                # Stylesheets
+│   ├── .js                 # Client-side scripts
 │   └── ...                 # HTML pages
 ├── src/
 │   ├── config/             # Database connection setups
