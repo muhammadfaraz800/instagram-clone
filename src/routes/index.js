@@ -8,6 +8,7 @@ import contentRoutes from './content.js';
 import reelsRoutes from './reels.js';
 import actionsRoutes from './actions.js';
 import exploreRoutes from './explore.js';
+import feedRoutes from './feed.js';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.use('/content', contentRoutes);
 router.use('/reels', reelsRoutes);
 router.use('/actions', actionsRoutes);
 router.use('/explore', exploreRoutes);
+router.use('/feed', feedRoutes);
 
 export default router;
 
