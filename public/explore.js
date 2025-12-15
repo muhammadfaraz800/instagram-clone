@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasMoreContent = true;
     const seed = Math.random().toString(36).substring(2, 15);
     let currentPostId = null;
+    let isGlobalMuted = true; // Track global mute state - default to muted
 
     // Elements
     const exploreGrid = document.getElementById('exploreGrid');
@@ -281,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             video.autoplay = true;
             video.loop = true;
             video.playsInline = true;
+            video.muted = isGlobalMuted; // Use global mute state - default muted
             videoWrapper.appendChild(video);
 
             // Play/Pause overlay (shows when paused)
@@ -290,10 +292,12 @@ document.addEventListener('DOMContentLoaded', () => {
             playOverlay.style.display = 'none';
             videoWrapper.appendChild(playOverlay);
 
-            // Volume button
+            // Volume button - sync icon with actual mute state
             const volumeBtn = document.createElement('button');
             volumeBtn.className = 'explore-video-volume-btn';
-            volumeBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            volumeBtn.innerHTML = isGlobalMuted ?
+                '<i class="fa-solid fa-volume-xmark"></i>' :
+                '<i class="fa-solid fa-volume-high"></i>';
             videoWrapper.appendChild(volumeBtn);
 
             // Click to play/pause
@@ -307,10 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Volume toggle
+            // Volume toggle - persist state globally
             volumeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 video.muted = !video.muted;
+                isGlobalMuted = video.muted; // Persist state for future videos
                 volumeBtn.innerHTML = video.muted ?
                     '<i class="fa-solid fa-volume-xmark"></i>' :
                     '<i class="fa-solid fa-volume-high"></i>';
