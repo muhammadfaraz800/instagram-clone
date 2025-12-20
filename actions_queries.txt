@@ -1,0 +1,147 @@
+-- likeContent
+SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId
+
+-- likeContent
+INSERT INTO Action (ActionID, UserName, ContentID, ActionDate)
+VALUES (:actionId, :username, :contentId, CURRENT_TIMESTAMP)
+
+-- likeContent
+INSERT INTO Likes (ActionID) VALUES (:actionId)
+
+-- likeContent
+SELECT COUNT(*) AS LIKE_COUNT FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.ContentID = :contentId
+
+-- unlikeContent
+SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId
+
+-- unlikeContent
+DELETE FROM Action WHERE ActionID = :actionId
+
+-- unlikeContent
+SELECT COUNT(*) AS LIKE_COUNT FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.ContentID = :contentId
+
+-- checkUserLikedContent
+SELECT l.ActionID FROM Likes l
+JOIN Action a ON l.ActionID = a.ActionID
+WHERE a.UserName = :username AND a.ContentID = :contentId
+
+-- getContentLikes (Commented Out)
+SELECT 
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status
+ FROM Likes l
+ JOIN Action a ON l.ActionID = a.ActionID
+ JOIN Account acc ON a.UserName = acc.UserName
+ LEFT JOIN Verification v ON acc.UserName = v.UserName
+ WHERE a.ContentID = :contentId
+ ORDER BY 
+    CASE WHEN v.Status = 'Verified' THEN 1 ELSE 2 END,
+    a.ActionDate DESC
+
+-- addComment
+INSERT INTO Action (ActionID, UserName, ContentID, ActionDate)
+VALUES (:actionId, :username, :contentId, CURRENT_TIMESTAMP)
+
+-- addComment
+INSERT INTO Comments (ActionID, CommentText, ParentCommentID)
+VALUES (:actionId, :text, :parentCommentId)
+
+-- addComment
+SELECT 
+    c.ActionID,
+    c.CommentText,
+    c.ParentCommentID,
+    a.ActionDate,
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status
+ FROM Comments c
+ JOIN Action a ON c.ActionID = a.ActionID
+ JOIN Account acc ON a.UserName = acc.UserName
+ LEFT JOIN Verification v ON acc.UserName = v.UserName
+ WHERE c.ActionID = :actionId
+
+-- deleteComment
+SELECT a.UserName FROM Action a WHERE a.ActionID = :actionId
+
+-- deleteComment
+DELETE FROM Action WHERE ActionID = :actionId
+
+-- getContentComments
+SELECT 
+    c.ActionID,
+    c.CommentText,
+    c.ParentCommentID,
+    a.ActionDate,
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status,
+    (SELECT COUNT(*) FROM Comment_Like cl WHERE cl.Liked_Comment_ID = c.ActionID) AS Like_Count,
+    (SELECT COUNT(*) FROM Comment_Like cl 
+     JOIN Action cla ON cl.ActionID = cla.ActionID 
+     WHERE cl.Liked_Comment_ID = c.ActionID AND cla.UserName = :username) AS Is_Liked
+ FROM Comments c
+ JOIN Action a ON c.ActionID = a.ActionID
+ JOIN Account acc ON a.UserName = acc.UserName
+ LEFT JOIN Verification v ON acc.UserName = v.UserName
+ WHERE a.ContentID = :contentId
+ ORDER BY a.ActionDate ASC
+
+-- likeComment
+SELECT c.ActionID, a.ContentID FROM Comments c
+JOIN Action a ON c.ActionID = a.ActionID
+WHERE c.ActionID = :commentId
+
+-- likeComment
+SELECT cl.ActionID FROM Comment_Like cl
+JOIN Action a ON cl.ActionID = a.ActionID
+WHERE a.UserName = :username AND cl.Liked_Comment_ID = :commentId
+
+-- likeComment
+INSERT INTO Action (ActionID, UserName, ContentID, ActionDate)
+VALUES (:actionId, :username, :contentId, CURRENT_TIMESTAMP)
+
+-- likeComment
+INSERT INTO Comment_Like (ActionID, Liked_Comment_ID)
+VALUES (:actionId, :commentId)
+
+-- likeComment
+SELECT COUNT(*) AS LIKE_COUNT FROM Comment_Like WHERE Liked_Comment_ID = :commentId
+
+-- unlikeComment
+SELECT cl.ActionID FROM Comment_Like cl
+JOIN Action a ON cl.ActionID = a.ActionID
+WHERE a.UserName = :username AND cl.Liked_Comment_ID = :commentId
+
+-- unlikeComment
+DELETE FROM Action WHERE ActionID = :actionId
+
+-- unlikeComment
+SELECT COUNT(*) AS LIKE_COUNT FROM Comment_Like WHERE Liked_Comment_ID = :commentId
+
+-- getCommentLikes
+SELECT 
+    acc.UserName,
+    acc.Profile_Name,
+    acc.Profile_Picture_URL,
+    v.Status AS Verification_Status
+ FROM Comment_Like cl
+ JOIN Action a ON cl.ActionID = a.ActionID
+ JOIN Account acc ON a.UserName = acc.UserName
+ LEFT JOIN Verification v ON acc.UserName = v.UserName
+ WHERE cl.Liked_Comment_ID = :commentId
+ ORDER BY 
+    CASE WHEN v.Status = 'Verified' THEN 1 ELSE 2 END,
+    a.ActionDate DESC

@@ -121,7 +121,7 @@ export const signup = async (req, res) => {
                  VALUES (:username, :gender)`,
                 {
                     username: username.toLowerCase(),
-                    gender: gender || null
+                    gender: gender || 'Other'
                 },
                 { autoCommit: false }
             );

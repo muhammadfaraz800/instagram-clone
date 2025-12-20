@@ -1,0 +1,36 @@
+--  from src/controllers/authController.js
+
+-- Function: signup
+INSERT INTO Account (USERNAME, BIO, HASHED_PASSWORD, EMAIL, PROFILE_NAME, PROFILE_PICTURE_URL, VISIBILITY) 
+VALUES (:username, :bio, :hashed_password, :email, :profile_name, :profile_picture_url, :visibility);
+
+-- Function: signup (if account_type === 'Business')
+INSERT INTO Business (USERNAME, BIO_URL, CONTACTNO, BUSINESS_TYPE) 
+VALUES (:username, :bio_url, :contact_no, :business_type);
+
+-- Function: signup (if account_type === 'Normal')
+INSERT INTO Normal (USERNAME, GENDER) 
+VALUES (:username, :gender);
+
+-- Function: login
+SELECT 
+    a.username, 
+    a.hashed_password, 
+    a.profile_picture_url,
+    b.business_type
+FROM Account a
+LEFT JOIN Business b ON a.UserName = b.UserName
+WHERE a.UserName = :username;
+
+-- Function: getMe
+SELECT 
+    a.profile_name,
+    a.username, 
+    a.profile_picture_url,
+    b.business_type,
+    v.Status AS Verification_Status
+FROM Account a
+LEFT JOIN Business b ON a.UserName = b.UserName
+LEFT JOIN Verification v ON a.UserName = v.UserName
+WHERE a.UserName = :username;
+

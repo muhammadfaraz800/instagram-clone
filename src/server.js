@@ -14,6 +14,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-
-// TODO: Make sure every file uploaded has unique name

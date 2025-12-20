@@ -50,8 +50,6 @@ export const logAction = async (category, action, user = null, meta = {}) => {
         const collectionName = `logs_${category}`;
         await db.collection(collectionName).insertOne(logEntry);
 
-        // Console log for debug (optional)
-        // console.log(`[LOG - ${category}/${action}] User: ${user}`);
     } catch (error) {
         console.error('Logging failed:', error);
         console.error('Failed Log Details:', { category, action, user, meta });

@@ -25,7 +25,6 @@ export async function getHomeFeed(req, res) {
 
         connection = await pool.getConnection();
 
-        // Simplified query - no nested subquery
         const result = await connection.execute(
             `SELECT 
                 c.ContentID,
